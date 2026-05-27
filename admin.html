@@ -287,6 +287,12 @@
     <div class="login-erro" id="loginErro">❌ Senha incorreta. Tente novamente.</div>
     <br/>
     <a href="index.html" class="btn-voltar">← Voltar à loja</a>
+    <div style="margin-top:20px; padding-top:16px; border-top:1px solid var(--bege);">
+      <p style="font-size:11px; color:#bbb; margin-bottom:8px;">Esqueceu a senha?</p>
+      <button onclick="resetarSenha()" style="font-size:12px; color:#c0392b; background:none; border:1px solid #f0c0c0; padding:7px 14px; border-radius:8px; cursor:pointer;">
+        🔓 Redefinir senha para o padrão
+      </button>
+    </div>
   </div>
 </div>
 
@@ -928,6 +934,16 @@ function toast(msg, tipo = '') {
   el.className = 'toast visivel' + (tipo ? ' ' + tipo : '');
   clearTimeout(_toastTimer);
   _toastTimer = setTimeout(() => el.classList.remove('visivel'), 2800);
+}
+
+function resetarSenha() {
+  if (!confirm('Isso vai redefinir a senha para "eline2025" e manter todos os produtos e bairros. Confirma?')) return;
+  const d = carregar();
+  d.senha = 'eline2025';
+  localStorage.setItem('elineBolos', JSON.stringify(d));
+  dados = d;
+  document.getElementById('loginErro').style.display = 'none';
+  alert('✅ Senha redefinida! Use: eline2025');
 }
 
 // Init
