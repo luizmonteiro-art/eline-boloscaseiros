@@ -263,11 +263,47 @@
       transition: border-color 0.2s;
     }
     .bairro-taxa-input:focus { border-color: var(--rosa); }
+
+    /* ===== UPLOAD DE FOTO ===== */
+    .foto-thumb {
+      width: 52px; height: 52px; border-radius: 12px;
+      object-fit: cover; background: var(--bege);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 26px; flex-shrink: 0; overflow: hidden;
+      border: 2px solid var(--rosa-claro);
+    }
+    .foto-thumb img { width: 100%; height: 100%; object-fit: cover; border-radius: 10px; }
+
+    .btn-foto {
+      font-size: 11px; font-weight: 700; color: var(--rosa-escuro);
+      background: var(--rosa-claro); padding: 5px 10px; border-radius: 8px;
+      transition: background 0.2s; white-space: nowrap;
+    }
+    .btn-foto:hover { background: var(--rosa); color: white; }
+
+    .foto-preview-area {
+      border: 2px dashed var(--bege-escuro); border-radius: var(--radius-sm);
+      padding: 16px; text-align: center; transition: border-color 0.2s;
+      cursor: pointer; background: var(--rosa-bg);
+    }
+    .foto-preview-area:hover { border-color: var(--rosa); }
+    .foto-preview-area.tem-foto { border-style: solid; border-color: var(--rosa-claro); padding: 8px; }
+    .foto-preview-area img { width: 100%; max-height: 160px; object-fit: cover; border-radius: 8px; display: block; }
+    .foto-preview-area .placeholder { font-size: 32px; margin-bottom: 8px; }
+    .foto-preview-area .texto { font-size: 13px; color: var(--cinza-texto); }
+    .foto-preview-area .texto strong { color: var(--rosa-escuro); }
+
+    .foto-acoes {
+      display: flex; gap: 8px; justify-content: center; margin-top: 8px;
+    }
   </style>
 </head>
 <body>
 
 <div class="toast" id="toast"></div>
+
+<!-- Input oculto para upload de foto -->
+<input type="file" id="fileInputGlobal" accept="image/*" style="display:none" />
 
 <!-- ===================================================== -->
 <!--  TELA DE LOGIN                                        -->
@@ -378,9 +414,21 @@
             <input type="text" class="form-control" id="pDesc" placeholder="Ex: Bolo caseiro fofinho com cobertura de chocolate" />
           </div>
           <div class="full">
-            <label>URL da imagem (opcional)</label>
-            <input type="url" class="form-control" id="pImg" placeholder="https://..." />
+            <label>Foto do produto</label>
+            <div class="foto-preview-area" id="fotoPreviewArea" onclick="document.getElementById('fileInputForm').click()">
+              <div id="fotoPlaceholder">
+                <div class="placeholder">📷</div>
+                <div class="texto">Clique para <strong>escolher uma foto</strong><br>da galeria do celular ou computador</div>
+              </div>
+              <img id="fotoPreviewImg" style="display:none" alt="Preview" />
+            </div>
+            <div class="foto-acoes" id="fotoAcoes" style="display:none">
+              <button type="button" class="btn-foto" onclick="document.getElementById('fileInputForm').click()">🔄 Trocar foto</button>
+              <button type="button" class="btn-perigo" onclick="removerFotoForm()">🗑️ Remover foto</button>
+            </div>
+            <input type="file" id="fileInputForm" accept="image/*" style="display:none" onchange="previewFotoForm(this)" />
           </div>
+          <input type="hidden" id="pImg" value="" />
           <input type="hidden" id="pEditId" value="" />
           <div class="full">
             <div class="form-actions">
@@ -733,17 +781,27 @@ function renderProdutos() {
     ? '<p style="color:var(--cinza-texto);text-align:center;padding:20px">Nenhum produto nesta categoria.</p>'
     : lista.map(p => `
       <div class="item-admin" id="prod-${p.id}">
-        <div class="item-admin-emoji">${p.emoji || '🎂'}</div>
+        <div class="foto-thumb" onclick="uploadFotoProduto(${p.id})" title="Clique para trocar a foto" style="cursor:pointer">
+          ${p.img
+            ? `<img src="${p.img}" alt="${p.nome}" />`
+            : `<span>${p.emoji || '🎂'}</span>`
+          }
+        </div>
         <div class="item-admin-info">
           <div class="item-admin-nome">${p.nome}</div>
           <div class="item-admin-detalhe">
             ${p.categoria} • <strong style="color:var(--rosa-escuro)">${fmt(p.preco)}</strong>
-            ${p.desc ? ' • ' + p.desc.substring(0, 45) + (p.desc.length > 45 ? '...' : '') : ''}
+          </div>
+          <div style="margin-top:4px">
+            <button class="btn-foto" onclick="uploadFotoProduto(${p.id})">
+              ${p.img ? '🔄 Trocar foto' : '📷 Adicionar foto'}
+            </button>
+            ${p.img ? `<button class="btn-perigo" style="margin-left:4px;font-size:11px;padding:4px 8px" onclick="removerFotoProduto(${p.id})">✕ Remover</button>` : ''}
           </div>
         </div>
         <div class="item-admin-acoes">
           <div class="toggle-switch ${p.disponivel ? 'on' : ''}" onclick="toggleProd(${p.id})"
-               title="${p.disponivel ? 'Disponível — clique para desativar' : 'Indisponível — clique para ativar'}"></div>
+               title="${p.disponivel ? 'Disponível' : 'Indisponível'}"></div>
           <button class="btn-secundario" onclick="editarProd(${p.id})" style="font-size:12px;padding:6px 10px">✏️</button>
           <button class="btn-perigo" onclick="deletarProd(${p.id})">🗑️</button>
         </div>
@@ -774,11 +832,12 @@ function salvarProduto() {
 }
 
 function limparFormProd() {
-  ['pNome','pPreco','pEmoji','pDesc','pImg'].forEach(id => document.getElementById(id).value = '');
+  ['pNome','pPreco','pEmoji','pDesc'].forEach(id => document.getElementById(id).value = '');
   document.getElementById('pCategoria').selectedIndex = 0;
   document.getElementById('pEditId').value = '';
   document.getElementById('btnSalvarProd').textContent = '➕ Adicionar Produto';
   document.getElementById('editandoLabel').style.display = 'none';
+  removerFotoForm();
 }
 
 function editarProd(id) {
@@ -789,13 +848,12 @@ function editarProd(id) {
   document.getElementById('pPreco').value = p.preco;
   document.getElementById('pEmoji').value = p.emoji || '';
   document.getElementById('pDesc').value = p.desc || '';
-  document.getElementById('pImg').value = p.img || '';
   document.getElementById('pEditId').value = p.id;
+  mostrarFotoNoForm(p.img || '');
   document.getElementById('btnSalvarProd').textContent = '💾 Salvar Alterações';
   document.getElementById('editandoLabel').style.display = 'inline';
-  // scroll para o form
-  document.getElementById('tabProdutos').scrollIntoView({ behavior: 'smooth' });
   abrirTab(document.querySelector('.admin-tab[onclick*="tabProdutos"]'), 'tabProdutos');
+  document.getElementById('tabProdutos').scrollIntoView({ behavior: 'smooth' });
   document.getElementById('pNome').focus();
   toast('Produto carregado para edição!', '');
 }
@@ -920,6 +978,99 @@ function restaurarPadrao() {
   dados = JSON.parse(JSON.stringify(DADOS_PADRAO));
   salvar(); renderTudo();
   toast('✅ Dados restaurados!', 'sucesso');
+}
+
+/* ======================================================
+   FOTOS — COMPRESSÃO E UPLOAD
+====================================================== */
+
+// Comprime imagem para base64 (max 500px, qualidade 80%)
+function comprimirImagem(file, callback) {
+  const reader = new FileReader();
+  reader.onload = function(e) {
+    const img = new Image();
+    img.onload = function() {
+      const MAX = 500;
+      let w = img.width, h = img.height;
+      if (w > h) { if (w > MAX) { h = Math.round(h * MAX / w); w = MAX; } }
+      else        { if (h > MAX) { w = Math.round(w * MAX / h); h = MAX; } }
+      const canvas = document.createElement('canvas');
+      canvas.width = w; canvas.height = h;
+      canvas.getContext('2d').drawImage(img, 0, 0, w, h);
+      callback(canvas.toDataURL('image/jpeg', 0.80));
+    };
+    img.src = e.target.result;
+  };
+  reader.readAsDataURL(file);
+}
+
+// Upload de foto diretamente em um produto da lista
+let _uploadTargetId = null;
+function uploadFotoProduto(prodId) {
+  _uploadTargetId = prodId;
+  const input = document.getElementById('fileInputGlobal');
+  input.value = '';
+  input.onchange = function() {
+    if (!input.files[0]) return;
+    toast('⏳ Processando foto...', '');
+    comprimirImagem(input.files[0], function(base64) {
+      const p = dados.produtos.find(p => p.id === _uploadTargetId);
+      if (p) {
+        p.img = base64;
+        salvar();
+        renderProdutos();
+        toast('✅ Foto atualizada!', 'sucesso');
+      }
+    });
+  };
+  input.click();
+}
+
+function removerFotoProduto(prodId) {
+  const p = dados.produtos.find(p => p.id === prodId);
+  if (!p) return;
+  p.img = '';
+  salvar(); renderProdutos();
+  toast('Foto removida.', '');
+}
+
+// Preview de foto no formulário de adicionar/editar
+function previewFotoForm(input) {
+  if (!input.files[0]) return;
+  toast('⏳ Processando foto...', '');
+  comprimirImagem(input.files[0], function(base64) {
+    document.getElementById('pImg').value = base64;
+    const img = document.getElementById('fotoPreviewImg');
+    img.src = base64;
+    img.style.display = 'block';
+    document.getElementById('fotoPlaceholder').style.display = 'none';
+    document.getElementById('fotoPreviewArea').classList.add('tem-foto');
+    document.getElementById('fotoAcoes').style.display = 'flex';
+    toast('✅ Foto carregada!', 'sucesso');
+  });
+}
+
+function removerFotoForm() {
+  document.getElementById('pImg').value = '';
+  document.getElementById('fotoPreviewImg').style.display = 'none';
+  document.getElementById('fotoPlaceholder').style.display = 'block';
+  document.getElementById('fotoPreviewArea').classList.remove('tem-foto');
+  document.getElementById('fotoAcoes').style.display = 'none';
+  document.getElementById('fileInputForm').value = '';
+}
+
+function mostrarFotoNoForm(imgBase64) {
+  if (imgBase64) {
+    document.getElementById('pImg').value = imgBase64;
+    const img = document.getElementById('fotoPreviewImg');
+    img.src = imgBase64;
+    img.style.display = 'block';
+    document.getElementById('fotoPlaceholder').style.display = 'none';
+    document.getElementById('fotoPreviewArea').classList.add('tem-foto');
+    document.getElementById('fotoAcoes').style.display = 'flex';
+  } else {
+    removerFotoForm();
+  }
 }
 
 /* ======================================================
