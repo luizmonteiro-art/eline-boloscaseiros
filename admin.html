@@ -1,0 +1,937 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Admin — Eline Bolos</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;1,400&family=Nunito:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --rosa:        #E8809A;
+      --rosa-escuro: #D4607A;
+      --rosa-claro:  #F9D5DF;
+      --rosa-bg:     #FEF0F4;
+      --marrom:      #4A2418;
+      --marrom-medio:#7B4A2D;
+      --bege:        #F0E0C0;
+      --bege-escuro: #D9C4A0;
+      --verde:       #7CB342;
+      --branco:      #FFFFFF;
+      --cinza-texto: #555555;
+      --sombra:      0 4px 20px rgba(74,36,24,0.12);
+      --sombra-card: 0 2px 12px rgba(74,36,24,0.10);
+      --radius:      16px;
+      --radius-sm:   10px;
+    }
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: 'Nunito', sans-serif; background: #f5f5f5; color: var(--marrom); min-height: 100vh; }
+    button { cursor: pointer; border: none; background: none; font-family: inherit; }
+    input, select, textarea { font-family: inherit; }
+
+    /* ===== LOGIN ===== */
+    .login-page {
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+      background: linear-gradient(135deg, var(--rosa-claro), var(--bege));
+    }
+    .login-card {
+      background: var(--branco);
+      border-radius: var(--radius);
+      padding: 36px 28px;
+      width: 100%;
+      max-width: 380px;
+      box-shadow: var(--sombra);
+      text-align: center;
+    }
+    .login-logo { font-size: 52px; margin-bottom: 8px; }
+    .login-card h1 {
+      font-family: 'Playfair Display', serif;
+      font-size: 22px;
+      color: var(--marrom);
+      margin-bottom: 4px;
+    }
+    .login-card .sub { font-size: 13px; color: var(--cinza-texto); margin-bottom: 28px; }
+    .form-group { margin-bottom: 16px; text-align: left; }
+    .form-group label { display: block; font-size: 13px; font-weight: 700; color: var(--marrom); margin-bottom: 6px; }
+    .form-control {
+      width: 100%; padding: 13px 16px; border: 2px solid var(--bege);
+      border-radius: var(--radius-sm); font-size: 15px; color: var(--marrom);
+      background: var(--branco); transition: border-color 0.2s; outline: none;
+    }
+    .form-control:focus { border-color: var(--rosa); }
+    .btn-login {
+      width: 100%; background: var(--rosa-escuro); color: white;
+      font-size: 16px; font-weight: 800; padding: 15px; border-radius: 14px;
+      transition: background 0.2s; box-shadow: 0 4px 16px rgba(212,96,122,0.3);
+      margin-bottom: 12px;
+    }
+    .btn-login:hover { background: var(--marrom); }
+    .login-erro { color: #c0392b; font-size: 13px; font-weight: 600; margin-top: 8px; display: none; }
+    .btn-voltar {
+      font-size: 13px; color: var(--marrom-medio); text-decoration: none;
+      display: inline-flex; align-items: center; gap: 4px;
+    }
+    .btn-voltar:hover { color: var(--rosa-escuro); }
+
+    /* ===== PAINEL ===== */
+    .admin-page { display: none; min-height: 100vh; background: #f0f0f0; }
+    .admin-page.visivel { display: block; }
+
+    /* Header */
+    .admin-header {
+      background: var(--marrom); color: white;
+      padding: 0 20px; height: 60px;
+      display: flex; align-items: center; justify-content: space-between;
+      position: sticky; top: 0; z-index: 50;
+    }
+    .admin-header-brand { display: flex; align-items: center; gap: 10px; }
+    .admin-header-brand .logo { font-size: 24px; }
+    .admin-header-brand h1 {
+      font-family: 'Playfair Display', serif; font-size: 17px; color: var(--rosa-claro);
+    }
+    .admin-header-brand .sub { font-size: 11px; color: var(--bege-escuro); }
+    .admin-header-actions { display: flex; gap: 8px; align-items: center; }
+    .btn-ver-loja {
+      font-size: 12px; color: var(--bege); background: rgba(255,255,255,0.15);
+      padding: 7px 14px; border-radius: 8px; font-weight: 600;
+      text-decoration: none; transition: background 0.2s;
+    }
+    .btn-ver-loja:hover { background: rgba(255,255,255,0.25); }
+    .btn-sair {
+      font-size: 12px; color: var(--bege-escuro); background: rgba(255,255,255,0.1);
+      padding: 7px 14px; border-radius: 8px; font-weight: 600; transition: background 0.2s;
+    }
+    .btn-sair:hover { background: rgba(255,255,255,0.2); }
+
+    /* Tabs */
+    .admin-tabs {
+      background: var(--branco);
+      border-bottom: 2px solid var(--rosa-claro);
+      display: flex; overflow-x: auto;
+      scrollbar-width: none;
+    }
+    .admin-tabs::-webkit-scrollbar { display: none; }
+    .admin-tab {
+      padding: 14px 20px; font-size: 13px; font-weight: 700;
+      color: var(--cinza-texto); border-bottom: 3px solid transparent;
+      margin-bottom: -2px; white-space: nowrap; transition: all 0.2s;
+    }
+    .admin-tab.ativo { color: var(--rosa-escuro); border-color: var(--rosa-escuro); }
+    .admin-tab:hover:not(.ativo) { color: var(--marrom); }
+
+    /* Content */
+    .admin-content { padding: 20px; max-width: 960px; margin: 0 auto; }
+    .admin-section { display: none; }
+    .admin-section.ativa { display: block; }
+
+    /* Cards */
+    .admin-card {
+      background: var(--branco); border-radius: var(--radius);
+      padding: 20px; box-shadow: var(--sombra-card); margin-bottom: 16px;
+    }
+    .admin-card h3 {
+      font-size: 16px; font-weight: 800; color: var(--marrom);
+      margin-bottom: 16px; display: flex; align-items: center; gap: 8px;
+    }
+
+    /* Botões */
+    .btn-primario {
+      background: var(--rosa-escuro); color: white; font-size: 14px;
+      font-weight: 700; padding: 10px 20px; border-radius: var(--radius-sm);
+      transition: background 0.2s;
+    }
+    .btn-primario:hover { background: var(--marrom); }
+    .btn-secundario {
+      background: var(--bege); color: var(--marrom); font-size: 13px;
+      font-weight: 700; padding: 8px 16px; border-radius: var(--radius-sm);
+      transition: background 0.2s;
+    }
+    .btn-secundario:hover { background: var(--bege-escuro); }
+    .btn-perigo {
+      background: #fdecea; color: #c0392b; font-size: 12px;
+      font-weight: 700; padding: 6px 12px; border-radius: 8px; transition: background 0.2s;
+    }
+    .btn-perigo:hover { background: #f8d7da; }
+    .btn-verde {
+      background: var(--verde); color: white; font-size: 13px;
+      font-weight: 700; padding: 8px 16px; border-radius: var(--radius-sm); transition: background 0.2s;
+    }
+    .btn-verde:hover { background: #6aa33a; }
+
+    /* Form inline */
+    .form-inline {
+      display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 4px;
+    }
+    @media (max-width: 520px) { .form-inline { grid-template-columns: 1fr; } }
+    .form-inline .full { grid-column: 1 / -1; }
+    .form-inline label { font-size: 12px; font-weight: 700; color: var(--marrom); display: block; margin-bottom: 5px; }
+    .form-inline .form-control { padding: 10px 12px; font-size: 13px; }
+    .form-actions { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+
+    /* Lista items */
+    .lista-admin { display: flex; flex-direction: column; gap: 8px; margin-top: 4px; }
+    .item-admin {
+      background: var(--rosa-bg); border-radius: var(--radius-sm);
+      padding: 12px 16px; display: flex; align-items: center; gap: 12px;
+      transition: background 0.2s;
+    }
+    .item-admin:hover { background: var(--rosa-claro); }
+    .item-admin-emoji { font-size: 24px; width: 40px; text-align: center; flex-shrink: 0; }
+    .item-admin-info { flex: 1; min-width: 0; }
+    .item-admin-nome { font-weight: 700; font-size: 14px; color: var(--marrom); }
+    .item-admin-detalhe { font-size: 12px; color: var(--cinza-texto); margin-top: 2px; }
+    .item-admin-acoes { display: flex; gap: 6px; align-items: center; flex-shrink: 0; }
+
+    /* Toggle */
+    .toggle-switch {
+      width: 44px; height: 24px; background: var(--bege-escuro); border-radius: 12px;
+      position: relative; transition: background 0.2s; cursor: pointer; flex-shrink: 0;
+    }
+    .toggle-switch::after {
+      content: ''; position: absolute; top: 3px; left: 3px;
+      width: 18px; height: 18px; background: white; border-radius: 50%;
+      transition: transform 0.2s; box-shadow: 0 1px 4px rgba(0,0,0,0.2);
+    }
+    .toggle-switch.on { background: var(--verde); }
+    .toggle-switch.on::after { transform: translateX(20px); }
+
+    /* Status badge */
+    .badge {
+      font-size: 11px; font-weight: 700; padding: 3px 8px; border-radius: 10px;
+    }
+    .badge-verde { background: #e8f5e9; color: #388e3c; }
+    .badge-vermelho { background: #fdecea; color: #c0392b; }
+    .badge-cinza { background: #f5f5f5; color: #888; }
+
+    /* Config rows */
+    .config-row {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 14px 0; border-bottom: 1px solid var(--rosa-claro); gap: 16px;
+    }
+    .config-row:last-child { border-bottom: none; }
+    .config-label { font-size: 14px; font-weight: 700; color: var(--marrom); }
+    .config-sub { font-size: 12px; color: var(--cinza-texto); margin-top: 3px; }
+    .config-control { flex-shrink: 0; }
+
+    /* Dashboard cards */
+    .dashboard-grid {
+      display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 12px; margin-bottom: 20px;
+    }
+    .dash-card {
+      background: var(--branco); border-radius: var(--radius); padding: 16px;
+      box-shadow: var(--sombra-card); text-align: center;
+    }
+    .dash-card .num { font-size: 28px; font-weight: 800; color: var(--rosa-escuro); }
+    .dash-card .label { font-size: 12px; color: var(--cinza-texto); margin-top: 4px; }
+
+    /* Toast */
+    .toast {
+      position: fixed; bottom: 24px; left: 50%;
+      transform: translateX(-50%) translateY(20px);
+      background: var(--marrom); color: white; padding: 12px 24px;
+      border-radius: 24px; font-size: 14px; font-weight: 600; z-index: 999;
+      opacity: 0; pointer-events: none; transition: all 0.3s;
+      white-space: nowrap; box-shadow: var(--sombra);
+    }
+    .toast.visivel { opacity: 1; transform: translateX(-50%) translateY(0); }
+    .toast.sucesso { background: var(--verde); }
+    .toast.erro { background: #c0392b; }
+
+    /* Tabs categoria */
+    .cat-tabs {
+      display: flex; gap: 8px; overflow-x: auto; padding-bottom: 4px;
+      margin-bottom: 16px; scrollbar-width: none;
+    }
+    .cat-tabs::-webkit-scrollbar { display: none; }
+    .cat-tab {
+      flex-shrink: 0; padding: 7px 16px; border-radius: 20px; font-size: 13px;
+      font-weight: 700; color: var(--marrom-medio); background: var(--bege);
+      border: 2px solid transparent; transition: all 0.2s;
+    }
+    .cat-tab.ativo { background: var(--rosa-escuro); color: white; }
+    .cat-tab:hover:not(.ativo) { border-color: var(--rosa); }
+
+    /* Editar bairro inline */
+    .bairro-taxa-input {
+      width: 80px; padding: 6px 8px; border: 2px solid var(--bege);
+      border-radius: 8px; font-size: 13px; font-weight: 700;
+      color: var(--rosa-escuro); text-align: center; outline: none;
+      transition: border-color 0.2s;
+    }
+    .bairro-taxa-input:focus { border-color: var(--rosa); }
+  </style>
+</head>
+<body>
+
+<div class="toast" id="toast"></div>
+
+<!-- ===================================================== -->
+<!--  TELA DE LOGIN                                        -->
+<!-- ===================================================== -->
+<div class="login-page" id="loginPage">
+  <div class="login-card">
+    <div class="login-logo">🔐</div>
+    <h1>Painel Administrativo</h1>
+    <p class="sub">Eline Bolos Caseiros e Confeitados</p>
+    <div class="form-group">
+      <label>Senha de acesso</label>
+      <input type="password" class="form-control" id="senhaInput"
+             placeholder="Digite sua senha..."
+             onkeydown="if(event.key==='Enter') entrar()" />
+    </div>
+    <button class="btn-login" onclick="entrar()">Entrar no painel</button>
+    <div class="login-erro" id="loginErro">❌ Senha incorreta. Tente novamente.</div>
+    <br/>
+    <a href="index.html" class="btn-voltar">← Voltar à loja</a>
+  </div>
+</div>
+
+<!-- ===================================================== -->
+<!--  PAINEL ADMIN                                         -->
+<!-- ===================================================== -->
+<div class="admin-page" id="adminPage">
+
+  <header class="admin-header">
+    <div class="admin-header-brand">
+      <span class="logo">🎂</span>
+      <div>
+        <h1>Eline Bolos — Admin</h1>
+        <div class="sub">Painel de Gerenciamento</div>
+      </div>
+    </div>
+    <div class="admin-header-actions">
+      <a href="index.html" class="btn-ver-loja" target="_blank">🛒 Ver loja</a>
+      <button class="btn-sair" onclick="sair()">Sair</button>
+    </div>
+  </header>
+
+  <div class="admin-tabs">
+    <button class="admin-tab ativo" onclick="abrirTab(this,'tabVisao')">📊 Visão Geral</button>
+    <button class="admin-tab" onclick="abrirTab(this,'tabProdutos')">🍰 Produtos</button>
+    <button class="admin-tab" onclick="abrirTab(this,'tabBairros')">🛵 Bairros / Taxas</button>
+    <button class="admin-tab" onclick="abrirTab(this,'tabConfig')">⚙️ Configurações</button>
+  </div>
+
+  <div class="admin-content">
+
+    <!-- TAB: VISÃO GERAL -->
+    <div class="admin-section ativa" id="tabVisao">
+      <div class="dashboard-grid" id="dashCards"></div>
+
+      <div class="admin-card">
+        <h3>⚡ Ações Rápidas</h3>
+        <div style="display:flex; flex-wrap:wrap; gap:10px">
+          <button class="btn-primario" onclick="abrirTab(document.querySelector('[onclick*=tabProdutos]'),'tabProdutos')">➕ Adicionar Produto</button>
+          <button class="btn-secundario" onclick="abrirTab(document.querySelector('[onclick*=tabBairros]'),'tabBairros')">📍 Gerenciar Bairros</button>
+          <button class="btn-secundario" onclick="abrirTab(document.querySelector('[onclick*=tabConfig]'),'tabConfig')">⚙️ Configurações</button>
+          <a href="index.html" target="_blank" class="btn-verde" style="text-decoration:none;display:inline-flex;align-items:center;gap:4px">🛒 Abrir Loja</a>
+        </div>
+      </div>
+
+      <div class="admin-card">
+        <h3>📋 Produtos por Categoria</h3>
+        <div id="resumoCategorias"></div>
+      </div>
+    </div>
+
+    <!-- TAB: PRODUTOS -->
+    <div class="admin-section" id="tabProdutos">
+
+      <div class="admin-card">
+        <h3>➕ Adicionar / Editar Produto</h3>
+        <div class="form-inline">
+          <div>
+            <label>Nome do produto *</label>
+            <input type="text" class="form-control" id="pNome" placeholder="Ex: Bolo de Chocolate" />
+          </div>
+          <div>
+            <label>Categoria *</label>
+            <select class="form-control" id="pCategoria">
+              <option value="Bolos Caseiros">🎂 Bolos Caseiros</option>
+              <option value="Bolos com Cobertura">🍫 Bolos com Cobertura</option>
+              <option value="Bolos Pequenos">🧁 Bolos Pequenos</option>
+              <option value="Bolos por Encomenda">✨ Bolos por Encomenda</option>
+              <option value="Pudim">🍮 Pudim</option>
+              <option value="Doces">🍬 Doces</option>
+            </select>
+          </div>
+          <div>
+            <label>Preço (R$) *</label>
+            <input type="number" class="form-control" id="pPreco" placeholder="0,00" step="0.50" min="0" />
+          </div>
+          <div>
+            <label>Emoji (ícone)</label>
+            <input type="text" class="form-control" id="pEmoji" placeholder="🎂" maxlength="4" />
+          </div>
+          <div class="full">
+            <label>Descrição</label>
+            <input type="text" class="form-control" id="pDesc" placeholder="Ex: Bolo caseiro fofinho com cobertura de chocolate" />
+          </div>
+          <div class="full">
+            <label>URL da imagem (opcional)</label>
+            <input type="url" class="form-control" id="pImg" placeholder="https://..." />
+          </div>
+          <input type="hidden" id="pEditId" value="" />
+          <div class="full">
+            <div class="form-actions">
+              <button class="btn-primario" onclick="salvarProduto()" id="btnSalvarProd">➕ Adicionar Produto</button>
+              <button class="btn-secundario" onclick="limparFormProd()">✕ Limpar</button>
+              <span id="editandoLabel" style="font-size:12px;color:var(--rosa-escuro);font-weight:700;display:none">✏️ Editando produto...</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="admin-card">
+        <h3>📋 Produtos Cadastrados <span id="contProdutos" style="font-size:13px;font-weight:600;color:var(--cinza-texto)"></span></h3>
+        <div class="cat-tabs" id="catTabs"></div>
+        <div class="lista-admin" id="listaProdutos"></div>
+      </div>
+    </div>
+
+    <!-- TAB: BAIRROS -->
+    <div class="admin-section" id="tabBairros">
+
+      <div class="admin-card" style="background: #fff9e6; border: 1px solid #ffe082;">
+        <p style="font-size:13px; color: #795548;">
+          ⚠️ <strong>Taxas provisórias!</strong> Os valores abaixo são estimativas. Ajuste conforme as taxas reais praticadas na sua cidade.
+          Você pode editar o valor de cada bairro clicando diretamente no campo de taxa.
+        </p>
+      </div>
+
+      <div class="admin-card">
+        <h3>➕ Adicionar Bairro</h3>
+        <div class="form-inline">
+          <div>
+            <label>Nome do bairro *</label>
+            <input type="text" class="form-control" id="bNome" placeholder="Ex: Vila Nova" />
+          </div>
+          <div>
+            <label>Taxa de entrega (R$) *</label>
+            <input type="number" class="form-control" id="bTaxa" placeholder="5.00" step="0.50" min="0" />
+          </div>
+          <div class="full">
+            <button class="btn-primario" onclick="adicionarBairro()">➕ Adicionar Bairro</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="admin-card">
+        <h3>🗺️ Bairros Cadastrados <span id="contBairros" style="font-size:13px;font-weight:600;color:var(--cinza-texto)"></span></h3>
+        <p style="font-size:12px;color:var(--cinza-texto);margin-bottom:12px">
+          Clique no valor da taxa para editar diretamente. Clique em 💾 para salvar.
+        </p>
+        <div class="lista-admin" id="listaBairros"></div>
+      </div>
+    </div>
+
+    <!-- TAB: CONFIGURAÇÕES -->
+    <div class="admin-section" id="tabConfig">
+
+      <div class="admin-card">
+        <h3>🏪 Status da Loja</h3>
+        <div class="config-row">
+          <div>
+            <div class="config-label">Loja aberta para pedidos</div>
+            <div class="config-sub">Quando fechada, exibe aviso mas clientes ainda podem pedir</div>
+          </div>
+          <div class="config-control">
+            <div class="toggle-switch on" id="toggleLoja" onclick="toggleLojaStatus()"></div>
+          </div>
+        </div>
+        <div class="config-row">
+          <div>
+            <div class="config-label">Horário de funcionamento</div>
+            <div class="config-sub">Texto exibido na loja para os clientes</div>
+          </div>
+          <div class="config-control">
+            <input type="text" class="form-control" id="cfgHorario"
+                   style="width:180px; font-size:13px; padding:9px 12px"
+                   placeholder="Ex: 08h às 18h" />
+          </div>
+        </div>
+      </div>
+
+      <div class="admin-card">
+        <h3>📱 WhatsApp</h3>
+        <div class="config-row">
+          <div>
+            <div class="config-label">Número que recebe os pedidos</div>
+            <div class="config-sub">Formato: código do país + DDD + número (sem espaços)</div>
+          </div>
+          <div class="config-control">
+            <input type="text" class="form-control" id="cfgWhatsapp"
+                   style="width:190px; font-size:13px; padding:9px 12px"
+                   placeholder="5598984156128" />
+          </div>
+        </div>
+        <div class="config-row">
+          <div>
+            <div class="config-label">Testar link do WhatsApp</div>
+            <div class="config-sub">Abre o WhatsApp com mensagem de teste</div>
+          </div>
+          <div class="config-control">
+            <button class="btn-verde" onclick="testarWhatsapp()">📲 Testar</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="admin-card">
+        <h3>🔐 Segurança</h3>
+        <div class="config-row">
+          <div>
+            <div class="config-label">Alterar senha do admin</div>
+            <div class="config-sub">Mínimo 4 caracteres</div>
+          </div>
+          <div class="config-control" style="display:flex;gap:8px">
+            <input type="password" class="form-control" id="cfgSenhaNova"
+                   style="width:140px; font-size:13px; padding:9px 12px"
+                   placeholder="Nova senha" />
+            <button class="btn-secundario" onclick="alterarSenha()">Salvar</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="admin-card">
+        <h3>💾 Salvar Tudo</h3>
+        <p style="font-size:13px;color:var(--cinza-texto);margin-bottom:16px">
+          Salva as configurações acima (status, horário, WhatsApp). Alterações de produtos e bairros são salvas automaticamente.
+        </p>
+        <div style="display:flex;gap:10px;flex-wrap:wrap">
+          <button class="btn-primario" onclick="salvarConfiguracoes()">💾 Salvar Configurações</button>
+          <button class="btn-secundario" onclick="exportarDados()">📥 Exportar Backup</button>
+          <button class="btn-perigo" onclick="restaurarPadrao()">⚠️ Restaurar Padrão</button>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<script>
+/* ======================================================
+   DADOS PADRÃO (igual ao index.html)
+====================================================== */
+const DADOS_PADRAO = {
+  senha: 'eline2025',
+  whatsapp: '5598984156128',
+  horario: '08h às 18h',
+  lojaAberta: true,
+  produtos: [
+    // BOLOS CASEIROS
+    { id: 1,  nome: 'Bolo de Cenoura',              categoria: 'Bolos Caseiros',      preco: 23.00, emoji: '🥕', desc: 'Serve 10 fatias • Cenoura caseiro, receita tradicional', disponivel: true, img: '' },
+    { id: 2,  nome: 'Bolo Mesclado',                categoria: 'Bolos Caseiros',      preco: 23.00, emoji: '🌀', desc: 'Serve 10 fatias • Metade baunilha, metade chocolate', disponivel: true, img: '' },
+    { id: 3,  nome: 'Bolo Amanteigado',             categoria: 'Bolos Caseiros',      preco: 23.00, emoji: '🎂', desc: 'Serve 10 fatias • Clássico bolo manteiga, úmido e fofinho', disponivel: true, img: '' },
+    { id: 4,  nome: 'Bolo de Chocolate',            categoria: 'Bolos Caseiros',      preco: 23.00, emoji: '🍫', desc: 'Serve 10 fatias • Bolo de chocolate intenso e molhadinho', disponivel: true, img: '' },
+    { id: 5,  nome: 'Bolo Formigueiro',             categoria: 'Bolos Caseiros',      preco: 23.00, emoji: '🎂', desc: 'Serve 10 fatias • Bolo caseiro com granulado de chocolate', disponivel: true, img: '' },
+    { id: 6,  nome: 'Bolo de Laranja',              categoria: 'Bolos Caseiros',      preco: 25.00, emoji: '🍊', desc: 'Serve 8 fatias • Bolo fofinho com sabor cítrico de laranja', disponivel: true, img: '' },
+    { id: 7,  nome: 'Tapioca com Queijo',           categoria: 'Bolos Caseiros',      preco: 23.00, emoji: '🧀', desc: 'Serve 6 fatias • Combinação especial de tapioca e queijo', disponivel: true, img: '' },
+    { id: 8,  nome: 'Bolo de Milho',                categoria: 'Bolos Caseiros',      preco: 30.00, emoji: '🌽', desc: 'Serve 8 fatias • Bolo de milho cremoso, sabor de fazenda', disponivel: true, img: '' },
+    // BOLOS COM COBERTURA
+    { id: 9,  nome: 'Cenoura com Cobertura',        categoria: 'Bolos com Cobertura', preco: 35.00, emoji: '🥕', desc: 'Serve 10 fatias • Cenoura com cobertura de chocolate', disponivel: true, img: '' },
+    { id: 10, nome: 'Cenoura Vulcão',               categoria: 'Bolos com Cobertura', preco: 45.00, emoji: '🌋', desc: 'Serve 10 fatias • Cenoura com cobertura vulcão especial', disponivel: true, img: '' },
+    { id: 11, nome: 'Bolo Choconinho',              categoria: 'Bolos com Cobertura', preco: 35.00, emoji: '🤎', desc: 'Serve 10 fatias • Chocolate com cobertura de leite ninho', disponivel: true, img: '' },
+    { id: 12, nome: 'Chocolate com Cobertura',      categoria: 'Bolos com Cobertura', preco: 35.00, emoji: '🍫', desc: 'Serve 10 fatias • Chocolate com cobertura de chocolate', disponivel: true, img: '' },
+    { id: 13, nome: 'Amanteigado c/ Chocolate',     categoria: 'Bolos com Cobertura', preco: 35.00, emoji: '🎂', desc: 'Serve 10 fatias • Amanteigado com cobertura de chocolate', disponivel: true, img: '' },
+    { id: 14, nome: 'Mesclado com Chocolate',       categoria: 'Bolos com Cobertura', preco: 45.00, emoji: '🌀', desc: 'Serve 10 fatias • Mesclado com cobertura de chocolate', disponivel: true, img: '' },
+    { id: 15, nome: 'Mesclado com Ninho',           categoria: 'Bolos com Cobertura', preco: 45.00, emoji: '🌀', desc: 'Serve 10 fatias • Mesclado com cobertura de leite ninho', disponivel: true, img: '' },
+    { id: 16, nome: 'Mesclado Dois Amores',         categoria: 'Bolos com Cobertura', preco: 35.00, emoji: '💕', desc: 'Serve 10 fatias • Mesclado com cobertura dois amores', disponivel: true, img: '' },
+    { id: 17, nome: 'Dois Amores com Cobertura',    categoria: 'Bolos com Cobertura', preco: 35.00, emoji: '💕', desc: 'Serve 10 fatias • Dois amores com cobertura especial', disponivel: true, img: '' },
+    { id: 18, nome: 'Amanteigado Dois Amores',      categoria: 'Bolos com Cobertura', preco: 45.00, emoji: '💕', desc: 'Serve 10 fatias • Amanteigado com recheio dois amores', disponivel: true, img: '' },
+    // BOLOS PEQUENOS
+    { id: 19, nome: 'Bolo de Milho "P"',            categoria: 'Bolos Pequenos',      preco: 20.00, emoji: '🌽', desc: 'Serve 4 fatias • Bolinho de milho cremoso individual', disponivel: true, img: '' },
+    { id: 20, nome: 'Bolo de Ninho',                categoria: 'Bolos Pequenos',      preco: 20.00, emoji: '🍼', desc: 'Serve 4 fatias • Bolinho com cobertura de leite ninho', disponivel: true, img: '' },
+    { id: 21, nome: 'Ninho Dois Amores',            categoria: 'Bolos Pequenos',      preco: 20.00, emoji: '💕', desc: 'Serve 4 fatias • Bolinho ninho com recheio dois amores', disponivel: true, img: '' },
+    { id: 22, nome: 'Ninho com Chocolate',          categoria: 'Bolos Pequenos',      preco: 20.00, emoji: '🤎', desc: 'Serve 4 fatias • Bolinho de ninho com cobertura de chocolate', disponivel: true, img: '' },
+    { id: 23, nome: 'Choconinho',                   categoria: 'Bolos Pequenos',      preco: 20.00, emoji: '🍫', desc: 'Serve 4 fatias • Bolinho chocolate com cobertura de ninho', disponivel: true, img: '' },
+    { id: 24, nome: 'Dois Amores',                  categoria: 'Bolos Pequenos',      preco: 20.00, emoji: '💕', desc: 'Serve 4 fatias • Bolinho metade chocolate, metade baunilha', disponivel: true, img: '' },
+    { id: 25, nome: 'Bolo de Chocolate Pequeno',    categoria: 'Bolos Pequenos',      preco: 20.00, emoji: '🍫', desc: 'Serve 4 fatias • Bolinho de chocolate com cobertura', disponivel: true, img: '' },
+    // BOLOS POR ENCOMENDA
+    { id: 26, nome: 'Bolo Especial',                categoria: 'Bolos por Encomenda', preco: 75.00, emoji: '✨', desc: 'Serve 12 fatias • Bolo decorado sob encomenda', disponivel: true, img: '' },
+    { id: 27, nome: 'Bolo Especial Decorado',       categoria: 'Bolos por Encomenda', preco: 80.00, emoji: '✨', desc: 'Serve 12 fatias • Bolo especial com decoração premium', disponivel: true, img: '' },
+    { id: 28, nome: 'Bolo Especial c/ Morango',     categoria: 'Bolos por Encomenda', preco: 85.00, emoji: '🍓', desc: 'Serve 12 fatias • Bolo especial com geleia de morango', disponivel: true, img: '' },
+    { id: 29, nome: 'Bolo Especial Premium',        categoria: 'Bolos por Encomenda', preco: 90.00, emoji: '👑', desc: 'Serve 12 fatias • Bolo especial com decoração luxo', disponivel: true, img: '' },
+    { id: 30, nome: 'Bolo Guirlanda',               categoria: 'Bolos por Encomenda', preco: 120.00,emoji: '🎄', desc: 'Serve 12 fatias • Bolo guirlanda decorado com morangos', disponivel: true, img: '' },
+    // PUDIM
+    { id: 31, nome: 'Pudim de Leite (1 kg)',        categoria: 'Pudim',               preco: 40.00, emoji: '🍮', desc: '1 kg inteiro • Pudim de leite condensado cremoso', disponivel: true, img: '' },
+    { id: 32, nome: 'Pudim de Leite (200g)',        categoria: 'Pudim',               preco: 10.00, emoji: '🍮', desc: '200 gramas • Porção individual do pudim caseiro', disponivel: true, img: '' },
+  ],
+  bairros: [
+    { id: 1,  nome: 'Centro',                    taxa: 3.00  },
+    { id: 2,  nome: 'Mercado Municipal',          taxa: 3.00  },
+    { id: 3,  nome: 'Barreirinha',                taxa: 3.00  },
+    { id: 4,  nome: 'São Benedito',               taxa: 3.00  },
+    { id: 5,  nome: 'Santo Antônio',              taxa: 3.00  },
+    { id: 6,  nome: 'Canaã',                      taxa: 5.00  },
+    { id: 7,  nome: 'Nova Santa Inês',            taxa: 5.00  },
+    { id: 8,  nome: 'Jardim Tropical',            taxa: 5.00  },
+    { id: 9,  nome: 'Adelaide Cabral',            taxa: 5.00  },
+    { id: 10, nome: 'Vila Edmundo Rios',          taxa: 5.00  },
+    { id: 11, nome: 'Jardim Brasília',            taxa: 5.00  },
+    { id: 12, nome: 'COHEB',                      taxa: 5.00  },
+    { id: 13, nome: 'Palmeira',                   taxa: 5.00  },
+    { id: 14, nome: 'Céu',                        taxa: 5.00  },
+    { id: 15, nome: 'Vila Conceição',             taxa: 5.00  },
+    { id: 16, nome: 'Parque Santa Cruz',          taxa: 5.00  },
+    { id: 17, nome: 'Jardim Abreu',               taxa: 5.00  },
+    { id: 18, nome: 'Vila Parente',               taxa: 5.00  },
+    { id: 19, nome: 'Ceplac',                     taxa: 5.00  },
+    { id: 20, nome: 'COHAB',                      taxa: 7.00  },
+    { id: 21, nome: 'Angelim',                    taxa: 7.00  },
+    { id: 22, nome: 'Mutirão',                    taxa: 7.00  },
+    { id: 23, nome: 'Vila Cabral',                taxa: 7.00  },
+    { id: 24, nome: 'Vila Davi',                  taxa: 7.00  },
+    { id: 25, nome: 'Vila Marcony',               taxa: 7.00  },
+    { id: 26, nome: 'Residencial Brasil',         taxa: 7.00  },
+    { id: 27, nome: 'São Cristóvão',              taxa: 7.00  },
+    { id: 28, nome: 'Jardim Nova Era',            taxa: 7.00  },
+    { id: 29, nome: 'Núcleo CVRD',               taxa: 7.00  },
+    { id: 30, nome: 'Vila Militar',               taxa: 7.00  },
+    { id: 31, nome: 'Sabbak',                     taxa: 7.00  },
+    { id: 32, nome: 'Parque Pramorar',            taxa: 7.00  },
+    { id: 33, nome: 'Vila Olímpica',              taxa: 7.00  },
+    { id: 34, nome: 'Canecão',                    taxa: 7.00  },
+    { id: 35, nome: 'Santa Filomena',             taxa: 7.00  },
+    { id: 36, nome: 'Residencial Sol Nascente',   taxa: 7.00  },
+    { id: 37, nome: 'Aeroporto',                  taxa: 10.00 },
+    { id: 38, nome: 'Área Rural de Santa Inês',   taxa: 15.00 },
+  ]
+};
+
+/* ======================================================
+   STORAGE
+====================================================== */
+function carregar() {
+  const s = localStorage.getItem('elineBolos');
+  if (!s) { localStorage.setItem('elineBolos', JSON.stringify(DADOS_PADRAO)); return JSON.parse(JSON.stringify(DADOS_PADRAO)); }
+  const d = JSON.parse(s);
+  if (!d.senha) d.senha = DADOS_PADRAO.senha;
+  if (!d.whatsapp) d.whatsapp = DADOS_PADRAO.whatsapp;
+  if (d.lojaAberta === undefined) d.lojaAberta = true;
+  if (!d.bairros || d.bairros.length < 10) d.bairros = DADOS_PADRAO.bairros;
+  return d;
+}
+function salvar() { localStorage.setItem('elineBolos', JSON.stringify(dados)); }
+
+let dados = carregar();
+
+/* ======================================================
+   LOGIN
+====================================================== */
+function entrar() {
+  const senha = document.getElementById('senhaInput').value;
+  if (senha === dados.senha) {
+    document.getElementById('loginPage').style.display = 'none';
+    document.getElementById('adminPage').classList.add('visivel');
+    document.getElementById('senhaInput').value = '';
+    document.getElementById('loginErro').style.display = 'none';
+    renderTudo();
+  } else {
+    document.getElementById('loginErro').style.display = 'block';
+    document.getElementById('senhaInput').value = '';
+    document.getElementById('senhaInput').focus();
+  }
+}
+function sair() {
+  document.getElementById('adminPage').classList.remove('visivel');
+  document.getElementById('loginPage').style.display = 'flex';
+}
+
+/* ======================================================
+   TABS
+====================================================== */
+function abrirTab(btn, tabId) {
+  document.querySelectorAll('.admin-tab').forEach(t => t.classList.remove('ativo'));
+  document.querySelectorAll('.admin-section').forEach(s => s.classList.remove('ativa'));
+  btn.classList.add('ativo');
+  document.getElementById(tabId).classList.add('ativa');
+}
+
+/* ======================================================
+   RENDER TUDO
+====================================================== */
+function renderTudo() {
+  renderDashboard();
+  renderProdutos();
+  renderBairros();
+  carregarConfig();
+}
+
+/* ======================================================
+   DASHBOARD
+====================================================== */
+function renderDashboard() {
+  const total = dados.produtos.length;
+  const disponiveis = dados.produtos.filter(p => p.disponivel).length;
+  const cats = new Set(dados.produtos.map(p => p.categoria)).size;
+  const bairros = dados.bairros.length;
+
+  document.getElementById('dashCards').innerHTML = `
+    <div class="dash-card"><div class="num">${total}</div><div class="label">Produtos</div></div>
+    <div class="dash-card"><div class="num">${disponiveis}</div><div class="label">Disponíveis</div></div>
+    <div class="dash-card"><div class="num">${cats}</div><div class="label">Categorias</div></div>
+    <div class="dash-card"><div class="num">${bairros}</div><div class="label">Bairros</div></div>
+  `;
+
+  const cats2 = [...new Set(dados.produtos.map(p => p.categoria))];
+  document.getElementById('resumoCategorias').innerHTML = cats2.map(c => {
+    const ps = dados.produtos.filter(p => p.categoria === c);
+    const dispC = ps.filter(p => p.disponivel).length;
+    return `
+      <div class="config-row">
+        <div><div class="config-label">${getCatEmoji(c)} ${c}</div></div>
+        <div style="display:flex;align-items:center;gap:8px">
+          <span class="badge badge-verde">${dispC} disponíveis</span>
+          <span class="badge badge-cinza">${ps.length} total</span>
+        </div>
+      </div>
+    `;
+  }).join('');
+}
+
+/* ======================================================
+   PRODUTOS
+====================================================== */
+let catAtiva = 'Todas';
+
+function getCatEmoji(cat) {
+  return {
+    'Todas': '🍽️',
+    'Bolos Caseiros': '🎂',
+    'Bolos com Cobertura': '🍫',
+    'Bolos Pequenos': '🧁',
+    'Bolos por Encomenda': '✨',
+    'Pudim': '🍮',
+    'Doces': '🍬'
+  }[cat] || '🎂';
+}
+
+function renderCatTabs() {
+  const cats = ['Todas', ...new Set(dados.produtos.map(p => p.categoria))];
+  document.getElementById('catTabs').innerHTML = cats.map(c =>
+    `<button class="cat-tab ${c === catAtiva ? 'ativo' : ''}" onclick="filtrarCat('${c}')">${getCatEmoji(c)} ${c}</button>`
+  ).join('');
+}
+
+function filtrarCat(cat) { catAtiva = cat; renderProdutos(); }
+
+function renderProdutos() {
+  renderCatTabs();
+  const lista = catAtiva === 'Todas' ? dados.produtos : dados.produtos.filter(p => p.categoria === catAtiva);
+  document.getElementById('contProdutos').textContent = `(${dados.produtos.length} total)`;
+  document.getElementById('listaProdutos').innerHTML = lista.length === 0
+    ? '<p style="color:var(--cinza-texto);text-align:center;padding:20px">Nenhum produto nesta categoria.</p>'
+    : lista.map(p => `
+      <div class="item-admin" id="prod-${p.id}">
+        <div class="item-admin-emoji">${p.emoji || '🎂'}</div>
+        <div class="item-admin-info">
+          <div class="item-admin-nome">${p.nome}</div>
+          <div class="item-admin-detalhe">
+            ${p.categoria} • <strong style="color:var(--rosa-escuro)">${fmt(p.preco)}</strong>
+            ${p.desc ? ' • ' + p.desc.substring(0, 45) + (p.desc.length > 45 ? '...' : '') : ''}
+          </div>
+        </div>
+        <div class="item-admin-acoes">
+          <div class="toggle-switch ${p.disponivel ? 'on' : ''}" onclick="toggleProd(${p.id})"
+               title="${p.disponivel ? 'Disponível — clique para desativar' : 'Indisponível — clique para ativar'}"></div>
+          <button class="btn-secundario" onclick="editarProd(${p.id})" style="font-size:12px;padding:6px 10px">✏️</button>
+          <button class="btn-perigo" onclick="deletarProd(${p.id})">🗑️</button>
+        </div>
+      </div>
+    `).join('');
+}
+
+function salvarProduto() {
+  const nome  = document.getElementById('pNome').value.trim();
+  const cat   = document.getElementById('pCategoria').value;
+  const preco = parseFloat(document.getElementById('pPreco').value);
+  const emoji = document.getElementById('pEmoji').value.trim() || '🎂';
+  const desc  = document.getElementById('pDesc').value.trim();
+  const img   = document.getElementById('pImg').value.trim();
+  const editId = document.getElementById('pEditId').value;
+
+  if (!nome || !cat || isNaN(preco) || preco < 0) { toast('Preencha nome, categoria e preço!', 'erro'); return; }
+
+  if (editId) {
+    const idx = dados.produtos.findIndex(p => p.id === parseInt(editId));
+    if (idx >= 0) dados.produtos[idx] = { ...dados.produtos[idx], nome, categoria: cat, preco, emoji, desc, img };
+    toast(`✅ ${nome} atualizado!`, 'sucesso');
+  } else {
+    dados.produtos.push({ id: Date.now(), nome, categoria: cat, preco, emoji, desc, img, disponivel: true });
+    toast(`${emoji} ${nome} adicionado!`, 'sucesso');
+  }
+  salvar(); renderProdutos(); renderDashboard(); limparFormProd();
+}
+
+function limparFormProd() {
+  ['pNome','pPreco','pEmoji','pDesc','pImg'].forEach(id => document.getElementById(id).value = '');
+  document.getElementById('pCategoria').selectedIndex = 0;
+  document.getElementById('pEditId').value = '';
+  document.getElementById('btnSalvarProd').textContent = '➕ Adicionar Produto';
+  document.getElementById('editandoLabel').style.display = 'none';
+}
+
+function editarProd(id) {
+  const p = dados.produtos.find(p => p.id === id);
+  if (!p) return;
+  document.getElementById('pNome').value = p.nome;
+  document.getElementById('pCategoria').value = p.categoria;
+  document.getElementById('pPreco').value = p.preco;
+  document.getElementById('pEmoji').value = p.emoji || '';
+  document.getElementById('pDesc').value = p.desc || '';
+  document.getElementById('pImg').value = p.img || '';
+  document.getElementById('pEditId').value = p.id;
+  document.getElementById('btnSalvarProd').textContent = '💾 Salvar Alterações';
+  document.getElementById('editandoLabel').style.display = 'inline';
+  // scroll para o form
+  document.getElementById('tabProdutos').scrollIntoView({ behavior: 'smooth' });
+  abrirTab(document.querySelector('.admin-tab[onclick*="tabProdutos"]'), 'tabProdutos');
+  document.getElementById('pNome').focus();
+  toast('Produto carregado para edição!', '');
+}
+
+function toggleProd(id) {
+  const p = dados.produtos.find(p => p.id === id);
+  if (!p) return;
+  p.disponivel = !p.disponivel;
+  salvar(); renderProdutos(); renderDashboard();
+  toast(p.disponivel ? `✅ ${p.nome} disponível` : `⛔ ${p.nome} desativado`, '');
+}
+
+function deletarProd(id) {
+  const p = dados.produtos.find(p => p.id === id);
+  if (!p || !confirm(`Excluir "${p.nome}" permanentemente?`)) return;
+  dados.produtos = dados.produtos.filter(p2 => p2.id !== id);
+  salvar(); renderProdutos(); renderDashboard();
+  toast('Produto removido.', '');
+}
+
+/* ======================================================
+   BAIRROS
+====================================================== */
+function renderBairros() {
+  document.getElementById('contBairros').textContent = `(${dados.bairros.length} bairros)`;
+  document.getElementById('listaBairros').innerHTML = dados.bairros.length === 0
+    ? '<p style="color:var(--cinza-texto);text-align:center;padding:20px">Nenhum bairro cadastrado.</p>'
+    : dados.bairros.map(b => `
+      <div class="item-admin">
+        <div class="item-admin-emoji">📍</div>
+        <div class="item-admin-info">
+          <div class="item-admin-nome">${b.nome}</div>
+        </div>
+        <div class="item-admin-acoes" style="gap:8px">
+          <span style="font-size:12px;color:var(--cinza-texto)">R$</span>
+          <input type="number" class="bairro-taxa-input" value="${b.taxa.toFixed(2)}"
+                 id="taxa-${b.id}" step="0.50" min="0"
+                 onkeydown="if(event.key==='Enter') salvarTaxa(${b.id})" />
+          <button class="btn-verde" style="padding:6px 10px;font-size:12px" onclick="salvarTaxa(${b.id})">💾</button>
+          <button class="btn-perigo" onclick="deletarBairro(${b.id})">🗑️</button>
+        </div>
+      </div>
+    `).join('');
+}
+
+function salvarTaxa(id) {
+  const input = document.getElementById(`taxa-${id}`);
+  const taxa = parseFloat(input.value);
+  if (isNaN(taxa) || taxa < 0) { toast('Valor inválido!', 'erro'); return; }
+  const b = dados.bairros.find(b => b.id === id);
+  if (b) { b.taxa = taxa; salvar(); toast(`📍 Taxa de ${b.nome} atualizada!`, 'sucesso'); }
+}
+
+function adicionarBairro() {
+  const nome = document.getElementById('bNome').value.trim();
+  const taxa = parseFloat(document.getElementById('bTaxa').value);
+  if (!nome || isNaN(taxa) || taxa < 0) { toast('Preencha nome e taxa!', 'erro'); return; }
+  dados.bairros.push({ id: Date.now(), nome, taxa });
+  salvar(); renderBairros(); renderDashboard();
+  document.getElementById('bNome').value = '';
+  document.getElementById('bTaxa').value = '';
+  toast(`📍 ${nome} adicionado!`, 'sucesso');
+}
+
+function deletarBairro(id) {
+  const b = dados.bairros.find(b => b.id === id);
+  if (!b || !confirm(`Remover "${b.nome}"?`)) return;
+  dados.bairros = dados.bairros.filter(b2 => b2.id !== id);
+  salvar(); renderBairros(); renderDashboard();
+  toast('Bairro removido.', '');
+}
+
+/* ======================================================
+   CONFIGURAÇÕES
+====================================================== */
+function carregarConfig() {
+  document.getElementById('cfgWhatsapp').value = dados.whatsapp || '';
+  document.getElementById('cfgHorario').value = dados.horario || '';
+  document.getElementById('toggleLoja').classList.toggle('on', dados.lojaAberta !== false);
+}
+
+function toggleLojaStatus() {
+  dados.lojaAberta = !dados.lojaAberta;
+  document.getElementById('toggleLoja').classList.toggle('on', dados.lojaAberta);
+  salvar();
+  toast(dados.lojaAberta ? '✅ Loja aberta!' : '🔒 Loja fechada!', '');
+}
+
+function salvarConfiguracoes() {
+  dados.whatsapp = document.getElementById('cfgWhatsapp').value.trim() || '5598984156128';
+  dados.horario  = document.getElementById('cfgHorario').value.trim();
+  salvar();
+  toast('✅ Configurações salvas!', 'sucesso');
+}
+
+function alterarSenha() {
+  const nova = document.getElementById('cfgSenhaNova').value.trim();
+  if (!nova || nova.length < 4) { toast('Senha deve ter ao menos 4 caracteres.', 'erro'); return; }
+  dados.senha = nova;
+  salvar();
+  document.getElementById('cfgSenhaNova').value = '';
+  toast('🔐 Senha alterada com sucesso!', 'sucesso');
+}
+
+function testarWhatsapp() {
+  const wpp = document.getElementById('cfgWhatsapp').value.trim() || dados.whatsapp;
+  const msg = '🎂 *Teste — Eline Bolos Admin*\nSe você recebeu essa mensagem, o WhatsApp está configurado corretamente! ✅';
+  window.open(`https://wa.me/${wpp}?text=${encodeURIComponent(msg)}`, '_blank');
+}
+
+function exportarDados() {
+  const blob = new Blob([JSON.stringify(dados, null, 2)], { type: 'application/json' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = `eline-bolos-backup-${new Date().toISOString().slice(0,10)}.json`;
+  a.click();
+  toast('📥 Backup exportado!', 'sucesso');
+}
+
+function restaurarPadrao() {
+  if (!confirm('Isso vai restaurar todos os dados para o padrão inicial. Os dados atuais serão perdidos. Confirma?')) return;
+  dados = JSON.parse(JSON.stringify(DADOS_PADRAO));
+  salvar(); renderTudo();
+  toast('✅ Dados restaurados!', 'sucesso');
+}
+
+/* ======================================================
+   UTILITÁRIOS
+====================================================== */
+function fmt(v) { return v.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' }); }
+
+let _toastTimer;
+function toast(msg, tipo = '') {
+  const el = document.getElementById('toast');
+  el.textContent = msg;
+  el.className = 'toast visivel' + (tipo ? ' ' + tipo : '');
+  clearTimeout(_toastTimer);
+  _toastTimer = setTimeout(() => el.classList.remove('visivel'), 2800);
+}
+
+// Init
+document.getElementById('senhaInput').focus();
+</script>
+</body>
+</html>
