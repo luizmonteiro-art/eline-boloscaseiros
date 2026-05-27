@@ -1,0 +1,2069 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Eline Bolos Caseiros e Confeitados</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=Nunito:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+  <style>
+    /* ===== VARIÁVEIS DE COR (paleta da logo) ===== */
+    :root {
+      --rosa:        #E8809A;
+      --rosa-escuro: #D4607A;
+      --rosa-claro:  #F9D5DF;
+      --rosa-bg:     #FEF0F4;
+      --marrom:      #4A2418;
+      --marrom-medio:#7B4A2D;
+      --bege:        #F0E0C0;
+      --bege-escuro: #D9C4A0;
+      --verde:       #7CB342;
+      --branco:      #FFFFFF;
+      --cinza-texto: #555555;
+      --sombra:      0 4px 20px rgba(74, 36, 24, 0.12);
+      --sombra-card: 0 2px 12px rgba(74, 36, 24, 0.10);
+      --radius:      16px;
+      --radius-sm:   10px;
+    }
+
+    /* ===== RESET & BASE ===== */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; }
+    body {
+      font-family: 'Nunito', sans-serif;
+      background: var(--rosa-bg);
+      color: var(--marrom);
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+    img { display: block; max-width: 100%; }
+    button { cursor: pointer; border: none; background: none; font-family: inherit; }
+    input, select, textarea { font-family: inherit; }
+
+    /* ===== HEADER ===== */
+    .header {
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      background: var(--branco);
+      box-shadow: 0 2px 12px rgba(74,36,24,0.10);
+      padding: 0 16px;
+      height: 64px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+    }
+    .header-brand {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      text-decoration: none;
+    }
+    .header-logo {
+      width: 44px;
+      height: 44px;
+      border-radius: 50%;
+      background: var(--rosa-claro);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 22px;
+      flex-shrink: 0;
+      overflow: hidden;
+    }
+    .header-logo img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      border-radius: 50%;
+    }
+    .header-title {
+      display: flex;
+      flex-direction: column;
+      line-height: 1.2;
+    }
+    .header-title .nome {
+      font-family: 'Playfair Display', serif;
+      font-size: 15px;
+      font-weight: 700;
+      color: var(--marrom);
+    }
+    .header-title .sub {
+      font-size: 10px;
+      color: var(--marrom-medio);
+      font-weight: 500;
+    }
+    .header-actions {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .btn-cart {
+      position: relative;
+      width: 44px;
+      height: 44px;
+      border-radius: 50%;
+      background: var(--rosa-claro);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 20px;
+      transition: background 0.2s;
+    }
+    .btn-cart:hover { background: var(--rosa); }
+    .cart-badge {
+      position: absolute;
+      top: 2px;
+      right: 2px;
+      background: var(--rosa-escuro);
+      color: white;
+      font-size: 10px;
+      font-weight: 800;
+      width: 18px;
+      height: 18px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      display: none;
+    }
+    .btn-admin-link {
+      font-size: 11px;
+      color: var(--marrom-medio);
+      text-decoration: none;
+      padding: 4px 8px;
+      border-radius: 6px;
+      transition: background 0.2s;
+    }
+    .btn-admin-link:hover { background: var(--bege); }
+
+    /* ===== STATUS LOJA ===== */
+    .status-bar {
+      background: var(--marrom);
+      color: var(--bege);
+      text-align: center;
+      font-size: 12px;
+      font-weight: 600;
+      padding: 6px 16px;
+      display: none;
+    }
+    .status-bar.fechada {
+      display: block;
+      background: #c0392b;
+      color: white;
+    }
+
+    /* ===== HERO ===== */
+    .hero {
+      background: linear-gradient(135deg, var(--rosa-claro) 0%, var(--bege) 100%);
+      padding: 32px 16px 40px;
+      text-align: center;
+      position: relative;
+      overflow: hidden;
+    }
+    .hero::before {
+      content: '';
+      position: absolute;
+      top: -40px; right: -40px;
+      width: 200px; height: 200px;
+      background: var(--rosa);
+      opacity: 0.12;
+      border-radius: 50%;
+    }
+    .hero::after {
+      content: '';
+      position: absolute;
+      bottom: -60px; left: -30px;
+      width: 180px; height: 180px;
+      background: var(--marrom);
+      opacity: 0.06;
+      border-radius: 50%;
+    }
+    .hero-emoji { font-size: 48px; margin-bottom: 8px; }
+    .hero h1 {
+      font-family: 'Playfair Display', serif;
+      font-size: clamp(24px, 6vw, 38px);
+      color: var(--marrom);
+      line-height: 1.2;
+      margin-bottom: 6px;
+    }
+    .hero h1 span { color: var(--rosa-escuro); font-style: italic; }
+    .hero p {
+      font-size: 14px;
+      color: var(--marrom-medio);
+      margin-bottom: 20px;
+      max-width: 320px;
+      margin-left: auto;
+      margin-right: auto;
+    }
+    .hero-tags {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      justify-content: center;
+      margin-bottom: 24px;
+    }
+    .hero-tag {
+      background: var(--branco);
+      color: var(--marrom);
+      font-size: 12px;
+      font-weight: 600;
+      padding: 6px 14px;
+      border-radius: 20px;
+      box-shadow: var(--sombra-card);
+    }
+    .hero-tag span { margin-right: 4px; }
+    .btn-hero {
+      background: var(--rosa-escuro);
+      color: white;
+      font-size: 15px;
+      font-weight: 700;
+      padding: 14px 32px;
+      border-radius: 30px;
+      text-decoration: none;
+      display: inline-block;
+      box-shadow: 0 4px 16px rgba(212,96,122,0.35);
+      transition: transform 0.15s, box-shadow 0.15s;
+    }
+    .btn-hero:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(212,96,122,0.45);
+    }
+    .btn-hero:active { transform: translateY(0); }
+
+    /* ===== SEÇÃO CARDÁPIO ===== */
+    .cardapio-section {
+      padding: 28px 16px 100px;
+      max-width: 960px;
+      margin: 0 auto;
+    }
+    .section-title {
+      font-family: 'Playfair Display', serif;
+      font-size: 24px;
+      color: var(--marrom);
+      text-align: center;
+      margin-bottom: 6px;
+    }
+    .section-title span { color: var(--rosa-escuro); }
+    .section-sub {
+      text-align: center;
+      font-size: 13px;
+      color: var(--marrom-medio);
+      margin-bottom: 20px;
+    }
+
+    /* TABS */
+    .tabs {
+      display: flex;
+      gap: 8px;
+      overflow-x: auto;
+      padding-bottom: 4px;
+      margin-bottom: 20px;
+      scrollbar-width: none;
+    }
+    .tabs::-webkit-scrollbar { display: none; }
+    .tab-btn {
+      flex-shrink: 0;
+      padding: 8px 18px;
+      border-radius: 20px;
+      font-size: 13px;
+      font-weight: 700;
+      color: var(--marrom-medio);
+      background: var(--branco);
+      border: 2px solid transparent;
+      transition: all 0.2s;
+      white-space: nowrap;
+      box-shadow: var(--sombra-card);
+    }
+    .tab-btn.ativo {
+      background: var(--rosa-escuro);
+      color: white;
+      border-color: var(--rosa-escuro);
+    }
+    .tab-btn:hover:not(.ativo) {
+      border-color: var(--rosa);
+      color: var(--rosa);
+    }
+
+    /* GRID PRODUTOS */
+    .produtos-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+      gap: 14px;
+    }
+    @media (min-width: 600px) {
+      .produtos-grid {
+        grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+      }
+    }
+
+    .produto-card {
+      background: var(--branco);
+      border-radius: var(--radius);
+      box-shadow: var(--sombra-card);
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      transition: transform 0.2s, box-shadow 0.2s;
+    }
+    .produto-card:hover {
+      transform: translateY(-3px);
+      box-shadow: var(--sombra);
+    }
+    .produto-card.indisponivel { opacity: 0.5; pointer-events: none; }
+
+    .produto-img {
+      width: 100%;
+      aspect-ratio: 1;
+      object-fit: cover;
+      background: var(--bege);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 48px;
+      color: var(--rosa-claro);
+    }
+    .produto-img img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+    .produto-info {
+      padding: 12px;
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+    }
+    .produto-nome {
+      font-weight: 700;
+      font-size: 14px;
+      color: var(--marrom);
+      margin-bottom: 4px;
+      line-height: 1.3;
+    }
+    .produto-desc {
+      font-size: 11px;
+      color: var(--cinza-texto);
+      margin-bottom: 10px;
+      flex: 1;
+      line-height: 1.4;
+    }
+    .produto-footer {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .produto-preco {
+      font-size: 15px;
+      font-weight: 800;
+      color: var(--rosa-escuro);
+    }
+    .btn-add {
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      background: var(--rosa-escuro);
+      color: white;
+      font-size: 20px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      line-height: 1;
+      transition: background 0.2s, transform 0.15s;
+      box-shadow: 0 2px 8px rgba(212,96,122,0.3);
+    }
+    .btn-add:hover { background: var(--marrom); transform: scale(1.1); }
+    .btn-add:active { transform: scale(0.95); }
+    .produto-tag-indisponivel {
+      font-size: 11px;
+      font-weight: 700;
+      color: #c0392b;
+      padding: 4px 0;
+    }
+
+    /* ===== CARRINHO FLUTUANTE (bottom sheet) ===== */
+    .cart-float {
+      position: fixed;
+      bottom: 16px;
+      left: 50%;
+      transform: translateX(-50%) translateY(100px);
+      z-index: 90;
+      background: var(--marrom);
+      color: white;
+      border-radius: 30px;
+      padding: 14px 24px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      font-weight: 700;
+      font-size: 14px;
+      box-shadow: 0 8px 30px rgba(74,36,24,0.35);
+      cursor: pointer;
+      transition: transform 0.3s cubic-bezier(0.34,1.56,0.64,1), box-shadow 0.2s;
+      white-space: nowrap;
+    }
+    .cart-float.visivel {
+      transform: translateX(-50%) translateY(0);
+    }
+    .cart-float:hover { box-shadow: 0 12px 35px rgba(74,36,24,0.45); }
+    .cart-float-icon { font-size: 20px; }
+    .cart-float-qty {
+      background: var(--rosa);
+      border-radius: 12px;
+      padding: 2px 8px;
+      font-size: 12px;
+    }
+    .cart-float-total { color: var(--bege); }
+
+    /* ===== DRAWER CARRINHO ===== */
+    .overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(74,36,24,0.4);
+      z-index: 200;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.3s;
+      backdrop-filter: blur(2px);
+    }
+    .overlay.aberto { opacity: 1; pointer-events: all; }
+
+    .cart-drawer {
+      position: fixed;
+      bottom: 0; left: 0; right: 0;
+      z-index: 210;
+      background: var(--branco);
+      border-radius: 24px 24px 0 0;
+      max-height: 90vh;
+      display: flex;
+      flex-direction: column;
+      transform: translateY(100%);
+      transition: transform 0.35s cubic-bezier(0.32,0.72,0,1);
+      box-shadow: 0 -8px 40px rgba(74,36,24,0.2);
+    }
+    .cart-drawer.aberto { transform: translateY(0); }
+
+    @media (min-width: 700px) {
+      .cart-drawer {
+        left: auto;
+        right: 0;
+        top: 0;
+        bottom: 0;
+        width: 420px;
+        border-radius: 0;
+        max-height: 100vh;
+        transform: translateX(100%);
+      }
+      .cart-drawer.aberto { transform: translateX(0); }
+    }
+
+    .cart-header {
+      padding: 20px 20px 12px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border-bottom: 1px solid var(--rosa-claro);
+      flex-shrink: 0;
+    }
+    .cart-header h2 {
+      font-family: 'Playfair Display', serif;
+      font-size: 20px;
+      color: var(--marrom);
+    }
+    .btn-fechar {
+      width: 36px; height: 36px;
+      border-radius: 50%;
+      background: var(--rosa-claro);
+      font-size: 18px;
+      display: flex; align-items: center; justify-content: center;
+      color: var(--marrom);
+      transition: background 0.2s;
+    }
+    .btn-fechar:hover { background: var(--rosa); color: white; }
+
+    .cart-body {
+      flex: 1;
+      overflow-y: auto;
+      padding: 16px 20px;
+    }
+    .cart-vazio {
+      text-align: center;
+      padding: 40px 20px;
+      color: var(--bege-escuro);
+    }
+    .cart-vazio .emoji { font-size: 48px; margin-bottom: 12px; }
+    .cart-vazio p { font-size: 14px; }
+
+    .cart-item {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 12px 0;
+      border-bottom: 1px solid var(--rosa-claro);
+    }
+    .cart-item:last-child { border-bottom: none; }
+    .cart-item-emoji {
+      font-size: 28px;
+      width: 48px; height: 48px;
+      background: var(--bege);
+      border-radius: 12px;
+      display: flex; align-items: center; justify-content: center;
+      flex-shrink: 0;
+    }
+    .cart-item-info { flex: 1; min-width: 0; }
+    .cart-item-nome {
+      font-weight: 700;
+      font-size: 14px;
+      color: var(--marrom);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .cart-item-preco {
+      font-size: 13px;
+      color: var(--rosa-escuro);
+      font-weight: 600;
+    }
+    .cart-item-controles {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .btn-qty {
+      width: 28px; height: 28px;
+      border-radius: 50%;
+      background: var(--rosa-claro);
+      font-size: 16px;
+      font-weight: 700;
+      color: var(--marrom);
+      display: flex; align-items: center; justify-content: center;
+      transition: background 0.2s;
+      line-height: 1;
+    }
+    .btn-qty:hover { background: var(--rosa); color: white; }
+    .qty-num {
+      font-size: 15px;
+      font-weight: 800;
+      color: var(--marrom);
+      min-width: 20px;
+      text-align: center;
+    }
+
+    .cart-footer {
+      padding: 16px 20px;
+      border-top: 1px solid var(--rosa-claro);
+      flex-shrink: 0;
+    }
+    .cart-subtotal {
+      display: flex;
+      justify-content: space-between;
+      font-size: 14px;
+      color: var(--cinza-texto);
+      margin-bottom: 6px;
+    }
+    .cart-total {
+      display: flex;
+      justify-content: space-between;
+      font-size: 18px;
+      font-weight: 800;
+      color: var(--marrom);
+      margin-bottom: 16px;
+    }
+    .cart-total span:last-child { color: var(--rosa-escuro); }
+    .btn-checkout {
+      width: 100%;
+      background: var(--rosa-escuro);
+      color: white;
+      font-size: 16px;
+      font-weight: 800;
+      padding: 15px;
+      border-radius: 14px;
+      transition: background 0.2s, transform 0.15s;
+      box-shadow: 0 4px 16px rgba(212,96,122,0.35);
+    }
+    .btn-checkout:hover { background: var(--marrom); transform: translateY(-1px); }
+    .btn-checkout:active { transform: translateY(0); }
+
+    /* ===== MODAL CHECKOUT ===== */
+    .modal-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(74,36,24,0.5);
+      z-index: 300;
+      display: flex;
+      align-items: flex-end;
+      justify-content: center;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.3s;
+      backdrop-filter: blur(3px);
+    }
+    .modal-overlay.aberto { opacity: 1; pointer-events: all; }
+
+    @media (min-width: 600px) {
+      .modal-overlay { align-items: center; }
+    }
+
+    .modal {
+      background: var(--branco);
+      border-radius: 24px 24px 0 0;
+      width: 100%;
+      max-width: 520px;
+      max-height: 92vh;
+      overflow-y: auto;
+      transform: translateY(40px);
+      transition: transform 0.35s cubic-bezier(0.32,0.72,0,1);
+      padding: 24px 20px 32px;
+    }
+    @media (min-width: 600px) {
+      .modal {
+        border-radius: 24px;
+        max-height: 90vh;
+        transform: translateY(20px) scale(0.97);
+      }
+    }
+    .modal-overlay.aberto .modal {
+      transform: translateY(0) scale(1);
+    }
+
+    .modal-title {
+      font-family: 'Playfair Display', serif;
+      font-size: 22px;
+      color: var(--marrom);
+      margin-bottom: 4px;
+    }
+    .modal-sub {
+      font-size: 13px;
+      color: var(--cinza-texto);
+      margin-bottom: 20px;
+    }
+    .form-group {
+      margin-bottom: 16px;
+    }
+    .form-group label {
+      display: block;
+      font-size: 13px;
+      font-weight: 700;
+      color: var(--marrom);
+      margin-bottom: 6px;
+    }
+    .form-group label .obrig { color: var(--rosa-escuro); }
+    .form-control {
+      width: 100%;
+      padding: 12px 14px;
+      border: 2px solid var(--bege);
+      border-radius: var(--radius-sm);
+      font-size: 14px;
+      color: var(--marrom);
+      background: var(--branco);
+      transition: border-color 0.2s;
+      outline: none;
+    }
+    .form-control:focus { border-color: var(--rosa); }
+    select.form-control { appearance: none; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath fill='%234A2418' d='M6 8L0 0h12z'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 14px center; padding-right: 36px; }
+    textarea.form-control { resize: none; min-height: 80px; }
+
+    /* Entrega/Retirada toggle */
+    .entrega-toggle {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 16px;
+    }
+    .toggle-btn {
+      flex: 1;
+      padding: 12px;
+      border-radius: var(--radius-sm);
+      border: 2px solid var(--bege);
+      font-size: 14px;
+      font-weight: 700;
+      color: var(--marrom-medio);
+      background: var(--branco);
+      transition: all 0.2s;
+      text-align: center;
+    }
+    .toggle-btn.ativo {
+      border-color: var(--rosa-escuro);
+      background: var(--rosa-claro);
+      color: var(--rosa-escuro);
+    }
+    .toggle-btn .icon { font-size: 18px; display: block; margin-bottom: 2px; }
+
+    .entrega-fields { display: none; }
+    .entrega-fields.visivel { display: block; }
+
+    .taxa-info {
+      background: var(--bege);
+      border-radius: var(--radius-sm);
+      padding: 10px 14px;
+      font-size: 13px;
+      color: var(--marrom);
+      margin-top: 8px;
+      display: none;
+    }
+    .taxa-info.visivel { display: block; }
+    .taxa-info strong { color: var(--rosa-escuro); }
+
+    /* Resumo pedido no checkout */
+    .resumo-pedido {
+      background: var(--rosa-bg);
+      border-radius: var(--radius-sm);
+      padding: 14px;
+      margin-bottom: 20px;
+    }
+    .resumo-titulo {
+      font-size: 13px;
+      font-weight: 700;
+      color: var(--marrom);
+      margin-bottom: 10px;
+    }
+    .resumo-item {
+      display: flex;
+      justify-content: space-between;
+      font-size: 13px;
+      color: var(--cinza-texto);
+      margin-bottom: 4px;
+    }
+    .resumo-linha { border-top: 1px dashed var(--bege-escuro); margin: 8px 0; }
+    .resumo-total {
+      display: flex;
+      justify-content: space-between;
+      font-weight: 800;
+      font-size: 15px;
+      color: var(--marrom);
+    }
+    .resumo-total span:last-child { color: var(--rosa-escuro); }
+
+    .btn-confirmar {
+      width: 100%;
+      background: var(--verde);
+      color: white;
+      font-size: 16px;
+      font-weight: 800;
+      padding: 16px;
+      border-radius: 14px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      box-shadow: 0 4px 16px rgba(124,179,66,0.3);
+      transition: background 0.2s, transform 0.15s;
+    }
+    .btn-confirmar:hover { background: #6aa33a; transform: translateY(-1px); }
+    .btn-confirmar:active { transform: translateY(0); }
+
+    /* ===== RODAPÉ ===== */
+    .footer {
+      background: var(--marrom);
+      color: var(--bege);
+      text-align: center;
+      padding: 28px 16px;
+    }
+    .footer .logo-footer {
+      font-family: 'Playfair Display', serif;
+      font-size: 20px;
+      font-style: italic;
+      color: var(--rosa-claro);
+      margin-bottom: 8px;
+    }
+    .footer .tagline {
+      font-size: 12px;
+      color: var(--bege-escuro);
+      margin-bottom: 16px;
+    }
+    .footer-links {
+      display: flex;
+      justify-content: center;
+      gap: 16px;
+      margin-bottom: 16px;
+    }
+    .footer-link {
+      color: var(--bege);
+      text-decoration: none;
+      font-size: 13px;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      transition: color 0.2s;
+    }
+    .footer-link:hover { color: var(--rosa); }
+    .footer-copy { font-size: 11px; color: var(--bege-escuro); opacity: 0.7; }
+
+    /* ===== ADMIN PANEL ===== */
+    .admin-panel {
+      display: none;
+      min-height: 100vh;
+      background: #f5f5f5;
+    }
+    .admin-panel.visivel { display: block; }
+    .main-app { display: block; }
+    .main-app.oculto { display: none; }
+
+    .admin-login {
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+      background: linear-gradient(135deg, var(--rosa-claro), var(--bege));
+    }
+    .login-card {
+      background: var(--branco);
+      border-radius: var(--radius);
+      padding: 32px 28px;
+      width: 100%;
+      max-width: 360px;
+      box-shadow: var(--sombra);
+      text-align: center;
+    }
+    .login-card .emoji { font-size: 40px; margin-bottom: 12px; }
+    .login-card h2 {
+      font-family: 'Playfair Display', serif;
+      color: var(--marrom);
+      margin-bottom: 6px;
+    }
+    .login-card p { font-size: 13px; color: var(--cinza-texto); margin-bottom: 24px; }
+    .login-erro { color: #c0392b; font-size: 13px; margin-top: 8px; display: none; }
+
+    .admin-header {
+      background: var(--marrom);
+      color: white;
+      padding: 14px 20px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .admin-header h1 {
+      font-family: 'Playfair Display', serif;
+      font-size: 18px;
+      color: var(--rosa-claro);
+    }
+    .btn-sair-admin {
+      font-size: 13px;
+      color: var(--bege);
+      background: rgba(255,255,255,0.15);
+      padding: 6px 14px;
+      border-radius: 8px;
+      font-weight: 600;
+      transition: background 0.2s;
+    }
+    .btn-sair-admin:hover { background: rgba(255,255,255,0.25); }
+
+    .admin-tabs {
+      background: var(--branco);
+      border-bottom: 2px solid var(--rosa-claro);
+      display: flex;
+      overflow-x: auto;
+    }
+    .admin-tab {
+      padding: 12px 20px;
+      font-size: 13px;
+      font-weight: 700;
+      color: var(--cinza-texto);
+      border-bottom: 3px solid transparent;
+      margin-bottom: -2px;
+      white-space: nowrap;
+      transition: color 0.2s, border-color 0.2s;
+    }
+    .admin-tab.ativo { color: var(--rosa-escuro); border-color: var(--rosa-escuro); }
+    .admin-tab:hover:not(.ativo) { color: var(--marrom); }
+
+    .admin-content {
+      padding: 20px;
+      max-width: 960px;
+      margin: 0 auto;
+    }
+    .admin-section { display: none; }
+    .admin-section.ativa { display: block; }
+
+    .admin-card {
+      background: var(--branco);
+      border-radius: var(--radius);
+      padding: 20px;
+      box-shadow: var(--sombra-card);
+      margin-bottom: 16px;
+    }
+    .admin-card h3 {
+      font-size: 16px;
+      font-weight: 800;
+      color: var(--marrom);
+      margin-bottom: 16px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .btn-primario {
+      background: var(--rosa-escuro);
+      color: white;
+      font-size: 14px;
+      font-weight: 700;
+      padding: 10px 20px;
+      border-radius: var(--radius-sm);
+      transition: background 0.2s;
+    }
+    .btn-primario:hover { background: var(--marrom); }
+
+    .btn-secundario {
+      background: var(--bege);
+      color: var(--marrom);
+      font-size: 13px;
+      font-weight: 700;
+      padding: 8px 16px;
+      border-radius: var(--radius-sm);
+      transition: background 0.2s;
+    }
+    .btn-secundario:hover { background: var(--bege-escuro); }
+
+    .btn-perigo {
+      background: #fdecea;
+      color: #c0392b;
+      font-size: 12px;
+      font-weight: 700;
+      padding: 6px 12px;
+      border-radius: 8px;
+      transition: background 0.2s;
+    }
+    .btn-perigo:hover { background: #f8d7da; }
+
+    .lista-admin {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+    .item-admin {
+      background: var(--rosa-bg);
+      border-radius: var(--radius-sm);
+      padding: 12px 16px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    .item-admin-info { flex: 1; min-width: 0; }
+    .item-admin-nome {
+      font-weight: 700;
+      font-size: 14px;
+      color: var(--marrom);
+    }
+    .item-admin-detalhe {
+      font-size: 12px;
+      color: var(--cinza-texto);
+      margin-top: 2px;
+    }
+    .item-admin-acoes {
+      display: flex;
+      gap: 6px;
+      flex-shrink: 0;
+    }
+    .toggle-disponivel {
+      width: 40px; height: 22px;
+      background: var(--bege-escuro);
+      border-radius: 11px;
+      position: relative;
+      transition: background 0.2s;
+      cursor: pointer;
+      flex-shrink: 0;
+    }
+    .toggle-disponivel::after {
+      content: '';
+      position: absolute;
+      top: 3px; left: 3px;
+      width: 16px; height: 16px;
+      background: white;
+      border-radius: 50%;
+      transition: transform 0.2s;
+      box-shadow: 0 1px 4px rgba(0,0,0,0.2);
+    }
+    .toggle-disponivel.on {
+      background: var(--verde);
+    }
+    .toggle-disponivel.on::after { transform: translateX(18px); }
+
+    /* Form inline admin */
+    .form-inline {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+      margin-top: 12px;
+    }
+    @media (max-width: 500px) { .form-inline { grid-template-columns: 1fr; } }
+    .form-inline .full { grid-column: 1 / -1; }
+    .form-inline label { font-size: 12px; font-weight: 700; color: var(--marrom); display: block; margin-bottom: 4px; }
+    .form-inline .form-control { padding: 9px 12px; font-size: 13px; }
+
+    /* Configurações */
+    .config-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 12px 0;
+      border-bottom: 1px solid var(--rosa-claro);
+    }
+    .config-row:last-child { border-bottom: none; }
+    .config-label { font-size: 14px; font-weight: 600; color: var(--marrom); }
+    .config-sub { font-size: 12px; color: var(--cinza-texto); margin-top: 2px; }
+
+    /* Toast */
+    .toast {
+      position: fixed;
+      bottom: 90px;
+      left: 50%;
+      transform: translateX(-50%) translateY(20px);
+      background: var(--marrom);
+      color: white;
+      padding: 12px 24px;
+      border-radius: 24px;
+      font-size: 14px;
+      font-weight: 600;
+      z-index: 999;
+      opacity: 0;
+      pointer-events: none;
+      transition: all 0.3s;
+      white-space: nowrap;
+      box-shadow: var(--sombra);
+    }
+    .toast.visivel {
+      opacity: 1;
+      transform: translateX(-50%) translateY(0);
+    }
+    .toast.sucesso { background: var(--verde); }
+    .toast.erro { background: #c0392b; }
+
+    /* Animação de entrada */
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(16px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    .produto-card {
+      animation: fadeUp 0.4s ease both;
+    }
+  </style>
+</head>
+<body>
+
+<!-- ===== TOAST ===== -->
+<div class="toast" id="toast"></div>
+
+<!-- ============================================================ -->
+<!--  APLICATIVO PRINCIPAL                                        -->
+<!-- ============================================================ -->
+<div class="main-app" id="mainApp">
+
+  <!-- STATUS BAR (loja fechada) -->
+  <div class="status-bar" id="statusBar">
+    🔒 Estamos fechados no momento. Mas você pode ver o cardápio e fazer seu pedido para quando abrirmos!
+  </div>
+
+  <!-- HEADER -->
+  <header class="header">
+    <a class="header-brand" href="#">
+      <div class="header-logo" id="headerLogo">🎂</div>
+      <div class="header-title">
+        <span class="nome">Eline Bolos</span>
+        <span class="sub">Caseiros e Confeitados</span>
+      </div>
+    </a>
+    <div class="header-actions">
+      <button class="btn-cart" id="btnCartHeader" aria-label="Carrinho">
+        🛒
+        <span class="cart-badge" id="cartBadge">0</span>
+      </button>
+    </div>
+  </header>
+
+  <!-- HERO -->
+  <section class="hero">
+    <div class="hero-emoji">🎂</div>
+    <h1>Eline Bolos<br><span>Caseiros e Confeitados</span></h1>
+    <p>Bolo é carinho em forma de comida 🙂<br>Santa Inês – MA</p>
+    <div class="hero-tags">
+      <div class="hero-tag"><span>🍰</span> Bolos Caseiros</div>
+      <div class="hero-tag"><span>🍮</span> Pudim</div>
+      <div class="hero-tag"><span>🍬</span> Doces</div>
+      <div class="hero-tag"><span>🛵</span> Delivery</div>
+    </div>
+    <a href="#cardapio" class="btn-hero">Ver Cardápio 🍴</a>
+  </section>
+
+  <!-- CARDÁPIO -->
+  <section class="cardapio-section" id="cardapio">
+    <h2 class="section-title">Nosso <span>Cardápio</span></h2>
+    <p class="section-sub" id="section-sub-data">Feito com amor, todos os dias 💕</p>
+
+    <!-- Tabs categorias -->
+    <div class="tabs" id="categorias-tabs"></div>
+
+    <!-- Grid produtos -->
+    <div class="produtos-grid" id="produtosGrid"></div>
+  </section>
+
+  <!-- RODAPÉ -->
+  <footer class="footer">
+    <div class="logo-footer">Eline Bolos</div>
+    <p class="tagline">Caseiros e Confeitados • Santa Inês – MA</p>
+    <div class="footer-links">
+      <a class="footer-link" href="https://wa.me/5598984156128" target="_blank">📱 WhatsApp</a>
+      <a class="footer-link" href="https://instagram.com/elineboloscaseiros" target="_blank">📸 Instagram</a>
+    </div>
+    <p class="footer-copy">© 2025 Eline Bolos Caseiros e Confeitados</p>
+  </footer>
+
+</div><!-- /main-app -->
+
+<!-- ===== CARRINHO FLUTUANTE ===== -->
+<button class="cart-float" id="cartFloat">
+  <span class="cart-float-icon">🛒</span>
+  <span class="cart-float-qty" id="cartFloatQty">0 itens</span>
+  <span class="cart-float-total" id="cartFloatTotal">R$ 0,00</span>
+</button>
+
+<!-- ===== OVERLAY ===== -->
+<div class="overlay" id="overlay"></div>
+
+<!-- ===== DRAWER CARRINHO ===== -->
+<div class="cart-drawer" id="cartDrawer">
+  <div class="cart-header">
+    <h2>🛒 Meu Pedido</h2>
+    <button class="btn-fechar" id="btnFecharCart">✕</button>
+  </div>
+  <div class="cart-body" id="cartBody">
+    <div class="cart-vazio" id="cartVazio">
+      <div class="emoji">🎂</div>
+      <p>Seu carrinho está vazio.<br>Escolha algo delicioso!</p>
+    </div>
+    <div id="cartItens"></div>
+  </div>
+  <div class="cart-footer" id="cartFooter" style="display:none">
+    <div class="cart-subtotal">
+      <span>Subtotal</span>
+      <span id="cartSubtotal">R$ 0,00</span>
+    </div>
+    <div class="cart-total">
+      <span>Total</span>
+      <span id="cartTotal">R$ 0,00</span>
+    </div>
+    <button class="btn-checkout" id="btnCheckout">Fazer Pedido 🎉</button>
+  </div>
+</div>
+
+<!-- ===== MODAL CHECKOUT ===== -->
+<div class="modal-overlay" id="modalOverlay">
+  <div class="modal" id="modalCheckout">
+    <h2 class="modal-title">Finalizar Pedido 🎂</h2>
+    <p class="modal-sub">Preencha seus dados e seu pedido vai direto pro WhatsApp!</p>
+
+    <!-- Resumo -->
+    <div class="resumo-pedido" id="resumoPedido"></div>
+
+    <!-- Tipo de entrega -->
+    <div class="entrega-toggle" id="entregaToggle">
+      <button class="toggle-btn ativo" data-tipo="retirada" onclick="setTipoEntrega('retirada')">
+        <span class="icon">🏃</span> Retirada
+      </button>
+      <button class="toggle-btn" data-tipo="entrega" onclick="setTipoEntrega('entrega')">
+        <span class="icon">🛵</span> Entrega
+      </button>
+    </div>
+
+    <!-- Campos entrega -->
+    <div class="entrega-fields" id="entregaFields">
+      <div class="form-group">
+        <label>Bairro <span class="obrig">*</span></label>
+        <select class="form-control" id="selectBairro" onchange="atualizarTaxa()">
+          <option value="">Selecione seu bairro...</option>
+        </select>
+      </div>
+      <div class="taxa-info" id="taxaInfo">
+        Taxa de entrega: <strong id="taxaValor">R$ 0,00</strong>
+      </div>
+    </div>
+
+    <!-- Dados do cliente -->
+    <div class="form-group">
+      <label>Seu nome <span class="obrig">*</span></label>
+      <input type="text" class="form-control" id="clienteNome" placeholder="Ex: Maria Silva" />
+    </div>
+    <div class="form-group">
+      <label>Telefone <span class="obrig">*</span></label>
+      <input type="tel" class="form-control" id="clienteTel" placeholder="(98) 99999-9999" />
+    </div>
+    <div class="form-group" id="enderecoGroup" style="display:none">
+      <label>Endereço / Referência</label>
+      <input type="text" class="form-control" id="clienteEndereco" placeholder="Ex: Rua das Flores, 123" />
+    </div>
+    <div class="form-group">
+      <label>Observações</label>
+      <textarea class="form-control" id="clienteObs" placeholder="Ex: sem açúcar, mensagem na embalagem..."></textarea>
+    </div>
+
+    <button class="btn-confirmar" id="btnConfirmar" onclick="confirmarPedido()">
+      <span>💬</span> Enviar pelo WhatsApp
+    </button>
+  </div>
+</div>
+
+<!-- ============================================================ -->
+<!--  PAINEL ADMIN                                                -->
+<!-- ============================================================ -->
+<div class="admin-panel" id="adminPanel">
+
+  <!-- LOGIN -->
+  <div class="admin-login" id="adminLogin">
+    <div class="login-card">
+      <div class="emoji">🔐</div>
+      <h2>Painel Admin</h2>
+      <p>Eline Bolos Caseiros</p>
+      <div class="form-group">
+        <input type="password" class="form-control" id="senhaAdmin" placeholder="Digite a senha..." onkeydown="if(event.key==='Enter') fazerLoginAdmin()" />
+      </div>
+      <button class="btn-primario" style="width:100%" onclick="fazerLoginAdmin()">Entrar</button>
+      <div class="login-erro" id="loginErro">Senha incorreta. Tente novamente.</div>
+      <div style="margin-top:16px">
+        <button class="btn-secundario" onclick="voltarLoja()">← Voltar à loja</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- PAINEL LOGADO -->
+  <div id="adminLogado" style="display:none">
+    <div class="admin-header">
+      <h1>🎂 Admin — Eline Bolos</h1>
+      <button class="btn-sair-admin" onclick="sairAdmin()">Sair</button>
+    </div>
+    <div class="admin-tabs">
+      <button class="admin-tab ativo" onclick="abrirAdminTab(this, 'tabProdutos')">🍰 Produtos</button>
+      <button class="admin-tab" onclick="abrirAdminTab(this, 'tabBairros')">🛵 Bairros / Taxas</button>
+      <button class="admin-tab" onclick="abrirAdminTab(this, 'tabConfig')">⚙️ Configurações</button>
+    </div>
+
+    <div class="admin-content">
+
+      <!-- TAB PRODUTOS -->
+      <div class="admin-section ativa" id="tabProdutos">
+        <div class="admin-card">
+          <h3>➕ Adicionar Produto</h3>
+          <div class="form-inline">
+            <div>
+              <label>Nome do produto *</label>
+              <input type="text" class="form-control" id="novoProdNome" placeholder="Ex: Bolo de Chocolate" />
+            </div>
+            <div>
+              <label>Categoria *</label>
+              <select class="form-control" id="novoProdCategoria">
+                <option value="Bolos">🎂 Bolos</option>
+                <option value="Pudim">🍮 Pudim</option>
+                <option value="Doces">🍬 Doces</option>
+              </select>
+            </div>
+            <div>
+              <label>Preço (R$) *</label>
+              <input type="number" class="form-control" id="novoProdPreco" placeholder="0.00" step="0.50" min="0" />
+            </div>
+            <div>
+              <label>Emoji (ícone)</label>
+              <input type="text" class="form-control" id="novoProdEmoji" placeholder="🎂" maxlength="4" />
+            </div>
+            <div class="full">
+              <label>Descrição</label>
+              <input type="text" class="form-control" id="novoProdDesc" placeholder="Ex: Bolo caseiro fofinho com cobertura de chocolate" />
+            </div>
+            <div class="full">
+              <label>URL da imagem (opcional)</label>
+              <input type="url" class="form-control" id="novoProdImg" placeholder="https://..." />
+            </div>
+            <div class="full" style="display:flex; gap:8px; align-items:center">
+              <button class="btn-primario" onclick="adicionarProduto()">Adicionar Produto</button>
+              <button class="btn-secundario" onclick="limparFormProduto()">Limpar</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="admin-card">
+          <h3>📋 Produtos Cadastrados</h3>
+          <div class="tabs" id="adminCategoriaTabs" style="margin-bottom:12px"></div>
+          <div class="lista-admin" id="listaProdutos"></div>
+        </div>
+      </div>
+
+      <!-- TAB BAIRROS -->
+      <div class="admin-section" id="tabBairros">
+        <div class="admin-card">
+          <h3>➕ Adicionar Bairro</h3>
+          <div class="form-inline">
+            <div>
+              <label>Nome do bairro *</label>
+              <input type="text" class="form-control" id="novoBairroNome" placeholder="Ex: Centro" />
+            </div>
+            <div>
+              <label>Taxa de entrega (R$) *</label>
+              <input type="number" class="form-control" id="novoBairroTaxa" placeholder="5.00" step="0.50" min="0" />
+            </div>
+            <div class="full" style="display:flex; gap:8px">
+              <button class="btn-primario" onclick="adicionarBairro()">Adicionar Bairro</button>
+            </div>
+          </div>
+        </div>
+        <div class="admin-card">
+          <h3>🗺️ Bairros Cadastrados</h3>
+          <div class="lista-admin" id="listaBairros"></div>
+        </div>
+      </div>
+
+      <!-- TAB CONFIGURAÇÕES -->
+      <div class="admin-section" id="tabConfig">
+        <div class="admin-card">
+          <h3>⚙️ Configurações da Loja</h3>
+          <div class="config-row">
+            <div>
+              <div class="config-label">Status da loja</div>
+              <div class="config-sub">Quando fechada, o cliente vê um aviso mas pode pedir</div>
+            </div>
+            <div class="toggle-disponivel on" id="toggleLojaAberta" onclick="toggleLoja()"></div>
+          </div>
+          <div class="config-row">
+            <div>
+              <div class="config-label">Número WhatsApp</div>
+              <div class="config-sub">Número que recebe os pedidos (com código do país)</div>
+            </div>
+            <input type="text" class="form-control" id="configWhatsapp" style="width:180px; font-size:13px; padding:8px 10px" placeholder="5598984156128" />
+          </div>
+          <div class="config-row">
+            <div>
+              <div class="config-label">Horário de funcionamento</div>
+              <div class="config-sub">Exibido para os clientes</div>
+            </div>
+            <input type="text" class="form-control" id="configHorario" style="width:180px; font-size:13px; padding:8px 10px" placeholder="08h às 18h" />
+          </div>
+          <div class="config-row">
+            <div>
+              <div class="config-label">Alterar senha do admin</div>
+              <div class="config-sub">Senha atual é necessária para alterar</div>
+            </div>
+            <div style="display:flex; gap:6px">
+              <input type="password" class="form-control" id="novaSenha" style="width:130px; font-size:13px; padding:8px 10px" placeholder="Nova senha" />
+              <button class="btn-secundario" onclick="alterarSenha()">Salvar</button>
+            </div>
+          </div>
+          <div style="margin-top:16px">
+            <button class="btn-primario" onclick="salvarConfiguracoes()">💾 Salvar Configurações</button>
+          </div>
+        </div>
+
+        <div class="admin-card">
+          <h3>🔄 Dados</h3>
+          <div class="config-row">
+            <div>
+              <div class="config-label">Exportar dados</div>
+              <div class="config-sub">Baixar todos os dados em JSON (backup)</div>
+            </div>
+            <button class="btn-secundario" onclick="exportarDados()">📥 Exportar</button>
+          </div>
+          <div class="config-row">
+            <div>
+              <div class="config-label">Restaurar padrão</div>
+              <div class="config-sub">Restaura produtos e bairros iniciais</div>
+            </div>
+            <button class="btn-perigo" onclick="restaurarPadrao()">⚠️ Restaurar</button>
+          </div>
+        </div>
+      </div>
+
+    </div><!-- /admin-content -->
+  </div><!-- /adminLogado -->
+</div><!-- /admin-panel -->
+
+<!-- ============================================================ -->
+<!--  JAVASCRIPT                                                  -->
+<!-- ============================================================ -->
+<script>
+
+/* ======================================================
+   DADOS PADRÃO
+====================================================== */
+const DADOS_PADRAO = {
+  senha: 'eline2025',
+  whatsapp: '5598984156128',
+  horario: '08h às 18h',
+  lojaAberta: true,
+  produtos: [
+    { id: 1, nome: 'Bolo Amanteigado', categoria: 'Bolos', preco: 10.00, emoji: '🎂', desc: 'Bolo caseiro fofinho e úmido, sabor manteiga irresistível', disponivel: true, img: '' },
+    { id: 2, nome: 'Bolo de Cenoura', categoria: 'Bolos', preco: 10.00, emoji: '🥕', desc: 'Tradicional bolo de cenoura com cobertura de chocolate', disponivel: true, img: '' },
+    { id: 3, nome: 'Bolo de Chocolate', categoria: 'Bolos', preco: 10.00, emoji: '🍫', desc: 'Bolo de chocolate intenso, molhadinho e com muito sabor', disponivel: true, img: '' },
+    { id: 4, nome: 'Bolo Choconinho', categoria: 'Bolos', preco: 12.00, emoji: '🤎', desc: 'Bolo de chocolate com recheio especial de ninho', disponivel: true, img: '' },
+    { id: 5, nome: 'Bolo Dois Amores', categoria: 'Bolos', preco: 12.00, emoji: '💕', desc: 'A união perfeita: metade chocolate, metade baunilha', disponivel: true, img: '' },
+    { id: 6, nome: 'Bolo Mesclado', categoria: 'Bolos', preco: 10.00, emoji: '🌀', desc: 'Textura marmorizad entre baunilha e chocolate', disponivel: true, img: '' },
+    { id: 7, nome: 'Bolo de Milho "P"', categoria: 'Bolos', preco: 10.00, emoji: '🌽', desc: 'Bolo de milho cremoso e úmido, sabor de fazenda', disponivel: true, img: '' },
+    { id: 8, nome: 'Pudim Inteiro', categoria: 'Pudim', preco: 25.00, emoji: '🍮', desc: 'Pudim de leite condensado cremoso, feito no capricho', disponivel: true, img: '' },
+    { id: 9, nome: 'Fatia de Pudim', categoria: 'Pudim', preco: 8.00, emoji: '🍮', desc: 'Fatia generosa do nosso pudim caseiro', disponivel: true, img: '' },
+    { id: 10, nome: 'Brigadeiro', categoria: 'Doces', preco: 3.00, emoji: '🍬', desc: 'Brigadeiro tradicional ou gourmet, feito com Ninho', disponivel: true, img: '' },
+    { id: 11, nome: 'Caixinha de Doces (12un)', categoria: 'Doces', preco: 30.00, emoji: '🎁', desc: '12 doces sortidos, perfeitos para festas e presentes', disponivel: true, img: '' },
+  ],
+  bairros: [
+    { id: 1, nome: 'Centro', taxa: 0.00 },
+    { id: 2, nome: 'Cohab', taxa: 3.00 },
+    { id: 3, nome: 'Vila São Luis', taxa: 3.00 },
+    { id: 4, nome: 'Novo Horizonte', taxa: 5.00 },
+    { id: 5, nome: 'Cidade Operária', taxa: 5.00 },
+    { id: 6, nome: 'São Cristóvão', taxa: 5.00 },
+    { id: 7, nome: 'Bela Vista', taxa: 5.00 },
+    { id: 8, nome: 'Alto da Boa Vista', taxa: 7.00 },
+    { id: 9, nome: 'Igarapé', taxa: 7.00 },
+    { id: 10, nome: 'Outro bairro', taxa: 8.00 },
+  ]
+};
+
+/* ======================================================
+   STORAGE
+====================================================== */
+function carregarDados() {
+  const s = localStorage.getItem('elineBolos');
+  if (!s) {
+    localStorage.setItem('elineBolos', JSON.stringify(DADOS_PADRAO));
+    return JSON.parse(JSON.stringify(DADOS_PADRAO));
+  }
+  // merge para garantir campos novos
+  const d = JSON.parse(s);
+  if (!d.senha) d.senha = DADOS_PADRAO.senha;
+  if (!d.whatsapp) d.whatsapp = DADOS_PADRAO.whatsapp;
+  if (d.lojaAberta === undefined) d.lojaAberta = true;
+  return d;
+}
+function salvarDados(d) {
+  localStorage.setItem('elineBolos', JSON.stringify(d));
+}
+
+let dados = carregarDados();
+
+/* ======================================================
+   CARRINHO
+====================================================== */
+let carrinho = []; // [{produto, qtd}]
+
+function adicionarAoCarrinho(produtoId) {
+  const prod = dados.produtos.find(p => p.id === produtoId);
+  if (!prod || !prod.disponivel) return;
+  const idx = carrinho.findIndex(c => c.produtoId === produtoId);
+  if (idx >= 0) {
+    carrinho[idx].qtd++;
+  } else {
+    carrinho.push({ produtoId, qtd: 1 });
+  }
+  atualizarUI();
+  mostrarToast(`${prod.emoji} ${prod.nome} adicionado!`, 'sucesso');
+}
+
+function removerDoCarrinho(produtoId) {
+  const idx = carrinho.findIndex(c => c.produtoId === produtoId);
+  if (idx < 0) return;
+  carrinho[idx].qtd--;
+  if (carrinho[idx].qtd <= 0) carrinho.splice(idx, 1);
+  atualizarUI();
+}
+
+function calcularSubtotal() {
+  return carrinho.reduce((acc, c) => {
+    const p = dados.produtos.find(p => p.id === c.produtoId);
+    return acc + (p ? p.preco * c.qtd : 0);
+  }, 0);
+}
+
+function calcularTotal() {
+  const sub = calcularSubtotal();
+  const taxa = tipoEntrega === 'entrega' ? (taxaAtual || 0) : 0;
+  return sub + taxa;
+}
+
+function totalItens() {
+  return carrinho.reduce((acc, c) => acc + c.qtd, 0);
+}
+
+function atualizarUI() {
+  const qtd = totalItens();
+  const sub = calcularSubtotal();
+  const total = calcularTotal();
+
+  // Badge header
+  const badge = document.getElementById('cartBadge');
+  badge.textContent = qtd;
+  badge.style.display = qtd > 0 ? 'flex' : 'none';
+
+  // Float button
+  const floatBtn = document.getElementById('cartFloat');
+  floatBtn.classList.toggle('visivel', qtd > 0);
+  document.getElementById('cartFloatQty').textContent = qtd === 1 ? '1 item' : `${qtd} itens`;
+  document.getElementById('cartFloatTotal').textContent = formatarMoeda(total);
+
+  // Drawer
+  const cartVazio = document.getElementById('cartVazio');
+  const cartItens = document.getElementById('cartItens');
+  const cartFooter = document.getElementById('cartFooter');
+
+  if (qtd === 0) {
+    cartVazio.style.display = 'block';
+    cartItens.innerHTML = '';
+    cartFooter.style.display = 'none';
+    return;
+  }
+
+  cartVazio.style.display = 'none';
+  cartFooter.style.display = 'block';
+
+  cartItens.innerHTML = carrinho.map(c => {
+    const p = dados.produtos.find(p => p.id === c.produtoId);
+    if (!p) return '';
+    return `
+      <div class="cart-item">
+        <div class="cart-item-emoji">${p.emoji || '🎂'}</div>
+        <div class="cart-item-info">
+          <div class="cart-item-nome">${p.nome}</div>
+          <div class="cart-item-preco">${formatarMoeda(p.preco * c.qtd)}</div>
+        </div>
+        <div class="cart-item-controles">
+          <button class="btn-qty" onclick="removerDoCarrinho(${p.id})">−</button>
+          <span class="qty-num">${c.qtd}</span>
+          <button class="btn-qty" onclick="adicionarAoCarrinho(${p.id})">+</button>
+        </div>
+      </div>
+    `;
+  }).join('');
+
+  document.getElementById('cartSubtotal').textContent = formatarMoeda(sub);
+  document.getElementById('cartTotal').textContent = formatarMoeda(total);
+}
+
+/* ======================================================
+   ABRIR / FECHAR CARRINHO
+====================================================== */
+function abrirCarrinho() {
+  document.getElementById('cartDrawer').classList.add('aberto');
+  document.getElementById('overlay').classList.add('aberto');
+}
+function fecharCarrinho() {
+  document.getElementById('cartDrawer').classList.remove('aberto');
+  document.getElementById('overlay').classList.remove('aberto');
+}
+
+document.getElementById('btnCartHeader').addEventListener('click', abrirCarrinho);
+document.getElementById('cartFloat').addEventListener('click', abrirCarrinho);
+document.getElementById('btnFecharCart').addEventListener('click', fecharCarrinho);
+document.getElementById('overlay').addEventListener('click', () => {
+  fecharCarrinho();
+  fecharCheckout();
+});
+
+/* ======================================================
+   CHECKOUT
+====================================================== */
+let tipoEntrega = 'retirada';
+let taxaAtual = 0;
+
+function setTipoEntrega(tipo) {
+  tipoEntrega = tipo;
+  document.querySelectorAll('.toggle-btn').forEach(b => {
+    b.classList.toggle('ativo', b.dataset.tipo === tipo);
+  });
+  const entregaFields = document.getElementById('entregaFields');
+  const enderecoGroup = document.getElementById('enderecoGroup');
+  entregaFields.classList.toggle('visivel', tipo === 'entrega');
+  enderecoGroup.style.display = tipo === 'entrega' ? 'block' : 'none';
+  taxaAtual = 0;
+  document.getElementById('taxaInfo').classList.remove('visivel');
+  atualizarUI();
+  atualizarResumoPedido();
+}
+
+function atualizarTaxa() {
+  const select = document.getElementById('selectBairro');
+  const bairroId = parseInt(select.value);
+  const bairro = dados.bairros.find(b => b.id === bairroId);
+  if (bairro) {
+    taxaAtual = bairro.taxa;
+    const taxaInfo = document.getElementById('taxaInfo');
+    taxaInfo.classList.add('visivel');
+    document.getElementById('taxaValor').textContent = formatarMoeda(bairro.taxa);
+  } else {
+    taxaAtual = 0;
+    document.getElementById('taxaInfo').classList.remove('visivel');
+  }
+  atualizarUI();
+  atualizarResumoPedido();
+}
+
+function atualizarResumoPedido() {
+  const sub = calcularSubtotal();
+  const taxa = tipoEntrega === 'entrega' ? taxaAtual : 0;
+  const total = sub + taxa;
+  const itens = carrinho.map(c => {
+    const p = dados.produtos.find(p => p.id === c.produtoId);
+    if (!p) return '';
+    return `<div class="resumo-item"><span>${c.qtd}x ${p.nome}</span><span>${formatarMoeda(p.preco * c.qtd)}</span></div>`;
+  }).join('');
+
+  let taxaHtml = '';
+  if (tipoEntrega === 'entrega' && taxa > 0) {
+    taxaHtml = `<div class="resumo-item"><span>🛵 Taxa de entrega</span><span>${formatarMoeda(taxa)}</span></div>`;
+  }
+
+  document.getElementById('resumoPedido').innerHTML = `
+    <div class="resumo-titulo">📋 Resumo do pedido</div>
+    ${itens}
+    ${taxaHtml}
+    <div class="resumo-linha"></div>
+    <div class="resumo-total"><span>Total</span><span>${formatarMoeda(total)}</span></div>
+  `;
+}
+
+function abrirCheckout() {
+  if (totalItens() === 0) return;
+  fecharCarrinho();
+
+  // Popular bairros
+  const sel = document.getElementById('selectBairro');
+  sel.innerHTML = '<option value="">Selecione seu bairro...</option>' +
+    dados.bairros.map(b => `<option value="${b.id}">${b.nome} — ${formatarMoeda(b.taxa)}</option>`).join('');
+
+  atualizarResumoPedido();
+
+  document.getElementById('modalOverlay').classList.add('aberto');
+}
+
+function fecharCheckout() {
+  document.getElementById('modalOverlay').classList.remove('aberto');
+}
+
+document.getElementById('modalOverlay').addEventListener('click', (e) => {
+  if (e.target === document.getElementById('modalOverlay')) fecharCheckout();
+});
+
+document.getElementById('btnCheckout').addEventListener('click', abrirCheckout);
+
+function confirmarPedido() {
+  const nome = document.getElementById('clienteNome').value.trim();
+  const tel = document.getElementById('clienteTel').value.trim();
+  const obs = document.getElementById('clienteObs').value.trim();
+  const endereco = document.getElementById('clienteEndereco').value.trim();
+
+  if (!nome) { mostrarToast('Por favor, informe seu nome!', 'erro'); return; }
+  if (!tel) { mostrarToast('Por favor, informe seu telefone!', 'erro'); return; }
+
+  let bairroNome = '';
+  if (tipoEntrega === 'entrega') {
+    const bairroId = parseInt(document.getElementById('selectBairro').value);
+    const bairro = dados.bairros.find(b => b.id === bairroId);
+    if (!bairro) { mostrarToast('Por favor, selecione seu bairro!', 'erro'); return; }
+    bairroNome = bairro.nome;
+  }
+
+  // Montar mensagem
+  const itensMsg = carrinho.map(c => {
+    const p = dados.produtos.find(p => p.id === c.produtoId);
+    if (!p) return '';
+    return `  • ${c.qtd}x ${p.nome} — ${formatarMoeda(p.preco * c.qtd)}`;
+  }).join('\n');
+
+  const sub = calcularSubtotal();
+  const taxa = tipoEntrega === 'entrega' ? taxaAtual : 0;
+  const total = sub + taxa;
+
+  let msg = `🎂 *Novo Pedido — Eline Bolos*\n`;
+  msg += `━━━━━━━━━━━━━━━━━━\n`;
+  msg += `👤 *Cliente:* ${nome}\n`;
+  msg += `📱 *Telefone:* ${tel}\n`;
+  msg += `━━━━━━━━━━━━━━━━━━\n`;
+  msg += `📋 *Itens do pedido:*\n${itensMsg}\n`;
+  msg += `━━━━━━━━━━━━━━━━━━\n`;
+  if (tipoEntrega === 'entrega') {
+    msg += `🛵 *Tipo:* Entrega\n`;
+    msg += `📍 *Bairro:* ${bairroNome}\n`;
+    if (endereco) msg += `🏠 *Endereço:* ${endereco}\n`;
+    msg += `🚚 *Taxa de entrega:* ${formatarMoeda(taxa)}\n`;
+  } else {
+    msg += `🏃 *Tipo:* Retirada no local\n`;
+  }
+  msg += `━━━━━━━━━━━━━━━━━━\n`;
+  msg += `💰 *Total: ${formatarMoeda(total)}*\n`;
+  if (obs) msg += `📝 *Obs:* ${obs}\n`;
+  msg += `━━━━━━━━━━━━━━━━━━\n`;
+  msg += `_Pedido feito pelo site Eline Bolos_ 💕`;
+
+  const wpp = dados.whatsapp || '5598984156128';
+  const url = `https://wa.me/${wpp}?text=${encodeURIComponent(msg)}`;
+  window.open(url, '_blank');
+
+  // Limpar
+  carrinho = [];
+  document.getElementById('clienteNome').value = '';
+  document.getElementById('clienteTel').value = '';
+  document.getElementById('clienteObs').value = '';
+  document.getElementById('clienteEndereco').value = '';
+  fecharCheckout();
+  atualizarUI();
+  mostrarToast('Pedido enviado! Obrigada 💕', 'sucesso');
+}
+
+/* ======================================================
+   RENDERIZAR CARDÁPIO
+====================================================== */
+let categoriaAtiva = 'Todas';
+
+function renderCategorias() {
+  const cats = ['Todas', ...new Set(dados.produtos.map(p => p.categoria))];
+  const tabs = document.getElementById('categorias-tabs');
+  tabs.innerHTML = cats.map(c => `
+    <button class="tab-btn ${c === categoriaAtiva ? 'ativo' : ''}" onclick="filtrarCategoria('${c}')">${getCatEmoji(c)} ${c}</button>
+  `).join('');
+}
+
+function getCatEmoji(cat) {
+  const map = { 'Todas': '🍽️', 'Bolos': '🎂', 'Pudim': '🍮', 'Doces': '🍬' };
+  return map[cat] || '✨';
+}
+
+function filtrarCategoria(cat) {
+  categoriaAtiva = cat;
+  renderCategorias();
+  renderProdutos();
+}
+
+function renderProdutos() {
+  const lista = categoriaAtiva === 'Todas'
+    ? dados.produtos
+    : dados.produtos.filter(p => p.categoria === categoriaAtiva);
+
+  const grid = document.getElementById('produtosGrid');
+  if (lista.length === 0) {
+    grid.innerHTML = `<div style="grid-column:1/-1;text-align:center;padding:40px;color:var(--bege-escuro)">Nenhum produto nesta categoria.</div>`;
+    return;
+  }
+
+  grid.innerHTML = lista.map((p, i) => `
+    <div class="produto-card ${p.disponivel ? '' : 'indisponivel'}" style="animation-delay:${i * 0.05}s">
+      <div class="produto-img">
+        ${p.img ? `<img src="${p.img}" alt="${p.nome}" onerror="this.style.display='none'" />` : ''}
+        ${!p.img ? p.emoji || '🎂' : ''}
+      </div>
+      <div class="produto-info">
+        <div class="produto-nome">${p.nome}</div>
+        <div class="produto-desc">${p.desc || ''}</div>
+        <div class="produto-footer">
+          <span class="produto-preco">${formatarMoeda(p.preco)}</span>
+          ${p.disponivel
+            ? `<button class="btn-add" onclick="adicionarAoCarrinho(${p.id})" aria-label="Adicionar ${p.nome}">+</button>`
+            : `<span class="produto-tag-indisponivel">Indisponível</span>`
+          }
+        </div>
+      </div>
+    </div>
+  `).join('');
+}
+
+/* ======================================================
+   STATUS LOJA
+====================================================== */
+function atualizarStatusLoja() {
+  const bar = document.getElementById('statusBar');
+  const horario = dados.horario || '';
+  if (!dados.lojaAberta) {
+    bar.classList.add('fechada');
+    bar.textContent = `🔒 Estamos fechados no momento ${horario ? `(${horario})` : ''}. Mas você pode fazer seu pedido para quando abrirmos!`;
+  } else {
+    bar.classList.remove('fechada');
+    if (horario) {
+      bar.style.display = 'block';
+      bar.textContent = `✅ Abertos agora! ${horario}`;
+      bar.style.background = 'var(--verde)';
+      bar.style.color = 'white';
+    }
+  }
+}
+
+/* ======================================================
+   ADMIN — LOGIN
+====================================================== */
+function irParaAdmin() {
+  document.getElementById('mainApp').classList.add('oculto');
+  document.getElementById('adminPanel').classList.add('visivel');
+  document.getElementById('adminLogin').style.display = 'flex';
+  document.getElementById('adminLogado').style.display = 'none';
+}
+
+function voltarLoja() {
+  document.getElementById('adminPanel').classList.remove('visivel');
+  document.getElementById('mainApp').classList.remove('oculto');
+}
+
+function fazerLoginAdmin() {
+  const senha = document.getElementById('senhaAdmin').value;
+  if (senha === dados.senha) {
+    document.getElementById('adminLogin').style.display = 'none';
+    document.getElementById('adminLogado').style.display = 'block';
+    document.getElementById('senhaAdmin').value = '';
+    document.getElementById('loginErro').style.display = 'none';
+    renderAdminProdutos();
+    renderAdminBairros();
+    carregarConfiguracoes();
+  } else {
+    document.getElementById('loginErro').style.display = 'block';
+    document.getElementById('senhaAdmin').value = '';
+  }
+}
+
+function sairAdmin() {
+  document.getElementById('adminLogado').style.display = 'none';
+  document.getElementById('adminLogin').style.display = 'flex';
+  voltarLoja();
+}
+
+/* ======================================================
+   ADMIN — TABS
+====================================================== */
+function abrirAdminTab(btn, tabId) {
+  document.querySelectorAll('.admin-tab').forEach(t => t.classList.remove('ativo'));
+  document.querySelectorAll('.admin-section').forEach(s => s.classList.remove('ativa'));
+  btn.classList.add('ativo');
+  document.getElementById(tabId).classList.add('ativa');
+}
+
+/* ======================================================
+   ADMIN — PRODUTOS
+====================================================== */
+let adminCatAtiva = 'Todas';
+
+function renderAdminProdutos() {
+  const cats = ['Todas', ...new Set(dados.produtos.map(p => p.categoria))];
+  document.getElementById('adminCategoriaTabs').innerHTML = cats.map(c =>
+    `<button class="tab-btn ${c === adminCatAtiva ? 'ativo' : ''}" onclick="filtrarAdminCat('${c}')">${getCatEmoji(c)} ${c}</button>`
+  ).join('');
+
+  const lista = adminCatAtiva === 'Todas'
+    ? dados.produtos
+    : dados.produtos.filter(p => p.categoria === adminCatAtiva);
+
+  document.getElementById('listaProdutos').innerHTML = lista.length === 0
+    ? '<p style="color:var(--cinza-texto);text-align:center;padding:20px">Nenhum produto.</p>'
+    : lista.map(p => `
+      <div class="item-admin">
+        <div style="font-size:24px;width:40px;text-align:center">${p.emoji || '🎂'}</div>
+        <div class="item-admin-info">
+          <div class="item-admin-nome">${p.nome}</div>
+          <div class="item-admin-detalhe">${p.categoria} • ${formatarMoeda(p.preco)} ${p.desc ? '• ' + p.desc.substring(0,40) + (p.desc.length > 40 ? '...' : '') : ''}</div>
+        </div>
+        <div class="item-admin-acoes">
+          <div class="toggle-disponivel ${p.disponivel ? 'on' : ''}" onclick="toggleProduto(${p.id})" title="${p.disponivel ? 'Disponível' : 'Indisponível'}"></div>
+          <button class="btn-secundario" onclick="editarProduto(${p.id})" style="font-size:12px;padding:6px 10px">✏️</button>
+          <button class="btn-perigo" onclick="deletarProduto(${p.id})">🗑️</button>
+        </div>
+      </div>
+    `).join('');
+}
+
+function filtrarAdminCat(cat) {
+  adminCatAtiva = cat;
+  renderAdminProdutos();
+}
+
+function adicionarProduto() {
+  const nome = document.getElementById('novoProdNome').value.trim();
+  const cat = document.getElementById('novoProdCategoria').value;
+  const preco = parseFloat(document.getElementById('novoProdPreco').value);
+  const emoji = document.getElementById('novoProdEmoji').value.trim() || '🎂';
+  const desc = document.getElementById('novoProdDesc').value.trim();
+  const img = document.getElementById('novoProdImg').value.trim();
+
+  if (!nome || !cat || isNaN(preco) || preco < 0) {
+    mostrarToast('Preencha nome, categoria e preço!', 'erro'); return;
+  }
+  const novoId = Date.now();
+  dados.produtos.push({ id: novoId, nome, categoria: cat, preco, emoji, desc, img, disponivel: true });
+  salvarDados(dados);
+  renderAdminProdutos();
+  renderProdutos();
+  renderCategorias();
+  limparFormProduto();
+  mostrarToast(`${emoji} ${nome} adicionado!`, 'sucesso');
+}
+
+function limparFormProduto() {
+  ['novoProdNome','novoProdCategoria','novoProdPreco','novoProdEmoji','novoProdDesc','novoProdImg']
+    .forEach(id => { const el = document.getElementById(id); if(el) { el.tagName === 'SELECT' ? el.selectedIndex = 0 : el.value = ''; } });
+}
+
+function toggleProduto(id) {
+  const p = dados.produtos.find(p => p.id === id);
+  if (p) { p.disponivel = !p.disponivel; salvarDados(dados); renderAdminProdutos(); renderProdutos(); }
+}
+
+function editarProduto(id) {
+  const p = dados.produtos.find(p => p.id === id);
+  if (!p) return;
+  document.getElementById('novoProdNome').value = p.nome;
+  document.getElementById('novoProdCategoria').value = p.categoria;
+  document.getElementById('novoProdPreco').value = p.preco;
+  document.getElementById('novoProdEmoji').value = p.emoji || '';
+  document.getElementById('novoProdDesc').value = p.desc || '';
+  document.getElementById('novoProdImg').value = p.img || '';
+  // Remover o produto para ser re-adicionado
+  dados.produtos = dados.produtos.filter(p2 => p2.id !== id);
+  salvarDados(dados);
+  renderAdminProdutos();
+  renderProdutos();
+  document.getElementById('novoProdNome').focus();
+  mostrarToast('Produto carregado para edição. Altere e clique em Adicionar.', '');
+}
+
+function deletarProduto(id) {
+  const p = dados.produtos.find(p => p.id === id);
+  if (!p) return;
+  if (!confirm(`Tem certeza que deseja excluir "${p.nome}"?`)) return;
+  dados.produtos = dados.produtos.filter(p2 => p2.id !== id);
+  salvarDados(dados);
+  renderAdminProdutos();
+  renderProdutos();
+  renderCategorias();
+  mostrarToast('Produto removido.', '');
+}
+
+/* ======================================================
+   ADMIN — BAIRROS
+====================================================== */
+function renderAdminBairros() {
+  document.getElementById('listaBairros').innerHTML = dados.bairros.length === 0
+    ? '<p style="color:var(--cinza-texto);text-align:center;padding:20px">Nenhum bairro cadastrado.</p>'
+    : dados.bairros.map(b => `
+      <div class="item-admin">
+        <div style="font-size:20px">📍</div>
+        <div class="item-admin-info">
+          <div class="item-admin-nome">${b.nome}</div>
+          <div class="item-admin-detalhe">Taxa: ${formatarMoeda(b.taxa)}</div>
+        </div>
+        <div class="item-admin-acoes">
+          <button class="btn-perigo" onclick="deletarBairro(${b.id})">🗑️</button>
+        </div>
+      </div>
+    `).join('');
+}
+
+function adicionarBairro() {
+  const nome = document.getElementById('novoBairroNome').value.trim();
+  const taxa = parseFloat(document.getElementById('novoBairroTaxa').value);
+  if (!nome || isNaN(taxa) || taxa < 0) {
+    mostrarToast('Preencha o nome do bairro e a taxa!', 'erro'); return;
+  }
+  dados.bairros.push({ id: Date.now(), nome, taxa });
+  salvarDados(dados);
+  renderAdminBairros();
+  document.getElementById('novoBairroNome').value = '';
+  document.getElementById('novoBairroTaxa').value = '';
+  mostrarToast(`📍 ${nome} adicionado!`, 'sucesso');
+}
+
+function deletarBairro(id) {
+  const b = dados.bairros.find(b => b.id === id);
+  if (!b || !confirm(`Remover o bairro "${b.nome}"?`)) return;
+  dados.bairros = dados.bairros.filter(b2 => b2.id !== id);
+  salvarDados(dados);
+  renderAdminBairros();
+  mostrarToast('Bairro removido.', '');
+}
+
+/* ======================================================
+   ADMIN — CONFIGURAÇÕES
+====================================================== */
+function carregarConfiguracoes() {
+  document.getElementById('configWhatsapp').value = dados.whatsapp || '';
+  document.getElementById('configHorario').value = dados.horario || '';
+  const toggleLoja = document.getElementById('toggleLojaAberta');
+  toggleLoja.classList.toggle('on', dados.lojaAberta !== false);
+}
+
+function toggleLoja() {
+  dados.lojaAberta = !dados.lojaAberta;
+  document.getElementById('toggleLojaAberta').classList.toggle('on', dados.lojaAberta);
+}
+
+function salvarConfiguracoes() {
+  dados.whatsapp = document.getElementById('configWhatsapp').value.trim() || '5598984156128';
+  dados.horario = document.getElementById('configHorario').value.trim();
+  salvarDados(dados);
+  atualizarStatusLoja();
+  mostrarToast('✅ Configurações salvas!', 'sucesso');
+}
+
+function alterarSenha() {
+  const nova = document.getElementById('novaSenha').value.trim();
+  if (!nova || nova.length < 4) { mostrarToast('Senha deve ter ao menos 4 caracteres.', 'erro'); return; }
+  dados.senha = nova;
+  salvarDados(dados);
+  document.getElementById('novaSenha').value = '';
+  mostrarToast('🔐 Senha alterada com sucesso!', 'sucesso');
+}
+
+function exportarDados() {
+  const blob = new Blob([JSON.stringify(dados, null, 2)], { type: 'application/json' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = 'eline-bolos-backup.json';
+  a.click();
+}
+
+function restaurarPadrao() {
+  if (!confirm('Isso irá restaurar os produtos e bairros padrão. Os dados atuais serão perdidos. Confirma?')) return;
+  dados = JSON.parse(JSON.stringify(DADOS_PADRAO));
+  salvarDados(dados);
+  renderAdminProdutos();
+  renderAdminBairros();
+  renderProdutos();
+  renderCategorias();
+  carregarConfiguracoes();
+  mostrarToast('Dados restaurados!', 'sucesso');
+}
+
+/* ======================================================
+   UTILITÁRIOS
+====================================================== */
+function formatarMoeda(v) {
+  return v.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+}
+
+let toastTimeout;
+function mostrarToast(msg, tipo = '') {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.className = 'toast visivel' + (tipo ? ' ' + tipo : '');
+  clearTimeout(toastTimeout);
+  toastTimeout = setTimeout(() => t.classList.remove('visivel'), 2500);
+}
+
+/* ======================================================
+   ROTEAMENTO ADMIN via HASH
+====================================================== */
+function verificarRota() {
+  if (window.location.hash === '#admin') {
+    irParaAdmin();
+  }
+}
+window.addEventListener('hashchange', verificarRota);
+
+/* ======================================================
+   INICIALIZAÇÃO
+====================================================== */
+function init() {
+  renderCategorias();
+  renderProdutos();
+  atualizarUI();
+  atualizarStatusLoja();
+  verificarRota();
+
+  // Link admin escondido no footer
+  document.querySelector('.footer-copy').addEventListener('dblclick', () => {
+    window.location.hash = '#admin';
+    irParaAdmin();
+  });
+}
+
+init();
+</script>
+</body>
+</html>
