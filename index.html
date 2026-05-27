@@ -1483,6 +1483,11 @@ function carregarDados() {
   if (!d.senha) d.senha = DADOS_PADRAO.senha;
   if (!d.whatsapp) d.whatsapp = DADOS_PADRAO.whatsapp;
   if (d.lojaAberta === undefined) d.lojaAberta = true;
+  // Atualiza bairros automaticamente se a lista salva tiver menos bairros que o padrão
+  if (!d.bairros || d.bairros.length < DADOS_PADRAO.bairros.length) {
+    d.bairros = DADOS_PADRAO.bairros;
+    localStorage.setItem('elineBolos', JSON.stringify(d));
+  }
   return d;
 }
 function salvarDados(d) {
