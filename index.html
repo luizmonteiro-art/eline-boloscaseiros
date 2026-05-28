@@ -7,6 +7,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=Nunito:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <style>
     /* ===== VARIÁVEIS DE COR (paleta da logo) ===== */
     :root {
@@ -1388,7 +1389,31 @@
 <script>
 
 /* ======================================================
-   DADOS PADRÃO
+   SUPABASE
+====================================================== */
+const SUPA_URL = 'https://mivfthoxhfogcnoqgoyn.supabase.co';
+const SUPA_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1pdmZ0aG94aGZvZ2Nub3Fnb3luIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzk5MTgxNDEsImV4cCI6MjA5NTQ5NDE0MX0.pjyTV6jTFyxrl2nbO_xhoygEHsc_tq-kUCv2v31pu0c';
+const { createClient } = supabase;
+const sb = createClient(SUPA_URL, SUPA_KEY);
+
+let dados = { produtos: [], bairros: [], whatsapp: '5598984156128', lojaAberta: true, senha: 'eline2025', horario: '' };
+
+async function carregarDados() {
+  const [{ data: prods }, { data: bairros }, { data: config }] = await Promise.all([
+    sb.from('produtos').select('*').order('id'),
+    sb.from('bairros').select('*').order('id'),
+    sb.from('configuracoes').select('*').eq('id', 1).single()
+  ]);
+  dados.produtos = (prods || []).map(r => ({
+    id: r.id, nome: r.nome, categoria: r.categoria, preco: parseFloat(r.preco),
+    emoji: r.emoji || '🎂', desc: r.descricao || '', disponivel: r.disponivel, img: r.img || ''
+  }));
+  dados.bairros = (bairros || []).map(r => ({ id: r.id, nome: r.nome, taxa: parseFloat(r.taxa) }));
+  if (config) { dados.whatsapp = config.whatsapp; dados.lojaAberta = config.loja_aberta; dados.senha = config.senha; }
+}
+
+/* ======================================================
+   DADOS PADRÃO (mantido apenas para compatibilidade)
 ====================================================== */
 const DADOS_PADRAO = {
   senha: 'eline2025',
@@ -1484,34 +1509,8 @@ const DADOS_PADRAO = {
 };
 
 /* ======================================================
-   STORAGE
+   STORAGE — agora via Supabase (veja carregarDados() acima)
 ====================================================== */
-function carregarDados() {
-  const s = localStorage.getItem('elineBolos');
-  if (!s) {
-    localStorage.setItem('elineBolos', JSON.stringify(DADOS_PADRAO));
-    return JSON.parse(JSON.stringify(DADOS_PADRAO));
-  }
-  // merge para garantir campos novos
-  const d = JSON.parse(s);
-  if (!d.senha) d.senha = DADOS_PADRAO.senha;
-  if (!d.whatsapp) d.whatsapp = DADOS_PADRAO.whatsapp;
-  if (d.lojaAberta === undefined) d.lojaAberta = true;
-  // Atualiza bairros automaticamente se a lista salva tiver menos bairros que o padrão
-  // ou se as taxas estiverem desatualizadas (compara total de taxas como checksum simples)
-  const taxaChecksum = DADOS_PADRAO.bairros.reduce((s, b) => s + b.taxa, 0);
-  const taxaSalva = (d.bairros || []).reduce((s, b) => s + b.taxa, 0);
-  if (!d.bairros || d.bairros.length < DADOS_PADRAO.bairros.length || taxaSalva !== taxaChecksum) {
-    d.bairros = DADOS_PADRAO.bairros;
-    localStorage.setItem('elineBolos', JSON.stringify(d));
-  }
-  return d;
-}
-function salvarDados(d) {
-  localStorage.setItem('elineBolos', JSON.stringify(d));
-}
-
-let dados = carregarDados();
 
 /* ======================================================
    CARRINHO
@@ -2124,7 +2123,13 @@ function mostrarToast(msg, tipo = '') {
 /* ======================================================
    INICIALIZAÇÃO
 ====================================================== */
-function init() {
+async function init() {
+  // Mostrar loading
+  const grid = document.getElementById('produtosGrid');
+  if (grid) grid.innerHTML = '<div style="grid-column:1/-1;text-align:center;padding:60px;color:var(--marrom-medio)"><div style="font-size:48px;margin-bottom:12px">🎂</div><div style="font-size:16px;font-weight:600">Carregando cardápio...</div></div>';
+
+  await carregarDados();
+
   renderCategorias();
   renderProdutos();
   atualizarUI();
