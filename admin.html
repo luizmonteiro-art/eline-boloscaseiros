@@ -2,7 +2,7 @@
 <html lang="pt-BR">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0" />
   <title>Admin — Eline Bolos</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;1,400&family=Nunito:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
@@ -61,7 +61,7 @@
     .form-group label { display: block; font-size: 13px; font-weight: 700; color: var(--marrom); margin-bottom: 6px; }
     .form-control {
       width: 100%; padding: 13px 16px; border: 2px solid var(--bege);
-      border-radius: var(--radius-sm); font-size: 15px; color: var(--marrom);
+      border-radius: var(--radius-sm); font-size: 16px; color: var(--marrom);
       background: var(--branco); transition: border-color 0.2s; outline: none;
     }
     .form-control:focus { border-color: var(--rosa); }
@@ -174,7 +174,7 @@
     @media (max-width: 520px) { .form-inline { grid-template-columns: 1fr; } }
     .form-inline .full { grid-column: 1 / -1; }
     .form-inline label { font-size: 12px; font-weight: 700; color: var(--marrom); display: block; margin-bottom: 5px; }
-    .form-inline .form-control { padding: 10px 12px; font-size: 13px; }
+    .form-inline .form-control { padding: 10px 12px; font-size: 16px; }
     .form-actions { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
 
     /* Lista items */
@@ -1067,6 +1067,19 @@ async function init() {
 }
 
 init();
+
+/* ======================================================
+   FIX iOS: viewport jump ao fechar teclado
+====================================================== */
+(function() {
+  document.addEventListener('focusout', function(e) {
+    if (['INPUT', 'SELECT', 'TEXTAREA'].includes(e.target.tagName)) {
+      setTimeout(function() {
+        window.scrollTo({ top: 0, behavior: 'instant' });
+      }, 100);
+    }
+  });
+})();
 </script>
 </body>
 </html>
