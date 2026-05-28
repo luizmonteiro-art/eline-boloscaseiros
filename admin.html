@@ -362,6 +362,8 @@
     <button class="admin-tab ativo" onclick="abrirTab(this,'tabVisao')">📊 Visão Geral</button>
     <button class="admin-tab" onclick="abrirTab(this,'tabProdutos')">🍰 Produtos</button>
     <button class="admin-tab" onclick="abrirTab(this,'tabBairros')">🛵 Bairros / Taxas</button>
+    <button class="admin-tab" onclick="abrirTab(this,'tabPromocoes')">🔥 Promoções</button>
+    <button class="admin-tab" onclick="abrirTab(this,'tabCardapioDia')">📅 Cardápio do Dia</button>
     <button class="admin-tab" onclick="abrirTab(this,'tabConfig')">⚙️ Configurações</button>
   </div>
 
@@ -569,9 +571,96 @@
         </div>
       </div>
 
-    </div>
-  </div>
-</div>
+    </div><!-- /tabConfig -->
+
+    <!-- ================================================ -->
+    <!-- TAB: PROMOÇÕES                                   -->
+    <!-- ================================================ -->
+    <div class="admin-section" id="tabPromocoes">
+
+      <!-- Desconto em produto -->
+      <div class="admin-card">
+        <h3>🏷️ Desconto em Produto</h3>
+        <p style="font-size:13px;color:var(--cinza-texto);margin-bottom:16px">Selecione um produto, defina o preço promocional e ative. Aparece com destaque na loja.</p>
+        <div style="display:flex;flex-direction:column;gap:10px">
+          <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:flex-end">
+            <div style="flex:2;min-width:140px">
+              <label style="font-size:12px;font-weight:700;color:var(--marrom);display:block;margin-bottom:4px">Produto</label>
+              <select class="form-control" id="promoProduto" style="font-size:14px"></select>
+            </div>
+            <div style="flex:1;min-width:100px">
+              <label style="font-size:12px;font-weight:700;color:var(--marrom);display:block;margin-bottom:4px">Preço promo (R$)</label>
+              <input type="number" class="form-control" id="promoPreco" placeholder="Ex: 18,00" step="0.50" min="0" style="font-size:14px" />
+            </div>
+            <button class="btn-primario" onclick="salvarPromocaoProduto()" style="height:46px;white-space:nowrap">✅ Ativar Promoção</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Lista de produtos em promoção -->
+      <div class="admin-card">
+        <h3>📋 Promoções Ativas em Produtos</h3>
+        <div id="listaPromocoesProdutos"></div>
+      </div>
+
+      <!-- Banner livre -->
+      <div class="admin-card">
+        <h3>📢 Banner Promocional</h3>
+        <p style="font-size:13px;color:var(--cinza-texto);margin-bottom:16px">Crie um aviso livre — texto + imagem opcional. Aparece no topo da loja para todos os clientes.</p>
+        <div style="display:flex;flex-direction:column;gap:10px">
+          <div>
+            <label style="font-size:12px;font-weight:700;color:var(--marrom);display:block;margin-bottom:4px">Texto do banner *</label>
+            <textarea class="form-control" id="bannerTexto" placeholder="Ex: 🎉 Bolo de cenoura com 20% OFF hoje! Só até às 18h!" style="min-height:70px;font-size:14px"></textarea>
+          </div>
+          <div>
+            <label style="font-size:12px;font-weight:700;color:var(--marrom);display:block;margin-bottom:4px">Imagem (opcional)</label>
+            <div style="display:flex;gap:8px;align-items:center">
+              <button class="btn-secundario" onclick="document.getElementById('bannerImgInput').click()">📷 Adicionar foto</button>
+              <span id="bannerImgStatus" style="font-size:12px;color:var(--cinza-texto)">Nenhuma foto</span>
+              <input type="file" id="bannerImgInput" accept="image/*" style="display:none" onchange="previewBannerImg(this)" />
+            </div>
+            <input type="hidden" id="bannerImgBase64" />
+          </div>
+          <button class="btn-primario" onclick="adicionarBanner()" style="width:fit-content">📢 Publicar Banner</button>
+        </div>
+      </div>
+
+      <!-- Lista de banners -->
+      <div class="admin-card">
+        <h3>📋 Banners Publicados</h3>
+        <div id="listaBanners"></div>
+      </div>
+
+    </div><!-- /tabPromocoes -->
+
+    <!-- ================================================ -->
+    <!-- TAB: CARDÁPIO DO DIA + FLYER                     -->
+    <!-- ================================================ -->
+    <div class="admin-section" id="tabCardapioDia">
+
+      <div class="admin-card">
+        <h3>📅 Produtos do Dia</h3>
+        <p style="font-size:13px;color:var(--cinza-texto);margin-bottom:16px">Ative os produtos disponíveis hoje. Eles aparecem na aba "Cardápio do Dia" da loja e no flyer gerado.</p>
+        <div id="listaCardapioDia"></div>
+      </div>
+
+      <div class="admin-card">
+        <h3>🖼️ Gerar Flyer do Dia</h3>
+        <p style="font-size:13px;color:var(--cinza-texto);margin-bottom:16px">Gera uma imagem com os produtos do dia para compartilhar no WhatsApp e Instagram.</p>
+        <div style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:16px">
+          <button class="btn-primario" onclick="gerarFlyer()">🖼️ Gerar Flyer</button>
+          <button class="btn-secundario" id="btnBaixarFlyer" onclick="baixarFlyer()" style="display:none">💾 Baixar Imagem</button>
+          <button class="btn-secundario" id="btnCompartilharFlyer" onclick="compartilharFlyer()" style="display:none">📤 Compartilhar</button>
+        </div>
+        <div id="flyerPreview" style="display:none;text-align:center">
+          <canvas id="flyerCanvas" style="max-width:100%;border-radius:16px;box-shadow:0 4px 20px rgba(74,36,24,0.15)"></canvas>
+        </div>
+      </div>
+
+    </div><!-- /tabCardapioDia -->
+
+  </div><!-- /admin-content -->
+</div><!-- /adminPage -->
 
 <script>
 /* ======================================================
@@ -587,20 +676,28 @@ try {
   console.warn('Supabase não carregou:', e);
 }
 
-let dados = { produtos: [], bairros: [], whatsapp: '5598984156128', senha: 'eline2025', lojaAberta: true };
+let dados = { produtos: [], bairros: [], banners: [], whatsapp: '5598984156128', senha: 'eline2025', lojaAberta: true };
 
 function normProd(r) {
-  return { id: r.id, nome: r.nome, categoria: r.categoria, preco: parseFloat(r.preco), emoji: r.emoji || '🎂', desc: r.descricao || '', disponivel: r.disponivel, img: r.img || '' };
+  return {
+    id: r.id, nome: r.nome, categoria: r.categoria, preco: parseFloat(r.preco),
+    emoji: r.emoji || '🎂', desc: r.descricao || '', disponivel: r.disponivel, img: r.img || '',
+    em_promocao: r.em_promocao || false,
+    preco_promo: r.preco_promo ? parseFloat(r.preco_promo) : null,
+    cardapio_dia: r.cardapio_dia || false
+  };
 }
 
 async function carregarDados() {
-  const [{ data: prods }, { data: bairros }, { data: config }] = await Promise.all([
+  const [{ data: prods }, { data: bairros }, { data: config }, { data: banners }] = await Promise.all([
     sb.from('produtos').select('*').order('id'),
     sb.from('bairros').select('*').order('id'),
-    sb.from('configuracoes').select('*').eq('id', 1).single()
+    sb.from('configuracoes').select('*').eq('id', 1).single(),
+    sb.from('banners').select('*').order('id')
   ]);
   dados.produtos = (prods || []).map(normProd);
   dados.bairros  = (bairros || []).map(r => ({ id: r.id, nome: r.nome, taxa: parseFloat(r.taxa) }));
+  dados.banners  = (banners || []).map(r => ({ id: r.id, texto: r.texto, imagem: r.imagem || '', ativo: r.ativo }));
   if (config) { dados.whatsapp = config.whatsapp; dados.senha = config.senha; dados.lojaAberta = config.loja_aberta; }
 }
 
@@ -650,6 +747,8 @@ function renderTudo() {
   renderProdutos();
   renderBairros();
   carregarConfig();
+  renderPromocoes();
+  renderCardapioDia();
 }
 
 /* ======================================================
@@ -1045,6 +1144,420 @@ async function resetarSenha() {
   dados.senha = 'eline2025';
   document.getElementById('loginErro').style.display = 'none';
   alert('✅ Senha redefinida! Use: eline2025');
+}
+
+/* ======================================================
+   PROMOÇÕES — DESCONTO EM PRODUTO
+====================================================== */
+function renderPromocoes() {
+  // Popular select de produtos
+  const sel = document.getElementById('promoProduto');
+  if (sel) {
+    sel.innerHTML = dados.produtos.map(p =>
+      `<option value="${p.id}">${p.emoji} ${p.nome} — ${fmt(p.preco)}</option>`
+    ).join('');
+  }
+
+  // Lista de produtos em promoção
+  const lista = dados.produtos.filter(p => p.em_promocao);
+  const el = document.getElementById('listaPromocoesProdutos');
+  if (!el) return;
+  if (lista.length === 0) {
+    el.innerHTML = '<p style="color:var(--cinza-texto);padding:16px;text-align:center">Nenhuma promoção ativa em produtos.</p>';
+  } else {
+    el.innerHTML = lista.map(p => `
+      <div class="item-admin">
+        <div style="font-size:24px;width:40px;text-align:center">${p.emoji}</div>
+        <div class="item-admin-info">
+          <div class="item-admin-nome">${p.nome}</div>
+          <div class="item-admin-detalhe">
+            <span style="text-decoration:line-through;color:var(--cinza-texto)">${fmt(p.preco)}</span>
+            → <strong style="color:var(--rosa-escuro)">${fmt(p.preco_promo)}</strong>
+          </div>
+        </div>
+        <div class="item-admin-acoes">
+          <button class="btn-secundario" style="font-size:12px" onclick="compartilharPromocao(${p.id})">📲 WPP</button>
+          <button class="btn-perigo" onclick="desativarPromocao(${p.id})">✕ Remover</button>
+        </div>
+      </div>
+    `).join('');
+  }
+
+  // Lista de banners
+  renderBanners();
+}
+
+async function salvarPromocaoProduto() {
+  const prodId = parseInt(document.getElementById('promoProduto').value);
+  const precoPromo = parseFloat(document.getElementById('promoPreco').value);
+  if (!prodId || isNaN(precoPromo) || precoPromo <= 0) {
+    toast('Selecione o produto e informe o preço promocional.', 'erro'); return;
+  }
+  const prod = dados.produtos.find(p => p.id === prodId);
+  if (!prod) return;
+  if (precoPromo >= prod.preco) {
+    toast('O preço promocional deve ser menor que o preço original.', 'erro'); return;
+  }
+  const { error } = await sb.from('produtos').update({ em_promocao: true, preco_promo: precoPromo }).eq('id', prodId);
+  if (error) { toast('Erro ao salvar promoção!', 'erro'); return; }
+  prod.em_promocao = true;
+  prod.preco_promo = precoPromo;
+  document.getElementById('promoPreco').value = '';
+  renderPromocoes();
+  toast(`🔥 Promoção ativada para ${prod.nome}!`, 'sucesso');
+}
+
+async function desativarPromocao(prodId) {
+  const { error } = await sb.from('produtos').update({ em_promocao: false, preco_promo: null }).eq('id', prodId);
+  if (error) { toast('Erro ao remover promoção!', 'erro'); return; }
+  const p = dados.produtos.find(p => p.id === prodId);
+  if (p) { p.em_promocao = false; p.preco_promo = null; }
+  renderPromocoes();
+  toast('Promoção removida.', '');
+}
+
+function compartilharPromocao(prodId) {
+  const p = dados.produtos.find(p => p.id === prodId);
+  if (!p) return;
+  const msg = `🔥 *PROMOÇÃO ESPECIAL — Eline Bolos*\n\n`
+    + `${p.emoji} *${p.nome}*\n`
+    + `~~De ${fmt(p.preco)}~~ por apenas *${fmt(p.preco_promo)}*!\n\n`
+    + `${p.desc ? p.desc + '\n\n' : ''}`
+    + `Faça seu pedido agora! 🎂\n`
+    + `📲 ${window.location.origin.replace('admin.html','') || 'https://luizmonteiro-art.github.io/eline-boloscaseiros/'}`;
+  window.open(`https://wa.me/${dados.whatsapp}?text=${encodeURIComponent(msg)}`, '_blank');
+}
+
+/* ======================================================
+   PROMOÇÕES — BANNERS LIVRES
+====================================================== */
+function previewBannerImg(input) {
+  if (!input.files[0]) return;
+  comprimirImagem(input.files[0], function(base64) {
+    document.getElementById('bannerImgBase64').value = base64;
+    document.getElementById('bannerImgStatus').textContent = '✅ Foto pronta';
+    document.getElementById('bannerImgStatus').style.color = 'var(--verde)';
+  });
+}
+
+async function adicionarBanner() {
+  const texto = document.getElementById('bannerTexto').value.trim();
+  const imagem = document.getElementById('bannerImgBase64').value || '';
+  if (!texto) { toast('Digite o texto do banner!', 'erro'); return; }
+  const { data, error } = await sb.from('banners').insert({ texto, imagem, ativo: true }).select().single();
+  if (error) { toast('Erro ao publicar banner!', 'erro'); return; }
+  dados.banners.push({ id: data.id, texto: data.texto, imagem: data.imagem || '', ativo: true });
+  document.getElementById('bannerTexto').value = '';
+  document.getElementById('bannerImgBase64').value = '';
+  document.getElementById('bannerImgStatus').textContent = 'Nenhuma foto';
+  document.getElementById('bannerImgStatus').style.color = '';
+  renderBanners();
+  toast('📢 Banner publicado!', 'sucesso');
+}
+
+function renderBanners() {
+  const el = document.getElementById('listaBanners');
+  if (!el) return;
+  if (dados.banners.length === 0) {
+    el.innerHTML = '<p style="color:var(--cinza-texto);padding:16px;text-align:center">Nenhum banner publicado.</p>';
+    return;
+  }
+  el.innerHTML = dados.banners.map(b => `
+    <div class="item-admin" style="${b.ativo ? '' : 'opacity:0.5'}">
+      ${b.imagem ? `<img src="${b.imagem}" style="width:48px;height:48px;object-fit:cover;border-radius:8px;flex-shrink:0" />` : '<div style="font-size:24px;width:40px;text-align:center">📢</div>'}
+      <div class="item-admin-info">
+        <div class="item-admin-nome" style="white-space:normal;font-size:13px">${b.texto.substring(0,80)}${b.texto.length>80?'...':''}</div>
+        <div class="item-admin-detalhe">${b.ativo ? '🟢 Ativo' : '⚫ Inativo'}</div>
+      </div>
+      <div class="item-admin-acoes">
+        <div class="toggle-switch ${b.ativo ? 'on' : ''}" onclick="toggleBanner(${b.id})" title="${b.ativo ? 'Desativar' : 'Ativar'}"></div>
+        <button class="btn-secundario" style="font-size:12px" onclick="compartilharBanner(${b.id})">📲 WPP</button>
+        <button class="btn-perigo" onclick="deletarBanner(${b.id})">🗑️</button>
+      </div>
+    </div>
+  `).join('');
+}
+
+async function toggleBanner(id) {
+  const b = dados.banners.find(b => b.id === id);
+  if (!b) return;
+  const { error } = await sb.from('banners').update({ ativo: !b.ativo }).eq('id', id);
+  if (error) { toast('Erro!', 'erro'); return; }
+  b.ativo = !b.ativo;
+  renderBanners();
+  toast(b.ativo ? '✅ Banner ativado' : 'Banner desativado', '');
+}
+
+async function deletarBanner(id) {
+  if (!confirm('Excluir este banner?')) return;
+  const { error } = await sb.from('banners').delete().eq('id', id);
+  if (error) { toast('Erro ao excluir!', 'erro'); return; }
+  dados.banners = dados.banners.filter(b => b.id !== id);
+  renderBanners();
+  toast('Banner removido.', '');
+}
+
+function compartilharBanner(id) {
+  const b = dados.banners.find(b => b.id === id);
+  if (!b) return;
+  const msg = `${b.texto}\n\n🎂 *Eline Bolos Caseiros e Confeitados*\nFaça seu pedido pelo site!`;
+  window.open(`https://wa.me/${dados.whatsapp}?text=${encodeURIComponent(msg)}`, '_blank');
+}
+
+/* ======================================================
+   CARDÁPIO DO DIA
+====================================================== */
+function renderCardapioDia() {
+  const el = document.getElementById('listaCardapioDia');
+  if (!el) return;
+  if (dados.produtos.length === 0) {
+    el.innerHTML = '<p style="color:var(--cinza-texto);padding:16px;text-align:center">Nenhum produto cadastrado.</p>';
+    return;
+  }
+  const cats = [...new Set(dados.produtos.map(p => p.categoria))];
+  el.innerHTML = cats.map(cat => {
+    const prods = dados.produtos.filter(p => p.categoria === cat);
+    return `
+      <div style="margin-bottom:16px">
+        <div style="font-size:12px;font-weight:800;color:var(--marrom-medio);text-transform:uppercase;letter-spacing:1px;margin-bottom:8px">${getCatEmoji(cat)} ${cat}</div>
+        ${prods.map(p => `
+          <div class="item-admin" style="margin-bottom:6px;${p.cardapio_dia ? 'background:var(--rosa-bg);border:1px solid var(--rosa-claro)' : ''}">
+            <div style="font-size:20px;width:36px;text-align:center">${p.emoji}</div>
+            <div class="item-admin-info">
+              <div class="item-admin-nome">${p.nome}</div>
+              <div class="item-admin-detalhe">${fmt(p.preco)}</div>
+            </div>
+            <div class="toggle-switch ${p.cardapio_dia ? 'on' : ''}" onclick="toggleCardapioDia(${p.id})" title="${p.cardapio_dia ? 'Remover do dia' : 'Adicionar ao dia'}"></div>
+          </div>
+        `).join('')}
+      </div>
+    `;
+  }).join('');
+
+  // Contador
+  const qtd = dados.produtos.filter(p => p.cardapio_dia).length;
+  document.querySelector('#tabCardapioDia .admin-card h3').textContent = `📅 Produtos do Dia (${qtd} selecionados)`;
+}
+
+async function toggleCardapioDia(prodId) {
+  const p = dados.produtos.find(p => p.id === prodId);
+  if (!p) return;
+  const novoVal = !p.cardapio_dia;
+  const { error } = await sb.from('produtos').update({ cardapio_dia: novoVal }).eq('id', prodId);
+  if (error) { toast('Erro ao atualizar!', 'erro'); return; }
+  p.cardapio_dia = novoVal;
+  renderCardapioDia();
+  toast(novoVal ? `✅ ${p.nome} adicionado ao dia` : `Removido do cardápio do dia`, '');
+}
+
+/* ======================================================
+   FLYER — GERAÇÃO DE IMAGEM COM CANVAS
+====================================================== */
+let flyerDataUrl = null;
+
+async function gerarFlyer() {
+  const prodsDia = dados.produtos.filter(p => p.cardapio_dia && p.disponivel);
+  if (prodsDia.length === 0) {
+    toast('Selecione pelo menos 1 produto do dia!', 'erro'); return;
+  }
+
+  toast('⏳ Gerando flyer...', '');
+
+  const canvas = document.getElementById('flyerCanvas');
+  const ctx = canvas.getContext('2d');
+  const W = 1080, H = Math.max(1080, 420 + prodsDia.length * 130);
+  canvas.width = W; canvas.height = H;
+
+  // Fundo gradiente
+  const grad = ctx.createLinearGradient(0, 0, W, H);
+  grad.addColorStop(0, '#FEF0F4');
+  grad.addColorStop(1, '#F0E0C0');
+  ctx.fillStyle = grad;
+  ctx.fillRect(0, 0, W, H);
+
+  // Decoração topo
+  ctx.fillStyle = '#E8809A';
+  ctx.globalAlpha = 0.15;
+  ctx.beginPath(); ctx.arc(W - 80, -60, 180, 0, Math.PI * 2); ctx.fill();
+  ctx.beginPath(); ctx.arc(60, H - 60, 140, 0, Math.PI * 2); ctx.fill();
+  ctx.globalAlpha = 1;
+
+  // Faixa topo
+  ctx.fillStyle = '#4A2418';
+  ctx.fillRect(0, 0, W, 120);
+
+  // Título
+  ctx.fillStyle = '#F9D5DF';
+  ctx.font = 'bold 52px serif';
+  ctx.textAlign = 'center';
+  ctx.fillText('🎂 Eline Bolos Caseiros', W / 2, 58);
+  ctx.font = '28px sans-serif';
+  ctx.fillStyle = '#D9C4A0';
+  ctx.fillText('Caseiros e Confeitados • Santa Inês – MA', W / 2, 100);
+
+  // Subtítulo cardápio do dia
+  ctx.fillStyle = '#D4607A';
+  ctx.font = 'bold 44px sans-serif';
+  ctx.textAlign = 'center';
+  ctx.fillText('📅 Cardápio do Dia', W / 2, 185);
+
+  // Data
+  const hoje = new Date().toLocaleDateString('pt-BR', { weekday: 'long', day: 'numeric', month: 'long' });
+  ctx.fillStyle = '#7B4A2D';
+  ctx.font = '28px sans-serif';
+  ctx.fillText(hoje.charAt(0).toUpperCase() + hoje.slice(1), W / 2, 225);
+
+  // Linha separadora
+  ctx.strokeStyle = '#E8809A';
+  ctx.lineWidth = 3;
+  ctx.beginPath(); ctx.moveTo(80, 248); ctx.lineTo(W - 80, 248); ctx.stroke();
+
+  // Carregar imagens dos produtos
+  const imgPromises = prodsDia.map(p => new Promise(resolve => {
+    if (!p.img) { resolve(null); return; }
+    const img = new Image();
+    img.onload = () => resolve(img);
+    img.onerror = () => resolve(null);
+    img.src = p.img;
+  }));
+  const imgs = await Promise.all(imgPromises);
+
+  // Desenhar produtos
+  let y = 278;
+  prodsDia.forEach((p, i) => {
+    const cardH = 120;
+    const cardPad = 20;
+
+    // Card fundo
+    ctx.fillStyle = 'rgba(255,255,255,0.85)';
+    roundRect(ctx, 60, y, W - 120, cardH, 16);
+    ctx.fill();
+
+    // Sombra leve
+    ctx.shadowColor = 'rgba(74,36,24,0.10)';
+    ctx.shadowBlur = 12;
+    ctx.fillStyle = 'rgba(255,255,255,0.85)';
+    roundRect(ctx, 60, y, W - 120, cardH, 16);
+    ctx.fill();
+    ctx.shadowBlur = 0;
+
+    // Foto ou emoji
+    const imgSize = cardH - 20;
+    const imgX = 80, imgY = y + 10;
+    if (imgs[i]) {
+      ctx.save();
+      roundRect(ctx, imgX, imgY, imgSize, imgSize, 12);
+      ctx.clip();
+      ctx.drawImage(imgs[i], imgX, imgY, imgSize, imgSize);
+      ctx.restore();
+    } else {
+      ctx.fillStyle = '#F9D5DF';
+      roundRect(ctx, imgX, imgY, imgSize, imgSize, 12);
+      ctx.fill();
+      ctx.font = `${imgSize * 0.55}px serif`;
+      ctx.textAlign = 'center';
+      ctx.fillText(p.emoji || '🎂', imgX + imgSize / 2, imgY + imgSize * 0.68);
+    }
+
+    // Nome
+    ctx.fillStyle = '#4A2418';
+    ctx.font = 'bold 34px sans-serif';
+    ctx.textAlign = 'left';
+    const nomeX = imgX + imgSize + 24;
+    ctx.fillText(p.nome, nomeX, y + 50);
+
+    // Descrição curta
+    if (p.desc) {
+      ctx.fillStyle = '#7B4A2D';
+      ctx.font = '22px sans-serif';
+      const descCurta = p.desc.substring(0, 45) + (p.desc.length > 45 ? '...' : '');
+      ctx.fillText(descCurta, nomeX, y + 82);
+    }
+
+    // Preço
+    const precoX = W - 80;
+    if (p.em_promocao && p.preco_promo) {
+      ctx.fillStyle = '#999';
+      ctx.font = '22px sans-serif';
+      ctx.textAlign = 'right';
+      ctx.fillText(fmt(p.preco), precoX, y + 55);
+      ctx.fillStyle = '#D4607A';
+      ctx.font = 'bold 34px sans-serif';
+      ctx.fillText(fmt(p.preco_promo), precoX, y + 95);
+    } else {
+      ctx.fillStyle = '#D4607A';
+      ctx.font = 'bold 38px sans-serif';
+      ctx.textAlign = 'right';
+      ctx.fillText(fmt(p.preco), precoX, y + 78);
+    }
+
+    y += cardH + cardPad;
+  });
+
+  // Rodapé
+  y += 20;
+  ctx.fillStyle = '#4A2418';
+  ctx.fillRect(0, y, W, 100);
+  ctx.fillStyle = '#F9D5DF';
+  ctx.font = 'bold 30px sans-serif';
+  ctx.textAlign = 'center';
+  ctx.fillText('📲 Peça pelo site ou WhatsApp!', W / 2, y + 42);
+  ctx.fillStyle = '#D9C4A0';
+  ctx.font = '22px sans-serif';
+  ctx.fillText('luizmonteiro-art.github.io/eline-boloscaseiros', W / 2, y + 78);
+
+  // Ajustar altura real
+  canvas.height = y + 100;
+
+  // Rederizar de novo com altura correta
+  flyerDataUrl = canvas.toDataURL('image/jpeg', 0.92);
+
+  document.getElementById('flyerPreview').style.display = 'block';
+  document.getElementById('btnBaixarFlyer').style.display = 'inline-flex';
+  document.getElementById('btnCompartilharFlyer').style.display = 'inline-flex';
+  toast('✅ Flyer gerado!', 'sucesso');
+}
+
+function roundRect(ctx, x, y, w, h, r) {
+  ctx.beginPath();
+  ctx.moveTo(x + r, y);
+  ctx.lineTo(x + w - r, y);
+  ctx.quadraticCurveTo(x + w, y, x + w, y + r);
+  ctx.lineTo(x + w, y + h - r);
+  ctx.quadraticCurveTo(x + w, y + h, x + w - r, y + h);
+  ctx.lineTo(x + r, y + h);
+  ctx.quadraticCurveTo(x, y + h, x, y + h - r);
+  ctx.lineTo(x, y + r);
+  ctx.quadraticCurveTo(x, y, x + r, y);
+  ctx.closePath();
+}
+
+function baixarFlyer() {
+  if (!flyerDataUrl) return;
+  const a = document.createElement('a');
+  const hoje = new Date().toLocaleDateString('pt-BR').replace(/\//g, '-');
+  a.download = `cardapio-do-dia-${hoje}.jpg`;
+  a.href = flyerDataUrl;
+  a.click();
+  toast('💾 Imagem salva!', 'sucesso');
+}
+
+async function compartilharFlyer() {
+  if (!flyerDataUrl) return;
+  if (navigator.share && navigator.canShare) {
+    const blob = await fetch(flyerDataUrl).then(r => r.blob());
+    const hoje = new Date().toLocaleDateString('pt-BR').replace(/\//g, '-');
+    const file = new File([blob], `cardapio-do-dia-${hoje}.jpg`, { type: 'image/jpeg' });
+    if (navigator.canShare({ files: [file] })) {
+      try {
+        await navigator.share({ files: [file], title: 'Cardápio do Dia — Eline Bolos' });
+        return;
+      } catch(e) {}
+    }
+  }
+  // Fallback: baixar
+  baixarFlyer();
+  toast('Compartilhe a imagem salva no WhatsApp ou Instagram!', '');
 }
 
 /* ======================================================

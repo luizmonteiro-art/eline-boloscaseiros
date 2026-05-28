@@ -1084,6 +1084,64 @@
     .toast.sucesso { background: var(--verde); }
     .toast.erro { background: #c0392b; }
 
+    /* ===== BANNER PROMOCIONAL ===== */
+    .banners-container {
+      padding: 0 16px 12px;
+      max-width: 960px;
+      margin: 0 auto;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+    .banner-card {
+      background: linear-gradient(135deg, var(--rosa-escuro), #c0392b);
+      border-radius: var(--radius);
+      padding: 14px 18px;
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      box-shadow: 0 4px 16px rgba(212,96,122,0.3);
+      animation: fadeUp 0.4s ease both;
+    }
+    .banner-img {
+      width: 56px; height: 56px;
+      border-radius: 10px;
+      object-fit: cover;
+      flex-shrink: 0;
+    }
+    .banner-texto {
+      flex: 1;
+      font-size: 14px;
+      font-weight: 700;
+      color: white;
+      line-height: 1.4;
+    }
+
+    /* ===== BADGE PROMOÇÃO ===== */
+    .promo-badge {
+      background: #c0392b;
+      color: white;
+      font-size: 10px;
+      font-weight: 800;
+      padding: 3px 8px;
+      border-radius: 20px;
+      display: inline-block;
+      margin-bottom: 4px;
+      letter-spacing: 0.5px;
+      text-transform: uppercase;
+    }
+    .produto-preco-original {
+      font-size: 11px;
+      color: #999;
+      text-decoration: line-through;
+      display: block;
+    }
+    .produto-preco-promo {
+      font-size: 15px;
+      font-weight: 800;
+      color: #c0392b;
+    }
+
     /* Animação de entrada */
     @keyframes fadeUp {
       from { opacity: 0; transform: translateY(16px); }
@@ -1139,6 +1197,9 @@
     </div>
     <a href="#cardapio" class="btn-hero">Ver Cardápio 🍴</a>
   </section>
+
+  <!-- BANNERS PROMOCIONAIS -->
+  <div class="banners-container" id="bannersContainer"></div>
 
   <!-- CARDÁPIO -->
   <section class="cardapio-section" id="cardapio">
@@ -1467,19 +1528,24 @@ try {
   console.warn('Supabase não carregou:', e);
 }
 
-let dados = { produtos: [], bairros: [], whatsapp: '5598984156128', lojaAberta: true, senha: 'eline2025', horario: '' };
+let dados = { produtos: [], bairros: [], banners: [], whatsapp: '5598984156128', lojaAberta: true, senha: 'eline2025', horario: '' };
 
 async function carregarDados() {
-  const [{ data: prods }, { data: bairros }, { data: config }] = await Promise.all([
+  const [{ data: prods }, { data: bairros }, { data: config }, { data: banners }] = await Promise.all([
     sb.from('produtos').select('*').order('id'),
     sb.from('bairros').select('*').order('id'),
-    sb.from('configuracoes').select('*').eq('id', 1).single()
+    sb.from('configuracoes').select('*').eq('id', 1).single(),
+    sb.from('banners').select('*').order('id')
   ]);
   dados.produtos = (prods || []).map(r => ({
     id: r.id, nome: r.nome, categoria: r.categoria, preco: parseFloat(r.preco),
-    emoji: r.emoji || '🎂', desc: r.descricao || '', disponivel: r.disponivel, img: r.img || ''
+    emoji: r.emoji || '🎂', desc: r.descricao || '', disponivel: r.disponivel, img: r.img || '',
+    em_promocao: r.em_promocao || false,
+    preco_promo: r.preco_promo ? parseFloat(r.preco_promo) : null,
+    cardapio_dia: r.cardapio_dia || false
   }));
   dados.bairros = (bairros || []).map(r => ({ id: r.id, nome: r.nome, taxa: parseFloat(r.taxa) }));
+  dados.banners = (banners || []).filter(b => b.ativo).map(r => ({ id: r.id, texto: r.texto, imagem: r.imagem || '' }));
   if (config) { dados.whatsapp = config.whatsapp; dados.lojaAberta = config.loja_aberta; dados.senha = config.senha; }
 }
 
@@ -1889,10 +1955,23 @@ function confirmarPedido() {
 let categoriaAtiva = 'Todas';
 
 function renderCategorias() {
-  const cats = ['Todas', ...new Set(dados.produtos.map(p => p.categoria))];
+  const temDia = dados.produtos.some(p => p.cardapio_dia && p.disponivel);
+  const cats = ['Todas', ...(temDia ? ['📅 Cardápio do Dia'] : []), ...new Set(dados.produtos.map(p => p.categoria))];
   const tabs = document.getElementById('categorias-tabs');
   tabs.innerHTML = cats.map(c => `
-    <button class="tab-btn ${c === categoriaAtiva ? 'ativo' : ''}" onclick="filtrarCategoria('${c}')">${getCatEmoji(c)} ${c}</button>
+    <button class="tab-btn ${c === categoriaAtiva ? 'ativo' : ''}" onclick="filtrarCategoria('${c}')">${c.startsWith('📅') ? c : getCatEmoji(c) + ' ' + c}</button>
+  `).join('');
+}
+
+function renderBanners() {
+  const container = document.getElementById('bannersContainer');
+  if (!container) return;
+  if (!dados.banners || dados.banners.length === 0) { container.innerHTML = ''; return; }
+  container.innerHTML = dados.banners.map(b => `
+    <div class="banner-card">
+      ${b.imagem ? `<img src="${b.imagem}" class="banner-img" alt="banner" />` : '<span style="font-size:32px">📢</span>'}
+      <div class="banner-texto">${b.texto}</div>
+    </div>
   `).join('');
 }
 
@@ -1916,9 +1995,14 @@ function filtrarCategoria(cat) {
 }
 
 function renderProdutos() {
-  const lista = categoriaAtiva === 'Todas'
-    ? dados.produtos
-    : dados.produtos.filter(p => p.categoria === categoriaAtiva);
+  let lista;
+  if (categoriaAtiva === '📅 Cardápio do Dia') {
+    lista = dados.produtos.filter(p => p.cardapio_dia && p.disponivel);
+  } else if (categoriaAtiva === 'Todas') {
+    lista = dados.produtos;
+  } else {
+    lista = dados.produtos.filter(p => p.categoria === categoriaAtiva);
+  }
 
   const grid = document.getElementById('produtosGrid');
   if (lista.length === 0) {
@@ -1926,25 +2010,36 @@ function renderProdutos() {
     return;
   }
 
-  grid.innerHTML = lista.map((p, i) => `
-    <div class="produto-card ${p.disponivel ? '' : 'indisponivel'}" style="animation-delay:${i * 0.05}s">
-      <div class="produto-img">
-        ${p.img ? `<img src="${p.img}" alt="${p.nome}" onerror="this.style.display='none'" />` : ''}
-        ${!p.img ? p.emoji || '🎂' : ''}
-      </div>
-      <div class="produto-info">
-        <div class="produto-nome">${p.nome}</div>
-        <div class="produto-desc">${p.desc || ''}</div>
-        <div class="produto-footer">
-          <span class="produto-preco">${formatarMoeda(p.preco)}</span>
-          ${p.disponivel
-            ? `<button class="btn-add" onclick="adicionarAoCarrinho(${p.id})" aria-label="Adicionar ${p.nome}">+</button>`
-            : `<span class="produto-tag-indisponivel">Indisponível</span>`
-          }
+  grid.innerHTML = lista.map((p, i) => {
+    const temPromo = p.em_promocao && p.preco_promo;
+    const precoHtml = temPromo
+      ? `<div>
+           <span class="promo-badge">🔥 Promoção</span>
+           <span class="produto-preco-original">${formatarMoeda(p.preco)}</span>
+           <span class="produto-preco-promo">${formatarMoeda(p.preco_promo)}</span>
+         </div>`
+      : `<span class="produto-preco">${formatarMoeda(p.preco)}</span>`;
+
+    return `
+      <div class="produto-card ${p.disponivel ? '' : 'indisponivel'}" style="animation-delay:${i * 0.05}s${temPromo ? ';border:2px solid #c0392b' : ''}">
+        <div class="produto-img">
+          ${p.img ? `<img src="${p.img}" alt="${p.nome}" onerror="this.style.display='none'" />` : ''}
+          ${!p.img ? p.emoji || '🎂' : ''}
+        </div>
+        <div class="produto-info">
+          <div class="produto-nome">${p.nome}</div>
+          <div class="produto-desc">${p.desc || ''}</div>
+          <div class="produto-footer">
+            ${precoHtml}
+            ${p.disponivel
+              ? `<button class="btn-add" onclick="adicionarAoCarrinho(${p.id})" aria-label="Adicionar ${p.nome}">+</button>`
+              : `<span class="produto-tag-indisponivel">Indisponível</span>`
+            }
+          </div>
         </div>
       </div>
-    </div>
-  `).join('');
+    `;
+  }).join('');
 }
 
 /* ======================================================
@@ -2255,6 +2350,11 @@ function iniciarRealtime() {
         atualizarStatusLoja();
       }
     })
+    .on('postgres_changes', { event: '*', schema: 'public', table: 'banners' }, async () => {
+      const { data } = await sb.from('banners').select('*').order('id');
+      dados.banners = (data || []).filter(b => b.ativo).map(r => ({ id: r.id, texto: r.texto, imagem: r.imagem || '' }));
+      renderBanners();
+    })
     .subscribe();
 
   // Fallback: atualiza a cada 30 segundos caso o realtime falhe
@@ -2280,6 +2380,7 @@ async function init() {
 
   await carregarDados();
 
+  renderBanners();
   renderCategorias();
   renderProdutos();
   atualizarUI();
