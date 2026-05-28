@@ -92,6 +92,14 @@
     }
     .admin-header-brand { display: flex; align-items: center; gap: 10px; }
     .admin-header-brand .logo { font-size: 24px; }
+    .admin-header-brand .logo-img {
+      width: 46px; height: 46px;
+      border-radius: 50%;
+      object-fit: cover;
+      object-position: center;
+      flex-shrink: 0;
+      border: 2px solid rgba(255,255,255,0.3);
+    }
     .admin-header-brand h1 {
       font-family: 'Playfair Display', serif; font-size: 17px; color: var(--rosa-claro);
     }
@@ -346,7 +354,7 @@
 
   <header class="admin-header">
     <div class="admin-header-brand">
-      <span class="logo">🎂</span>
+      <img src="./logo.png" alt="Eline Bolos" class="logo-img" onerror="this.style.display='none';this.nextElementSibling.style.display='inline';" /><span class="logo" style="display:none">🎂</span>
       <div>
         <h1>Eline Bolos — Admin</h1>
         <div class="sub">Painel de Gerenciamento</div>
