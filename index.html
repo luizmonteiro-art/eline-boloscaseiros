@@ -2,7 +2,7 @@
 <html lang="pt-BR">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0" />
   <title>Eline Bolos Caseiros e Confeitados</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -663,7 +663,7 @@
       padding: 12px 14px;
       border: 2px solid var(--bege);
       border-radius: var(--radius-sm);
-      font-size: 14px;
+      font-size: 16px; /* 16px evita zoom automático no iOS Safari */
       color: var(--marrom);
       background: var(--branco);
       transition: border-color 0.2s;
@@ -2241,6 +2241,28 @@ async function init() {
 }
 
 init();
+
+/* ======================================================
+   FIX iOS: viewport jump ao fechar teclado
+====================================================== */
+(function() {
+  // Quando qualquer input/select/textarea perde o foco,
+  // força o scroll de volta ao topo da página para evitar
+  // o desalinhamento causado pelo zoom automático do iOS Safari.
+  function resetViewport() {
+    // Pequeno delay para o teclado terminar de fechar
+    setTimeout(function() {
+      window.scrollTo({ top: 0, behavior: 'instant' });
+      document.documentElement.style.height = '';
+    }, 100);
+  }
+
+  document.addEventListener('focusout', function(e) {
+    if (['INPUT', 'SELECT', 'TEXTAREA'].includes(e.target.tagName)) {
+      resetViewport();
+    }
+  });
+})();
 </script>
 </body>
 </html>
