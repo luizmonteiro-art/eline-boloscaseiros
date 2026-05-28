@@ -2225,10 +2225,56 @@ function mostrarToast(msg, tipo = '') {
 }
 
 /* ======================================================
+   SINCRONIZAÇÃO EM TEMPO REAL
+   Escuta mudanças no Supabase e atualiza a loja
+   automaticamente, sem precisar recarregar a página.
+====================================================== */
+function iniciarRealtime() {
+  if (!sb) return;
+
+  sb.channel('loja-realtime')
+    .on('postgres_changes', { event: '*', schema: 'public', table: 'produtos' }, async () => {
+      const { data } = await sb.from('produtos').select('*').order('id');
+      dados.produtos = (data || []).map(r => ({
+        id: r.id, nome: r.nome, categoria: r.categoria, preco: parseFloat(r.preco),
+        emoji: r.emoji || '🎂', desc: r.descricao || '', disponivel: r.disponivel, img: r.img || ''
+      }));
+      renderCategorias();
+      renderProdutos();
+      atualizarUI();
+    })
+    .on('postgres_changes', { event: '*', schema: 'public', table: 'bairros' }, async () => {
+      const { data } = await sb.from('bairros').select('*').order('id');
+      dados.bairros = (data || []).map(r => ({ id: r.id, nome: r.nome, taxa: parseFloat(r.taxa) }));
+    })
+    .on('postgres_changes', { event: '*', schema: 'public', table: 'configuracoes' }, async () => {
+      const { data } = await sb.from('configuracoes').select('*').eq('id', 1).single();
+      if (data) {
+        dados.whatsapp = data.whatsapp;
+        dados.lojaAberta = data.loja_aberta;
+        atualizarStatusLoja();
+      }
+    })
+    .subscribe();
+
+  // Fallback: atualiza a cada 30 segundos caso o realtime falhe
+  setInterval(async () => {
+    const snap = JSON.stringify(dados.produtos.map(p => ({ id: p.id, disponivel: p.disponivel, preco: p.preco, img: p.img })));
+    await carregarDados();
+    const snapNovo = JSON.stringify(dados.produtos.map(p => ({ id: p.id, disponivel: p.disponivel, preco: p.preco, img: p.img })));
+    if (snap !== snapNovo) {
+      renderCategorias();
+      renderProdutos();
+      atualizarUI();
+      atualizarStatusLoja();
+    }
+  }, 30000);
+}
+
+/* ======================================================
    INICIALIZAÇÃO
 ====================================================== */
 async function init() {
-  // Mostrar loading
   const grid = document.getElementById('produtosGrid');
   if (grid) grid.innerHTML = '<div style="grid-column:1/-1;text-align:center;padding:60px;color:var(--marrom-medio)"><div style="font-size:48px;margin-bottom:12px">🎂</div><div style="font-size:16px;font-weight:600">Carregando cardápio...</div></div>';
 
@@ -2238,6 +2284,7 @@ async function init() {
   renderProdutos();
   atualizarUI();
   atualizarStatusLoja();
+  iniciarRealtime();
 }
 
 init();
