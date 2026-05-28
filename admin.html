@@ -579,8 +579,13 @@
 ====================================================== */
 const SUPA_URL = 'https://mivfthoxhfogcnoqgoyn.supabase.co';
 const SUPA_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1pdmZ0aG94aGZvZ2Nub3Fnb3luIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzk5MTgxNDEsImV4cCI6MjA5NTQ5NDE0MX0.pjyTV6jTFyxrl2nbO_xhoygEHsc_tq-kUCv2v31pu0c';
-const { createClient } = supabase;
-const sb = createClient(SUPA_URL, SUPA_KEY);
+let sb = null;
+try {
+  const { createClient } = window.supabase;
+  sb = createClient(SUPA_URL, SUPA_KEY);
+} catch(e) {
+  console.warn('Supabase não carregou:', e);
+}
 
 let dados = { produtos: [], bairros: [], whatsapp: '5598984156128', senha: 'eline2025', lojaAberta: true };
 
