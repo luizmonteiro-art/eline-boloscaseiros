@@ -713,6 +713,51 @@
     .taxa-info.visivel { display: block; }
     .taxa-info strong { color: var(--rosa-escuro); }
 
+    /* ===== FORMA DE PAGAMENTO ===== */
+    .pgto-label {
+      font-size: 13px;
+      font-weight: 700;
+      color: var(--marrom);
+      margin-bottom: 8px;
+      display: block;
+    }
+    .pgto-opcoes {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      margin-bottom: 0;
+    }
+    .pgto-btn {
+      flex: 1;
+      min-width: 90px;
+      padding: 12px 8px;
+      border-radius: var(--radius-sm);
+      border: 2px solid var(--bege);
+      background: var(--branco);
+      font-size: 13px;
+      font-weight: 700;
+      color: var(--marrom-medio);
+      text-align: center;
+      cursor: pointer;
+      transition: border-color 0.2s, background 0.2s, color 0.2s;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 4px;
+      line-height: 1.2;
+    }
+    .pgto-btn .pgto-icon { font-size: 22px; }
+    .pgto-btn.ativo {
+      border-color: var(--rosa-escuro);
+      background: var(--rosa-bg);
+      color: var(--rosa-escuro);
+    }
+    .troco-group {
+      display: none;
+      margin-top: 10px;
+    }
+    .troco-group.visivel { display: block; }
+
     /* Resumo pedido no checkout */
     .resumo-pedido {
       background: var(--rosa-bg);
@@ -1202,6 +1247,27 @@
       <label>Endereço / Referência</label>
       <input type="text" class="form-control" id="clienteEndereco" placeholder="Ex: Rua das Flores, 123" />
     </div>
+    <!-- Forma de pagamento -->
+    <div class="form-group">
+      <span class="pgto-label">Forma de pagamento <span class="obrig">*</span></span>
+      <div class="pgto-opcoes">
+        <button class="pgto-btn" id="pgtoCartao" onclick="selecionarPgto('cartao')">
+          <span class="pgto-icon">💳</span>Cartão<br><small style="font-weight:400;font-size:11px">máquina</small>
+        </button>
+        <button class="pgto-btn" id="pgtoPix" onclick="selecionarPgto('pix')">
+          <span class="pgto-icon">💠</span>PIX
+        </button>
+        <button class="pgto-btn" id="pgtoDinheiro" onclick="selecionarPgto('dinheiro')">
+          <span class="pgto-icon">💵</span>Dinheiro
+        </button>
+      </div>
+      <div class="troco-group" id="trocoGroup">
+        <label style="font-size:13px;font-weight:600;color:var(--marrom);display:block;margin-bottom:6px">Troco para quanto?</label>
+        <input type="number" class="form-control" id="trocoValor" placeholder="Ex: 50,00" min="0" step="0.50" />
+        <small style="color:var(--cinza-texto);font-size:12px;margin-top:4px;display:block">Deixe em branco se não precisar de troco</small>
+      </div>
+    </div>
+
     <div class="form-group">
       <label>Observações</label>
       <textarea class="form-control" id="clienteObs" placeholder="Ex: sem açúcar, mensagem na embalagem..."></textarea>
@@ -1393,8 +1459,13 @@
 ====================================================== */
 const SUPA_URL = 'https://mivfthoxhfogcnoqgoyn.supabase.co';
 const SUPA_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1pdmZ0aG94aGZvZ2Nub3Fnb3luIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzk5MTgxNDEsImV4cCI6MjA5NTQ5NDE0MX0.pjyTV6jTFyxrl2nbO_xhoygEHsc_tq-kUCv2v31pu0c';
-const { createClient } = supabase;
-const sb = createClient(SUPA_URL, SUPA_KEY);
+let sb = null;
+try {
+  const { createClient } = window.supabase;
+  sb = createClient(SUPA_URL, SUPA_KEY);
+} catch(e) {
+  console.warn('Supabase não carregou:', e);
+}
 
 let dados = { produtos: [], bairros: [], whatsapp: '5598984156128', lojaAberta: true, senha: 'eline2025', horario: '' };
 
@@ -1510,7 +1581,14 @@ const DADOS_PADRAO = {
 
 /* ======================================================
    STORAGE — agora via Supabase (veja carregarDados() acima)
+   salvarDados() mantida como stub para compatibilidade com
+   funções legadas do mini-admin embutido nesta página.
+   Toda escrita real é feita pelo admin.html via Supabase.
 ====================================================== */
+function salvarDados() {
+  // No-op: este arquivo é somente leitura.
+  // Use admin.html para alterar produtos, bairros e configurações.
+}
 
 /* ======================================================
    CARRINHO
@@ -1715,6 +1793,21 @@ document.getElementById('modalOverlay').addEventListener('click', (e) => {
 
 document.getElementById('btnCheckout').addEventListener('click', abrirCheckout);
 
+/* ======================================================
+   FORMA DE PAGAMENTO
+====================================================== */
+let formaPgto = ''; // 'cartao' | 'pix' | 'dinheiro'
+
+function selecionarPgto(forma) {
+  formaPgto = forma;
+  ['cartao','pix','dinheiro'].forEach(f => {
+    document.getElementById('pgto' + f.charAt(0).toUpperCase() + f.slice(1)).classList.toggle('ativo', f === forma);
+  });
+  const trocoGroup = document.getElementById('trocoGroup');
+  trocoGroup.classList.toggle('visivel', forma === 'dinheiro');
+  if (forma !== 'dinheiro') document.getElementById('trocoValor').value = '';
+}
+
 function confirmarPedido() {
   const nome = document.getElementById('clienteNome').value.trim();
   const tel = document.getElementById('clienteTel').value.trim();
@@ -1723,6 +1816,7 @@ function confirmarPedido() {
 
   if (!nome) { mostrarToast('Por favor, informe seu nome!', 'erro'); return; }
   if (!tel) { mostrarToast('Por favor, informe seu telefone!', 'erro'); return; }
+  if (!formaPgto) { mostrarToast('Por favor, selecione a forma de pagamento!', 'erro'); return; }
 
   let bairroNome = '';
   if (tipoEntrega === 'entrega') {
@@ -1743,6 +1837,10 @@ function confirmarPedido() {
   const taxa = tipoEntrega === 'entrega' ? taxaAtual : 0;
   const total = sub + taxa;
 
+  // Forma de pagamento
+  const pgtoLabels = { cartao: '💳 Cartão (máquina)', pix: '💠 PIX', dinheiro: '💵 Dinheiro' };
+  const trocoVal = document.getElementById('trocoValor').value.trim();
+
   let msg = `🎂 *Novo Pedido — Eline Bolos*\n`;
   msg += `━━━━━━━━━━━━━━━━━━\n`;
   msg += `👤 *Cliente:* ${nome}\n`;
@@ -1760,6 +1858,8 @@ function confirmarPedido() {
   }
   msg += `━━━━━━━━━━━━━━━━━━\n`;
   msg += `💰 *Total: ${formatarMoeda(total)}*\n`;
+  msg += `💳 *Pagamento:* ${pgtoLabels[formaPgto]}\n`;
+  if (formaPgto === 'dinheiro' && trocoVal) msg += `🔄 *Troco para:* R$ ${parseFloat(trocoVal).toFixed(2).replace('.', ',')}\n`;
   if (obs) msg += `📝 *Obs:* ${obs}\n`;
   msg += `━━━━━━━━━━━━━━━━━━\n`;
   msg += `_Pedido feito pelo site Eline Bolos_ 💕`;
@@ -1770,10 +1870,14 @@ function confirmarPedido() {
 
   // Limpar
   carrinho = [];
+  formaPgto = '';
   document.getElementById('clienteNome').value = '';
   document.getElementById('clienteTel').value = '';
   document.getElementById('clienteObs').value = '';
   document.getElementById('clienteEndereco').value = '';
+  document.getElementById('trocoValor').value = '';
+  ['pgtoCartao','pgtoPix','pgtoDinheiro'].forEach(id => document.getElementById(id).classList.remove('ativo'));
+  document.getElementById('trocoGroup').classList.remove('visivel');
   fecharCheckout();
   atualizarUI();
   mostrarToast('Pedido enviado! Obrigada 💕', 'sucesso');
