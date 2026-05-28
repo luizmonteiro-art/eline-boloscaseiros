@@ -354,7 +354,7 @@
 
   <header class="admin-header">
     <div class="admin-header-brand">
-      <img src="./logo.png" alt="Eline Bolos" class="logo-img" onerror="this.style.display='none';this.nextElementSibling.style.display='inline';" /><span class="logo" style="display:none">🎂</span>
+      <img src="./logotipo.png" alt="Eline Bolos" class="logo-img" onerror="this.style.display='none';this.nextElementSibling.style.display='inline';" /><span class="logo" style="display:none">🎂</span>
       <div>
         <h1>Eline Bolos — Admin</h1>
         <div class="sub">Painel de Gerenciamento</div>
@@ -706,7 +706,7 @@ async function carregarDados() {
   dados.produtos = (prods || []).map(normProd);
   dados.bairros  = (bairros || []).map(r => ({ id: r.id, nome: r.nome, taxa: parseFloat(r.taxa) }));
   dados.banners  = (banners || []).map(r => ({ id: r.id, texto: r.texto, imagem: r.imagem || '', ativo: r.ativo }));
-  if (config) { dados.whatsapp = config.whatsapp; dados.senha = config.senha; dados.lojaAberta = config.loja_aberta; }
+  if (config) { dados.whatsapp = config.whatsapp; dados.senha = config.senha; dados.lojaAberta = config.loja_aberta; dados.horario = config.horario || ''; }
 }
 
 /* (DADOS_PADRAO removido — dados vêm do Supabase) */
@@ -716,23 +716,66 @@ async function carregarDados() {
 ====================================================== */
 
 /* ======================================================
+   SEGURANÇA — Bloqueio de tentativas + Timeout de sessão
+====================================================== */
+let _tentativas = 0;
+let _bloqueadoAte = 0;
+let _sessionTimer = null;
+const SESSION_TIMEOUT = 60 * 60 * 1000; // 60 minutos de inatividade
+
+function iniciarSessionTimer() {
+  clearTimeout(_sessionTimer);
+  _sessionTimer = setTimeout(() => {
+    toast('⏰ Sessão encerrada por inatividade. Faça login novamente.', 'erro');
+    setTimeout(sair, 2500);
+  }, SESSION_TIMEOUT);
+}
+
+function resetarSessionTimer() {
+  if (document.getElementById('adminPage').classList.contains('visivel')) {
+    iniciarSessionTimer();
+  }
+}
+
+/* ======================================================
    LOGIN
 ====================================================== */
 function entrar() {
+  const agora = Date.now();
+  if (agora < _bloqueadoAte) {
+    const resta = Math.ceil((_bloqueadoAte - agora) / 1000);
+    document.getElementById('loginErro').textContent = `🔒 Acesso bloqueado. Aguarde ${resta}s.`;
+    document.getElementById('loginErro').style.display = 'block';
+    return;
+  }
   const senha = document.getElementById('senhaInput').value;
   if (senha === dados.senha) {
+    _tentativas = 0;
     document.getElementById('loginPage').style.display = 'none';
     document.getElementById('adminPage').classList.add('visivel');
     document.getElementById('senhaInput').value = '';
     document.getElementById('loginErro').style.display = 'none';
+    iniciarSessionTimer();
+    if (dados.senha === 'eline2025') {
+      setTimeout(() => toast('⚠️ Você está usando a senha padrão! Altere em Configurações → Segurança.', 'erro'), 900);
+    }
     renderTudo();
   } else {
+    _tentativas++;
+    if (_tentativas >= 5) {
+      _bloqueadoAte = Date.now() + 30000;
+      _tentativas = 0;
+      document.getElementById('loginErro').textContent = '🔒 Muitas tentativas. Acesso bloqueado por 30 segundos.';
+    } else {
+      document.getElementById('loginErro').textContent = `❌ Senha incorreta. Tentativa ${_tentativas}/5.`;
+    }
     document.getElementById('loginErro').style.display = 'block';
     document.getElementById('senhaInput').value = '';
     document.getElementById('senhaInput').focus();
   }
 }
 function sair() {
+  clearTimeout(_sessionTimer);
   document.getElementById('adminPage').classList.remove('visivel');
   document.getElementById('loginPage').style.display = 'flex';
 }
@@ -1008,7 +1051,8 @@ async function toggleLojaStatus() {
 
 async function salvarConfiguracoes() {
   dados.whatsapp = document.getElementById('cfgWhatsapp').value.trim() || '5598984156128';
-  const { error } = await sb.from('configuracoes').update({ whatsapp: dados.whatsapp, loja_aberta: dados.lojaAberta }).eq('id', 1);
+  dados.horario  = document.getElementById('cfgHorario').value.trim();
+  const { error } = await sb.from('configuracoes').update({ whatsapp: dados.whatsapp, loja_aberta: dados.lojaAberta, horario: dados.horario }).eq('id', 1);
   if (error) { toast('Erro ao salvar!', 'erro'); return; }
   toast('✅ Configurações salvas!', 'sucesso');
 }
@@ -1364,7 +1408,7 @@ async function toggleCardapioDia(prodId) {
 let flyerDataUrl = null;
 
 async function gerarFlyer() {
-  const prodsDia = dados.produtos.filter(p => p.cardapio_dia && p.disponivel);
+  const prodsDia = dados.produtos.filter(p => p.cardapio_dia);
   if (prodsDia.length === 0) {
     toast('Selecione pelo menos 1 produto do dia!', 'erro'); return;
   }
@@ -1459,11 +1503,6 @@ async function gerarFlyer() {
     // Borda lateral rosa
     ctx.fillStyle = '#E8809A';
     ctx.fillRect(x, y, 8, CARD_H);
-    // arredondar a borda esquerda
-    ctx.beginPath();
-    ctx.arc(x + 8, y + 20, 20, 0, Math.PI * 2);
-    ctx.fillStyle = '#FFFFFF';
-    ctx.fill();
 
     // Foto ou emoji
     if (imgObjs[i]) {
@@ -1616,6 +1655,13 @@ async function init() {
 }
 
 init();
+
+/* ======================================================
+   RESET timer de sessão em qualquer interação
+====================================================== */
+document.addEventListener('click', resetarSessionTimer);
+document.addEventListener('touchstart', resetarSessionTimer, { passive: true });
+document.addEventListener('keydown', resetarSessionTimer);
 
 /* ======================================================
    FIX iOS: viewport jump ao fechar teclado

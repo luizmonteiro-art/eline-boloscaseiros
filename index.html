@@ -1170,7 +1170,9 @@
   <!-- HEADER -->
   <header class="header">
     <a class="header-brand" href="#">
-      <div class="header-logo" id="headerLogo">🎂</div>
+      <div class="header-logo" id="headerLogo">
+        <img src="./logotipo.png" alt="Eline Bolos" onerror="this.parentElement.innerHTML='🎂'" />
+      </div>
       <div class="header-title">
         <span class="nome">Eline Bolos</span>
         <span class="sub">Caseiros e Confeitados</span>
@@ -2332,7 +2334,10 @@ function iniciarRealtime() {
       const { data } = await sb.from('produtos').select('*').order('id');
       dados.produtos = (data || []).map(r => ({
         id: r.id, nome: r.nome, categoria: r.categoria, preco: parseFloat(r.preco),
-        emoji: r.emoji || '🎂', desc: r.descricao || '', disponivel: r.disponivel, img: r.img || ''
+        emoji: r.emoji || '🎂', desc: r.descricao || '', disponivel: r.disponivel, img: r.img || '',
+        cardapio_dia: r.cardapio_dia || false,
+        em_promocao: r.em_promocao || false,
+        preco_promo: r.preco_promo ? parseFloat(r.preco_promo) : null
       }));
       renderCategorias();
       renderProdutos();
