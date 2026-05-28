@@ -1360,158 +1360,186 @@ async function gerarFlyer() {
   if (prodsDia.length === 0) {
     toast('Selecione pelo menos 1 produto do dia!', 'erro'); return;
   }
-
   toast('⏳ Gerando flyer...', '');
 
-  const canvas = document.getElementById('flyerCanvas');
-  const ctx = canvas.getContext('2d');
-  const W = 1080, H = Math.max(1080, 420 + prodsDia.length * 130);
-  canvas.width = W; canvas.height = H;
-
-  // Fundo gradiente
-  const grad = ctx.createLinearGradient(0, 0, W, H);
-  grad.addColorStop(0, '#FEF0F4');
-  grad.addColorStop(1, '#F0E0C0');
-  ctx.fillStyle = grad;
-  ctx.fillRect(0, 0, W, H);
-
-  // Decoração topo
-  ctx.fillStyle = '#E8809A';
-  ctx.globalAlpha = 0.15;
-  ctx.beginPath(); ctx.arc(W - 80, -60, 180, 0, Math.PI * 2); ctx.fill();
-  ctx.beginPath(); ctx.arc(60, H - 60, 140, 0, Math.PI * 2); ctx.fill();
-  ctx.globalAlpha = 1;
-
-  // Faixa topo
-  ctx.fillStyle = '#4A2418';
-  ctx.fillRect(0, 0, W, 120);
-
-  // Título
-  ctx.fillStyle = '#F9D5DF';
-  ctx.font = 'bold 52px serif';
-  ctx.textAlign = 'center';
-  ctx.fillText('🎂 Eline Bolos Caseiros', W / 2, 58);
-  ctx.font = '28px sans-serif';
-  ctx.fillStyle = '#D9C4A0';
-  ctx.fillText('Caseiros e Confeitados • Santa Inês – MA', W / 2, 100);
-
-  // Subtítulo cardápio do dia
-  ctx.fillStyle = '#D4607A';
-  ctx.font = 'bold 44px sans-serif';
-  ctx.textAlign = 'center';
-  ctx.fillText('📅 Cardápio do Dia', W / 2, 185);
-
-  // Data
-  const hoje = new Date().toLocaleDateString('pt-BR', { weekday: 'long', day: 'numeric', month: 'long' });
-  ctx.fillStyle = '#7B4A2D';
-  ctx.font = '28px sans-serif';
-  ctx.fillText(hoje.charAt(0).toUpperCase() + hoje.slice(1), W / 2, 225);
-
-  // Linha separadora
-  ctx.strokeStyle = '#E8809A';
-  ctx.lineWidth = 3;
-  ctx.beginPath(); ctx.moveTo(80, 248); ctx.lineTo(W - 80, 248); ctx.stroke();
-
-  // Carregar imagens dos produtos
-  const imgPromises = prodsDia.map(p => new Promise(resolve => {
+  // ── 1. Carregar imagens ANTES de mexer no canvas ──
+  const imgObjs = await Promise.all(prodsDia.map(p => new Promise(resolve => {
     if (!p.img) { resolve(null); return; }
     const img = new Image();
-    img.onload = () => resolve(img);
+    img.onload  = () => resolve(img);
     img.onerror = () => resolve(null);
     img.src = p.img;
-  }));
-  const imgs = await Promise.all(imgPromises);
+  })));
 
-  // Desenhar produtos
-  let y = 278;
+  // ── 2. Calcular altura total ANTES de setar canvas ──
+  const W        = 1080;
+  const HEADER_H = 220;   // logotipo + nome + data
+  const CARD_H   = 160;   // altura de cada card de produto
+  const CARD_GAP = 20;
+  const FOOTER_H = 150;   // WhatsApp + site
+  const PAD      = 40;    // espaço entre header e produtos e rodapé
+  const H = HEADER_H + PAD + prodsDia.length * (CARD_H + CARD_GAP) + PAD + FOOTER_H;
+
+  // ── 3. Definir dimensões e ENTÃO desenhar ──
+  const canvas = document.getElementById('flyerCanvas');
+  canvas.width  = W;
+  canvas.height = H;
+  const ctx = canvas.getContext('2d');
+
+  // Fundo branco puro
+  ctx.fillStyle = '#FFFFFF';
+  ctx.fillRect(0, 0, W, H);
+
+  // ── HEADER ──
+  // Faixa superior marrom
+  ctx.fillStyle = '#4A2418';
+  ctx.fillRect(0, 0, W, HEADER_H);
+
+  // Círculos decorativos no header
+  ctx.globalAlpha = 0.12;
+  ctx.fillStyle = '#E8809A';
+  ctx.beginPath(); ctx.arc(W - 60, 30, 160, 0, Math.PI * 2); ctx.fill();
+  ctx.beginPath(); ctx.arc(80, HEADER_H + 10, 100, 0, Math.PI * 2); ctx.fill();
+  ctx.globalAlpha = 1;
+
+  // Emoji bolo
+  ctx.font = '64px serif';
+  ctx.textAlign = 'center';
+  ctx.fillText('🎂', W / 2, 78);
+
+  // Nome da empresa
+  ctx.fillStyle = '#F9D5DF';
+  ctx.font = 'bold 48px Georgia, serif';
+  ctx.textAlign = 'center';
+  ctx.fillText('Eline Bolos Caseiros', W / 2, 136);
+
+  ctx.fillStyle = '#D9C4A0';
+  ctx.font = '26px Arial, sans-serif';
+  ctx.fillText('e Confeitados  •  Santa Inês – MA', W / 2, 172);
+
+  // Faixa rosa com "Cardápio do Dia"
+  ctx.fillStyle = '#D4607A';
+  ctx.fillRect(0, HEADER_H, W, 56);
+  ctx.fillStyle = '#FFFFFF';
+  ctx.font = 'bold 32px Arial, sans-serif';
+  ctx.textAlign = 'center';
+  const hoje = new Date().toLocaleDateString('pt-BR', { weekday: 'long', day: 'numeric', month: 'long' });
+  const hojeStr = hoje.charAt(0).toUpperCase() + hoje.slice(1);
+  ctx.fillText(`📅 Cardápio do Dia  —  ${hojeStr}`, W / 2, HEADER_H + 36);
+
+  // ── PRODUTOS ──
+  let y = HEADER_H + 56 + PAD;
+
   prodsDia.forEach((p, i) => {
-    const cardH = 120;
-    const cardPad = 20;
+    const x      = 60;
+    const cardW  = W - 120;
+    const imgSz  = CARD_H - 20;  // 140px
+    const imgX   = x + 10;
+    const imgY   = y + 10;
+    const textX  = imgX + imgSz + 24;
+    const textW  = cardW - imgSz - 44;
 
-    // Card fundo
-    ctx.fillStyle = 'rgba(255,255,255,0.85)';
-    roundRect(ctx, 60, y, W - 120, cardH, 16);
+    // Card branco com borda rosa suave
+    ctx.fillStyle = '#FFFFFF';
+    ctx.shadowColor = 'rgba(74,36,24,0.12)';
+    ctx.shadowBlur  = 16;
+    ctx.shadowOffsetY = 4;
+    roundRect(ctx, x, y, cardW, CARD_H, 20);
     ctx.fill();
+    ctx.shadowBlur = 0; ctx.shadowOffsetY = 0;
 
-    // Sombra leve
-    ctx.shadowColor = 'rgba(74,36,24,0.10)';
-    ctx.shadowBlur = 12;
-    ctx.fillStyle = 'rgba(255,255,255,0.85)';
-    roundRect(ctx, 60, y, W - 120, cardH, 16);
+    // Borda lateral rosa
+    ctx.fillStyle = '#E8809A';
+    ctx.fillRect(x, y, 8, CARD_H);
+    // arredondar a borda esquerda
+    ctx.beginPath();
+    ctx.arc(x + 8, y + 20, 20, 0, Math.PI * 2);
+    ctx.fillStyle = '#FFFFFF';
     ctx.fill();
-    ctx.shadowBlur = 0;
 
     // Foto ou emoji
-    const imgSize = cardH - 20;
-    const imgX = 80, imgY = y + 10;
-    if (imgs[i]) {
+    if (imgObjs[i]) {
       ctx.save();
-      roundRect(ctx, imgX, imgY, imgSize, imgSize, 12);
+      roundRect(ctx, imgX, imgY, imgSz, imgSz, 14);
       ctx.clip();
-      ctx.drawImage(imgs[i], imgX, imgY, imgSize, imgSize);
+      ctx.drawImage(imgObjs[i], imgX, imgY, imgSz, imgSz);
       ctx.restore();
     } else {
-      ctx.fillStyle = '#F9D5DF';
-      roundRect(ctx, imgX, imgY, imgSize, imgSize, 12);
+      ctx.fillStyle = '#FEF0F4';
+      roundRect(ctx, imgX, imgY, imgSz, imgSz, 14);
       ctx.fill();
-      ctx.font = `${imgSize * 0.55}px serif`;
+      ctx.font = `${imgSz * 0.52}px serif`;
       ctx.textAlign = 'center';
-      ctx.fillText(p.emoji || '🎂', imgX + imgSize / 2, imgY + imgSize * 0.68);
+      ctx.fillText(p.emoji || '🎂', imgX + imgSz / 2, imgY + imgSz * 0.66);
     }
 
-    // Nome
+    // Nome do produto
     ctx.fillStyle = '#4A2418';
-    ctx.font = 'bold 34px sans-serif';
+    ctx.font = 'bold 36px Arial, sans-serif';
     ctx.textAlign = 'left';
-    const nomeX = imgX + imgSize + 24;
-    ctx.fillText(p.nome, nomeX, y + 50);
+    // Truncar nome longo
+    let nome = p.nome;
+    while (ctx.measureText(nome).width > textW && nome.length > 5) nome = nome.slice(0, -1);
+    if (nome !== p.nome) nome += '…';
+    ctx.fillText(nome, textX, y + 52);
 
     // Descrição curta
     if (p.desc) {
       ctx.fillStyle = '#7B4A2D';
-      ctx.font = '22px sans-serif';
-      const descCurta = p.desc.substring(0, 45) + (p.desc.length > 45 ? '...' : '');
-      ctx.fillText(descCurta, nomeX, y + 82);
+      ctx.font = '22px Arial, sans-serif';
+      let desc = p.desc.split('•')[0].trim();
+      while (ctx.measureText(desc).width > textW && desc.length > 5) desc = desc.slice(0, -1);
+      if (desc !== p.desc.split('•')[0].trim()) desc += '…';
+      ctx.fillText(desc, textX, y + 86);
     }
 
     // Preço
-    const precoX = W - 80;
     if (p.em_promocao && p.preco_promo) {
-      ctx.fillStyle = '#999';
-      ctx.font = '22px sans-serif';
+      ctx.fillStyle = '#AAA';
+      ctx.font = '24px Arial, sans-serif';
       ctx.textAlign = 'right';
-      ctx.fillText(fmt(p.preco), precoX, y + 55);
+      ctx.fillText(fmt(p.preco), W - 80, y + 60);
+      // linha riscada
+      const tw = ctx.measureText(fmt(p.preco)).width;
+      ctx.strokeStyle = '#AAA'; ctx.lineWidth = 2;
+      ctx.beginPath(); ctx.moveTo(W - 80 - tw, y + 55); ctx.lineTo(W - 80, y + 55); ctx.stroke();
       ctx.fillStyle = '#D4607A';
-      ctx.font = 'bold 34px sans-serif';
-      ctx.fillText(fmt(p.preco_promo), precoX, y + 95);
+      ctx.font = 'bold 40px Arial, sans-serif';
+      ctx.fillText(fmt(p.preco_promo), W - 80, y + 108);
     } else {
       ctx.fillStyle = '#D4607A';
-      ctx.font = 'bold 38px sans-serif';
+      ctx.font = 'bold 42px Arial, sans-serif';
       ctx.textAlign = 'right';
-      ctx.fillText(fmt(p.preco), precoX, y + 78);
+      ctx.fillText(fmt(p.preco), W - 80, y + 90);
     }
 
-    y += cardH + cardPad;
+    y += CARD_H + CARD_GAP;
   });
 
-  // Rodapé
-  y += 20;
+  // ── RODAPÉ ──
+  y += PAD - CARD_GAP;
   ctx.fillStyle = '#4A2418';
-  ctx.fillRect(0, y, W, 100);
+  ctx.fillRect(0, y, W, FOOTER_H);
+
+  // Linha rosa
+  ctx.fillStyle = '#D4607A';
+  ctx.fillRect(0, y, W, 6);
+
   ctx.fillStyle = '#F9D5DF';
-  ctx.font = 'bold 30px sans-serif';
+  ctx.font = 'bold 34px Arial, sans-serif';
   ctx.textAlign = 'center';
-  ctx.fillText('📲 Peça pelo site ou WhatsApp!', W / 2, y + 42);
+  ctx.fillText('📲 Faça seu pedido pelo WhatsApp!', W / 2, y + 56);
+
   ctx.fillStyle = '#D9C4A0';
-  ctx.font = '22px sans-serif';
-  ctx.fillText('luizmonteiro-art.github.io/eline-boloscaseiros', W / 2, y + 78);
+  ctx.font = '26px Arial, sans-serif';
+  ctx.fillText(`(98) 98415-6128  •  ${dados.whatsapp ? dados.whatsapp.replace('55','') : '98 98415-6128'}`, W / 2, y + 96);
 
-  // Ajustar altura real
-  canvas.height = y + 100;
+  ctx.fillStyle = '#7B4A2D';
+  ctx.font = '20px Arial, sans-serif';
+  ctx.fillText('luizmonteiro-art.github.io/eline-boloscaseiros', W / 2, y + 130);
 
-  // Rederizar de novo com altura correta
-  flyerDataUrl = canvas.toDataURL('image/jpeg', 0.92);
-
+  // ── Salvar ──
+  flyerDataUrl = canvas.toDataURL('image/jpeg', 0.93);
   document.getElementById('flyerPreview').style.display = 'block';
   document.getElementById('btnBaixarFlyer').style.display = 'inline-flex';
   document.getElementById('btnCompartilharFlyer').style.display = 'inline-flex';
