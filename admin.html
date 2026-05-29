@@ -391,6 +391,111 @@
     }
     @keyframes slideIn { from { transform: translateX(120%); } to { transform: translateX(0); } }
 
+    /* ===== CLIENTES ===== */
+    .cliente-card {
+      background: var(--branco);
+      border: 1px solid var(--bege-escuro);
+      border-radius: var(--radius-sm);
+      padding: 14px 16px;
+      margin-bottom: 10px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+    .cliente-nome { font-weight: 700; color: var(--marrom); font-size: 15px; }
+    .cliente-tel { font-size: 12px; color: var(--cinza-texto); }
+    .cliente-stats { display: flex; gap: 16px; flex-wrap: wrap; }
+    .cliente-stat { text-align: center; }
+    .cliente-stat .val { font-weight: 800; font-size: 16px; color: var(--rosa-escuro); }
+    .cliente-stat .lbl { font-size: 11px; color: var(--cinza-texto); }
+    .cliente-ultimo { font-size: 11px; color: var(--cinza-texto); margin-top: 2px; }
+    .btn-wpp-cliente {
+      background: #25D366;
+      color: white;
+      font-size: 12px;
+      font-weight: 700;
+      padding: 8px 14px;
+      border-radius: 8px;
+      text-decoration: none;
+      white-space: nowrap;
+    }
+
+    /* ===== CUPONS ===== */
+    .cupom-card {
+      background: var(--branco);
+      border: 1px solid var(--bege-escuro);
+      border-radius: var(--radius-sm);
+      padding: 14px 16px;
+      margin-bottom: 10px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+    .cupom-card.inativo { opacity: 0.5; }
+    .cupom-codigo-badge {
+      font-family: monospace;
+      font-size: 16px;
+      font-weight: 800;
+      background: var(--rosa-bg);
+      color: var(--rosa-escuro);
+      padding: 4px 12px;
+      border-radius: 8px;
+      letter-spacing: 2px;
+    }
+    .cupom-detalhe { font-size: 12px; color: var(--cinza-texto); margin-top: 4px; }
+    .cupom-acoes { display: flex; gap: 8px; }
+    .btn-toggle-cupom {
+      font-size: 12px;
+      font-weight: 700;
+      padding: 7px 14px;
+      border-radius: 8px;
+      border: 2px solid var(--bege-escuro);
+      background: none;
+      cursor: pointer;
+      color: var(--marrom);
+      transition: all 0.2s;
+    }
+    .btn-toggle-cupom:hover { border-color: var(--rosa); color: var(--rosa); }
+    .btn-del-cupom {
+      font-size: 12px;
+      font-weight: 700;
+      padding: 7px 14px;
+      border-radius: 8px;
+      border: 2px solid #e74c3c;
+      background: none;
+      cursor: pointer;
+      color: #e74c3c;
+      transition: all 0.2s;
+    }
+    .btn-del-cupom:hover { background: #e74c3c; color: white; }
+
+    /* ===== AGENDA ===== */
+    .agenda-item {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      padding: 12px 0;
+      border-bottom: 1px dashed var(--bege-escuro);
+    }
+    .agenda-item:last-child { border-bottom: none; }
+    .agenda-data {
+      min-width: 56px;
+      text-align: center;
+      background: var(--rosa-escuro);
+      color: white;
+      border-radius: 10px;
+      padding: 6px 4px;
+    }
+    .agenda-data .dia { font-size: 20px; font-weight: 800; line-height: 1; }
+    .agenda-data .mes { font-size: 10px; font-weight: 600; text-transform: uppercase; }
+    .agenda-info { flex: 1; }
+    .agenda-cliente { font-weight: 700; font-size: 14px; color: var(--marrom); }
+    .agenda-itens { font-size: 12px; color: var(--cinza-texto); margin-top: 2px; }
+
     /* ===== IMPRESSÃO ===== */
     @media print {
       .login-page, .admin-header, .admin-tabs,
@@ -466,6 +571,8 @@
     <button class="admin-tab" onclick="abrirTab(this,'tabPromocoes')">🔥 Promoções</button>
     <button class="admin-tab" onclick="abrirTab(this,'tabCardapioDia')">📅 Cardápio do Dia</button>
     <button class="admin-tab" id="tabBtnPedidos" onclick="abrirTab(this,'tabPedidos');carregarPedidosTab()">📦 Pedidos</button>
+    <button class="admin-tab" onclick="abrirTab(this,'tabClientes');carregarClientesTab()">👥 Clientes</button>
+    <button class="admin-tab" onclick="abrirTab(this,'tabCupons');carregarCuponsTab()">🎁 Cupons</button>
     <button class="admin-tab" onclick="abrirTab(this,'tabConfig')">⚙️ Configurações</button>
   </div>
 
@@ -804,6 +911,12 @@
         <div id="rankingProdutos"></div>
       </div>
 
+      <!-- Agenda de encomendas -->
+      <div class="admin-card">
+        <h3>📅 Agenda de Encomendas <small style="font-size:12px;font-weight:400;color:var(--cinza-texto)">— próximas datas solicitadas</small></h3>
+        <div id="agendaEncomendas"><p style="text-align:center;color:var(--cinza-texto);padding:20px">Carregando agenda...</p></div>
+      </div>
+
       <!-- Lista pedidos -->
       <div class="admin-card">
         <h3>📋 Pedidos <span id="contPedidos" style="font-size:13px;font-weight:600;color:var(--cinza-texto)"></span></h3>
@@ -811,6 +924,59 @@
       </div>
 
     </div><!-- /tabPedidos -->
+
+    <!-- ================================================ -->
+    <!-- TAB: CLIENTES                                    -->
+    <!-- ================================================ -->
+    <div class="admin-section" id="tabClientes">
+      <div class="admin-card">
+        <h3>👥 Clientes</h3>
+        <div id="clientesResumo" style="display:flex;gap:12px;flex-wrap:wrap;margin-bottom:20px"></div>
+        <input type="text" id="clienteBusca" class="form-control" placeholder="🔍 Buscar por nome ou telefone..." oninput="filtrarClientes()" style="margin-bottom:16px" />
+        <div id="listaClientes"><p style="text-align:center;color:var(--cinza-texto);padding:30px">Carregando clientes...</p></div>
+      </div>
+    </div>
+
+    <!-- ================================================ -->
+    <!-- TAB: CUPONS                                      -->
+    <!-- ================================================ -->
+    <div class="admin-section" id="tabCupons">
+      <div class="admin-card">
+        <h3>🎁 Cupons de Desconto</h3>
+        <!-- Formulário novo cupom -->
+        <div style="background:var(--rosa-bg);border-radius:var(--radius-sm);padding:16px;margin-bottom:20px">
+          <h4 style="margin-bottom:12px;color:var(--marrom)">➕ Novo Cupom</h4>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+            <div>
+              <label style="font-size:12px;font-weight:700;color:var(--marrom);display:block;margin-bottom:4px">Código</label>
+              <input type="text" id="cupomNovoCode" class="form-control" placeholder="EX: ELINE10" style="text-transform:uppercase" oninput="this.value=this.value.toUpperCase()" />
+            </div>
+            <div>
+              <label style="font-size:12px;font-weight:700;color:var(--marrom);display:block;margin-bottom:4px">Tipo</label>
+              <select id="cupomNovoTipo" class="form-control">
+                <option value="percentual">% Percentual</option>
+                <option value="fixo">R$ Valor fixo</option>
+              </select>
+            </div>
+            <div>
+              <label style="font-size:12px;font-weight:700;color:var(--marrom);display:block;margin-bottom:4px">Valor</label>
+              <input type="number" id="cupomNovoValor" class="form-control" placeholder="Ex: 10" min="0" step="0.01" />
+            </div>
+            <div>
+              <label style="font-size:12px;font-weight:700;color:var(--marrom);display:block;margin-bottom:4px">Uso máximo (0 = ilimitado)</label>
+              <input type="number" id="cupomNovoUsoMax" class="form-control" placeholder="0" min="0" value="0" />
+            </div>
+            <div>
+              <label style="font-size:12px;font-weight:700;color:var(--marrom);display:block;margin-bottom:4px">Validade (opcional)</label>
+              <input type="date" id="cupomNovoValidade" class="form-control" />
+            </div>
+          </div>
+          <button class="btn-primario" style="margin-top:12px;width:100%" onclick="criarCupom()">Criar Cupom</button>
+        </div>
+        <!-- Lista de cupons -->
+        <div id="listaCupons"><p style="text-align:center;color:var(--cinza-texto);padding:20px">Carregando cupons...</p></div>
+      </div>
+    </div>
 
   </div><!-- /admin-content -->
 </div><!-- /adminPage -->
@@ -1868,6 +2034,7 @@ function renderPedidosTab() {
   renderCardsPedidos();
   renderChartPedidos();
   renderRankingProdutos();
+  renderAgendaEncomendas();
   renderListaPedidos();
 }
 
@@ -2018,6 +2185,185 @@ async function alterarStatusPedido(id, novoStatus) {
 function exportarPDF() {
   window.print();
   toast('📥 Imprima ou salve como PDF no seu navegador!', '');
+}
+
+/* ======================================================
+   AGENDA DE ENCOMENDAS
+====================================================== */
+async function renderAgendaEncomendas() {
+  const el = document.getElementById('agendaEncomendas');
+  if (!el || !sb) return;
+  const hoje = new Date().toISOString().split('T')[0];
+  const { data } = await sb.from('pedidos')
+    .select('id,cliente_nome,cliente_tel,itens,data_entrega,total,status')
+    .gte('data_entrega', hoje)
+    .neq('status', 'cancelado')
+    .order('data_entrega', { ascending: true })
+    .limit(20);
+
+  if (!data || data.length === 0) {
+    el.innerHTML = '<p style="text-align:center;color:var(--cinza-texto);padding:20px">Nenhuma encomenda agendada 🎉</p>';
+    return;
+  }
+  const meses = ['Jan','Fev','Mar','Abr','Mai','Jun','Jul','Ago','Set','Out','Nov','Dez'];
+  el.innerHTML = data.map(p => {
+    const dt = new Date(p.data_entrega + 'T12:00:00');
+    const itensTexto = (p.itens || []).map(i => `${i.qtd}x ${i.nome}`).join(' • ');
+    return `
+      <div class="agenda-item">
+        <div class="agenda-data">
+          <div class="dia">${String(dt.getDate()).padStart(2,'0')}</div>
+          <div class="mes">${meses[dt.getMonth()]}</div>
+        </div>
+        <div class="agenda-info">
+          <div class="agenda-cliente">👤 ${p.cliente_nome}${p.cliente_tel ? ' · ' + p.cliente_tel : ''}</div>
+          <div class="agenda-itens">${itensTexto} · ${fmt(parseFloat(p.total||0))}</div>
+        </div>
+        <span class="pedido-status status-${p.status||'novo'}">${STATUS_LABELS[p.status||'novo']}</span>
+      </div>`;
+  }).join('');
+}
+
+/* ======================================================
+   CLIENTES
+====================================================== */
+let todosClientes = [];
+
+async function carregarClientesTab() {
+  const el = document.getElementById('listaClientes');
+  if (!sb) return;
+  el.innerHTML = '<p style="text-align:center;color:var(--cinza-texto);padding:30px">Carregando...</p>';
+
+  const { data } = await sb.from('pedidos')
+    .select('cliente_nome,cliente_tel,total,criado_em,status')
+    .order('criado_em', { ascending: false });
+
+  if (!data || data.length === 0) {
+    el.innerHTML = '<p style="text-align:center;color:var(--cinza-texto);padding:30px">Nenhum pedido registrado ainda.</p>';
+    return;
+  }
+
+  // Agrupar por telefone (identificador único do cliente)
+  const mapa = {};
+  data.forEach(p => {
+    const key = p.cliente_tel || p.cliente_nome;
+    if (!mapa[key]) {
+      mapa[key] = { nome: p.cliente_nome, tel: p.cliente_tel, pedidos: 0, gasto: 0, ultimo: p.criado_em, cancelados: 0 };
+    }
+    mapa[key].pedidos++;
+    if (p.status !== 'cancelado') mapa[key].gasto += parseFloat(p.total || 0);
+    else mapa[key].cancelados++;
+    if (p.criado_em > mapa[key].ultimo) mapa[key].ultimo = p.criado_em;
+  });
+
+  todosClientes = Object.values(mapa).sort((a,b) => b.gasto - a.gasto);
+
+  // Resumo
+  document.getElementById('clientesResumo').innerHTML = `
+    <div class="dash-card"><div class="num">${todosClientes.length}</div><div class="label">Clientes únicos</div></div>
+    <div class="dash-card"><div class="num">${data.length}</div><div class="label">Total de pedidos</div></div>
+    <div class="dash-card"><div class="num" style="font-size:16px">${fmt(todosClientes.reduce((s,c)=>s+c.gasto,0))}</div><div class="label">Receita total</div></div>
+  `;
+
+  renderListaClientes(todosClientes);
+}
+
+function renderListaClientes(lista) {
+  const el = document.getElementById('listaClientes');
+  if (lista.length === 0) { el.innerHTML = '<p style="text-align:center;color:var(--cinza-texto);padding:20px">Nenhum resultado.</p>'; return; }
+  el.innerHTML = lista.map(c => {
+    const ultimo = new Date(c.ultimo).toLocaleDateString('pt-BR', { day:'2-digit', month:'2-digit', year:'2-digit' });
+    const wppLink = c.tel ? `https://wa.me/55${c.tel.replace(/\D/g,'')}` : null;
+    return `
+      <div class="cliente-card">
+        <div>
+          <div class="cliente-nome">👤 ${c.nome}</div>
+          ${c.tel ? `<div class="cliente-tel">📱 ${c.tel}</div>` : ''}
+          <div class="cliente-ultimo">Último pedido: ${ultimo}</div>
+        </div>
+        <div class="cliente-stats">
+          <div class="cliente-stat"><div class="val">${c.pedidos}</div><div class="lbl">Pedidos</div></div>
+          <div class="cliente-stat"><div class="val">${fmt(c.gasto)}</div><div class="lbl">Gasto total</div></div>
+          <div class="cliente-stat"><div class="val">${fmt(c.gasto / Math.max(c.pedidos - c.cancelados, 1))}</div><div class="lbl">Ticket médio</div></div>
+        </div>
+        ${wppLink ? `<a href="${wppLink}" target="_blank" class="btn-wpp-cliente">💬 WhatsApp</a>` : ''}
+      </div>`;
+  }).join('');
+}
+
+function filtrarClientes() {
+  const q = document.getElementById('clienteBusca').value.toLowerCase();
+  if (!q) { renderListaClientes(todosClientes); return; }
+  renderListaClientes(todosClientes.filter(c =>
+    c.nome.toLowerCase().includes(q) || (c.tel && c.tel.includes(q))
+  ));
+}
+
+/* ======================================================
+   CUPONS
+====================================================== */
+async function carregarCuponsTab() {
+  if (!sb) return;
+  const { data } = await sb.from('cupons').select('*').order('criado_em', { ascending: false });
+  renderListaCupons(data || []);
+}
+
+function renderListaCupons(lista) {
+  const el = document.getElementById('listaCupons');
+  if (lista.length === 0) {
+    el.innerHTML = '<p style="text-align:center;color:var(--cinza-texto);padding:20px">Nenhum cupom criado ainda.</p>';
+    return;
+  }
+  el.innerHTML = lista.map(c => {
+    const descLabel = c.tipo === 'percentual' ? `${c.valor}% de desconto` : `R$ ${parseFloat(c.valor).toFixed(2).replace('.',',')} de desconto`;
+    const validade = c.validade ? `Válido até ${new Date(c.validade+'T12:00:00').toLocaleDateString('pt-BR')}` : 'Sem validade';
+    const uso = c.uso_maximo > 0 ? `${c.usos}/${c.uso_maximo} usos` : `${c.usos} usos`;
+    return `
+      <div class="cupom-card ${c.ativo ? '' : 'inativo'}">
+        <div>
+          <div class="cupom-codigo-badge">${c.codigo}</div>
+          <div class="cupom-detalhe">${descLabel} · ${uso} · ${validade}</div>
+        </div>
+        <div class="cupom-acoes">
+          <button class="btn-toggle-cupom" onclick="toggleCupom(${c.id}, ${c.ativo})">${c.ativo ? '⏸ Pausar' : '▶ Ativar'}</button>
+          <button class="btn-del-cupom" onclick="deletarCupom(${c.id})">🗑 Apagar</button>
+        </div>
+      </div>`;
+  }).join('');
+}
+
+async function criarCupom() {
+  const codigo = document.getElementById('cupomNovoCode').value.trim().toUpperCase();
+  const tipo = document.getElementById('cupomNovoTipo').value;
+  const valor = parseFloat(document.getElementById('cupomNovoValor').value);
+  const uso_maximo = parseInt(document.getElementById('cupomNovoUsoMax').value) || 0;
+  const validade = document.getElementById('cupomNovoValidade').value || null;
+
+  if (!codigo) { toast('Digite um código para o cupom!', 'erro'); return; }
+  if (!valor || valor <= 0) { toast('Digite um valor válido!', 'erro'); return; }
+
+  const { error } = await sb.from('cupons').insert({ codigo, tipo, valor, uso_maximo, validade, usos: 0, ativo: true });
+  if (error) { toast(error.code === '23505' ? 'Código já existe!' : 'Erro ao criar cupom!', 'erro'); return; }
+
+  document.getElementById('cupomNovoCode').value = '';
+  document.getElementById('cupomNovoValor').value = '';
+  document.getElementById('cupomNovoValidade').value = '';
+  document.getElementById('cupomNovoUsoMax').value = '0';
+  toast('✅ Cupom criado!', 'sucesso');
+  carregarCuponsTab();
+}
+
+async function toggleCupom(id, ativo) {
+  await sb.from('cupons').update({ ativo: !ativo }).eq('id', id);
+  toast(ativo ? '⏸ Cupom pausado' : '▶ Cupom ativado', 'sucesso');
+  carregarCuponsTab();
+}
+
+async function deletarCupom(id) {
+  if (!confirm('Apagar este cupom permanentemente?')) return;
+  await sb.from('cupons').delete().eq('id', id);
+  toast('🗑 Cupom apagado', 'sucesso');
+  carregarCuponsTab();
 }
 
 /* Realtime — notificar novo pedido */

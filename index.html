@@ -758,6 +758,109 @@
     }
     .troco-group.visivel { display: block; }
 
+    /* Cupom */
+    .cupom-row {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+    }
+    .cupom-row .form-control {
+      flex: 1;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      font-weight: 700;
+    }
+    .btn-cupom {
+      background: var(--marrom);
+      color: white;
+      font-size: 13px;
+      font-weight: 700;
+      padding: 12px 16px;
+      border-radius: var(--radius-sm);
+      white-space: nowrap;
+      transition: background 0.2s;
+    }
+    .btn-cupom:hover { background: var(--rosa-escuro); }
+    .cupom-ok { color: var(--verde); font-size: 12px; font-weight: 700; margin-top: 4px; }
+    .cupom-erro { color: #c0392b; font-size: 12px; font-weight: 700; margin-top: 4px; }
+
+    /* Modal de Avaliação */
+    .modal-avaliacao {
+      position: fixed;
+      inset: 0;
+      z-index: 999;
+      background: rgba(74,36,24,0.6);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.3s;
+    }
+    .modal-avaliacao.aberto { opacity: 1; pointer-events: all; }
+    .aval-card {
+      background: white;
+      border-radius: var(--radius);
+      padding: 28px 24px;
+      max-width: 380px;
+      width: 100%;
+      text-align: center;
+    }
+    .aval-titulo { font-family: 'Playfair Display', serif; font-size: 22px; color: var(--marrom); margin-bottom: 6px; }
+    .aval-sub { font-size: 13px; color: var(--marrom-medio); margin-bottom: 20px; }
+    .estrelas { display: flex; justify-content: center; gap: 10px; margin-bottom: 16px; }
+    .estrela { font-size: 36px; cursor: pointer; opacity: 0.35; transition: opacity 0.15s, transform 0.15s; }
+    .estrela.sel, .estrela:hover { opacity: 1; transform: scale(1.2); }
+    .aval-card textarea {
+      width: 100%;
+      border: 2px solid var(--bege-escuro);
+      border-radius: var(--radius-sm);
+      padding: 10px 12px;
+      font-family: inherit;
+      font-size: 13px;
+      resize: vertical;
+      min-height: 70px;
+      margin-bottom: 14px;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+    .aval-card textarea:focus { border-color: var(--rosa); }
+    .btn-aval-enviar {
+      width: 100%;
+      background: var(--rosa-escuro);
+      color: white;
+      font-size: 15px;
+      font-weight: 800;
+      padding: 14px;
+      border-radius: 14px;
+      margin-bottom: 10px;
+      transition: background 0.2s;
+    }
+    .btn-aval-enviar:hover { background: var(--marrom); }
+    .btn-aval-pular { font-size: 12px; color: var(--cinza-texto); text-decoration: underline; cursor: pointer; background: none; border: none; }
+
+    /* Seção de Avaliações na loja */
+    .avaliacoes-section {
+      padding: 0 16px 40px;
+      max-width: 960px;
+      margin: 0 auto;
+    }
+    .aval-lista { display: flex; flex-direction: column; gap: 12px; margin-top: 16px; }
+    .aval-item {
+      background: white;
+      border-radius: var(--radius-sm);
+      padding: 14px 16px;
+      box-shadow: var(--sombra-card);
+    }
+    .aval-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px; }
+    .aval-nome { font-weight: 700; font-size: 14px; color: var(--marrom); }
+    .aval-estrelas { color: #f4c430; font-size: 15px; }
+    .aval-comentario { font-size: 13px; color: var(--cinza-texto); margin-top: 4px; }
+    .aval-media { text-align: center; margin-bottom: 16px; }
+    .aval-media .nota { font-size: 48px; font-weight: 800; color: var(--marrom); line-height: 1; }
+    .aval-media .label { font-size: 13px; color: var(--marrom-medio); }
+
     /* Resumo pedido no checkout */
     .resumo-pedido {
       background: var(--rosa-bg);
@@ -1215,6 +1318,13 @@
     <div class="produtos-grid" id="produtosGrid"></div>
   </section>
 
+  <!-- AVALIAÇÕES -->
+  <section class="avaliacoes-section" id="avaliacoesSection" style="display:none">
+    <h2 class="section-title">O que dizem <span>nossos clientes</span> ⭐</h2>
+    <div class="aval-media"><div class="nota" id="avalNota">—</div><div class="label" id="avalLabel">Sem avaliações ainda</div></div>
+    <div class="aval-lista" id="avalLista"></div>
+  </section>
+
   <!-- RODAPÉ -->
   <footer class="footer">
     <div class="logo-footer">Eline Bolos</div>
@@ -1228,6 +1338,25 @@
   </footer>
 
 </div><!-- /main-app -->
+
+<!-- ===== MODAL AVALIAÇÃO ===== -->
+<div class="modal-avaliacao" id="modalAvaliacao">
+  <div class="aval-card">
+    <div style="font-size:48px;margin-bottom:8px">🎂</div>
+    <div class="aval-titulo">Como foi seu pedido?</div>
+    <div class="aval-sub">Sua opinião ajuda a Eline a melhorar cada vez mais!</div>
+    <div class="estrelas" id="estrelasAval">
+      <span class="estrela" data-nota="1" onclick="selecionarEstrela(1)">⭐</span>
+      <span class="estrela" data-nota="2" onclick="selecionarEstrela(2)">⭐</span>
+      <span class="estrela" data-nota="3" onclick="selecionarEstrela(3)">⭐</span>
+      <span class="estrela" data-nota="4" onclick="selecionarEstrela(4)">⭐</span>
+      <span class="estrela" data-nota="5" onclick="selecionarEstrela(5)">⭐</span>
+    </div>
+    <textarea id="avalComentario" placeholder="Deixe um comentário (opcional)..."></textarea>
+    <button class="btn-aval-enviar" onclick="enviarAvaliacao()">Enviar avaliação 💕</button>
+    <button class="btn-aval-pular" onclick="fecharAvaliacao()">Pular por agora</button>
+  </div>
+</div>
 
 <!-- ===== CARRINHO FLUTUANTE ===== -->
 <button class="cart-float" id="cartFloat">
@@ -1329,6 +1458,22 @@
         <input type="number" class="form-control" id="trocoValor" placeholder="Ex: 50,00" min="0" step="0.50" />
         <small style="color:var(--cinza-texto);font-size:12px;margin-top:4px;display:block">Deixe em branco se não precisar de troco</small>
       </div>
+    </div>
+
+    <!-- Data de entrega/retirada -->
+    <div class="form-group">
+      <label>📅 Data que precisa <small style="font-weight:400;color:var(--cinza-texto)">(opcional — para encomendas)</small></label>
+      <input type="date" class="form-control" id="dataEntrega" />
+    </div>
+
+    <!-- Cupom de desconto -->
+    <div class="form-group">
+      <label>🎁 Cupom de desconto <small style="font-weight:400;color:var(--cinza-texto)">(opcional)</small></label>
+      <div class="cupom-row">
+        <input type="text" class="form-control" id="cupomCodigo" placeholder="EX: ELINE10" maxlength="20" oninput="this.value=this.value.toUpperCase()" />
+        <button class="btn-cupom" onclick="aplicarCupom()">Aplicar</button>
+      </div>
+      <div id="cupomMsg"></div>
     </div>
 
     <div class="form-group">
@@ -1816,7 +1961,8 @@ function atualizarTaxa() {
 function atualizarResumoPedido() {
   const sub = calcularSubtotal();
   const taxa = tipoEntrega === 'entrega' ? taxaAtual : 0;
-  const total = sub + taxa;
+  const desconto = calcularDesconto(sub);
+  const total = sub + taxa - desconto;
   const itens = carrinho.map(c => {
     const p = dados.produtos.find(p => p.id === c.produtoId);
     if (!p) return '';
@@ -1827,11 +1973,16 @@ function atualizarResumoPedido() {
   if (tipoEntrega === 'entrega' && taxa > 0) {
     taxaHtml = `<div class="resumo-item"><span>🛵 Taxa de entrega</span><span>${formatarMoeda(taxa)}</span></div>`;
   }
+  let descontoHtml = '';
+  if (desconto > 0) {
+    descontoHtml = `<div class="resumo-item" style="color:var(--verde);font-weight:700"><span>🎁 Desconto (${cupomAtivo.codigo})</span><span>-${formatarMoeda(desconto)}</span></div>`;
+  }
 
   document.getElementById('resumoPedido').innerHTML = `
     <div class="resumo-titulo">📋 Resumo do pedido</div>
     ${itens}
     ${taxaHtml}
+    ${descontoHtml}
     <div class="resumo-linha"></div>
     <div class="resumo-total"><span>Total</span><span>${formatarMoeda(total)}</span></div>
   `;
@@ -1881,6 +2032,7 @@ async function confirmarPedido() {
   const tel = document.getElementById('clienteTel').value.trim();
   const obs = document.getElementById('clienteObs').value.trim();
   const endereco = document.getElementById('clienteEndereco').value.trim();
+  const dataEntrega = document.getElementById('dataEntrega').value || null;
 
   if (!nome) { mostrarToast('Por favor, informe seu nome!', 'erro'); return; }
   if (!tel) { mostrarToast('Por favor, informe seu telefone!', 'erro'); return; }
@@ -1903,7 +2055,8 @@ async function confirmarPedido() {
 
   const sub = calcularSubtotal();
   const taxa = tipoEntrega === 'entrega' ? taxaAtual : 0;
-  const total = sub + taxa;
+  const desconto = calcularDesconto(sub);
+  const total = sub + taxa - desconto;
 
   // Forma de pagamento
   const pgtoLabels = { cartao: '💳 Cartão (máquina)', pix: '💠 PIX', dinheiro: '💵 Dinheiro' };
@@ -1913,6 +2066,10 @@ async function confirmarPedido() {
   msg += `━━━━━━━━━━━━━━━━━━\n`;
   msg += `👤 *Cliente:* ${nome}\n`;
   msg += `📱 *Telefone:* ${tel}\n`;
+  if (dataEntrega) {
+    const [y,m,d] = dataEntrega.split('-');
+    msg += `📅 *Data desejada:* ${d}/${m}/${y}\n`;
+  }
   msg += `━━━━━━━━━━━━━━━━━━\n`;
   msg += `📋 *Itens do pedido:*\n${itensMsg}\n`;
   msg += `━━━━━━━━━━━━━━━━━━\n`;
@@ -1925,6 +2082,7 @@ async function confirmarPedido() {
     msg += `🏃 *Tipo:* Retirada no local\n`;
   }
   msg += `━━━━━━━━━━━━━━━━━━\n`;
+  if (desconto > 0) msg += `🎁 *Cupom (${cupomAtivo.codigo}):* -${formatarMoeda(desconto)}\n`;
   msg += `💰 *Total: ${formatarMoeda(total)}*\n`;
   msg += `💳 *Pagamento:* ${pgtoLabels[formaPgto]}\n`;
   if (formaPgto === 'dinheiro' && trocoVal) msg += `🔄 *Troco para:* R$ ${parseFloat(trocoVal).toFixed(2).replace('.', ',')}\n`;
@@ -1932,22 +2090,31 @@ async function confirmarPedido() {
   msg += `━━━━━━━━━━━━━━━━━━\n`;
   msg += `_Pedido feito pelo site Eline Bolos_ 💕`;
 
-  // Salvar pedido no Supabase silenciosamente (não bloqueia o WhatsApp)
+  // Salvar pedido no Supabase silenciosamente
+  let pedidoSalvoId = null;
   if (sb) {
     const itensPedido = carrinho.map(c => {
       const p = dados.produtos.find(p => p.id === c.produtoId);
       return p ? { id: p.id, nome: p.nome, qtd: c.qtd, preco_unit: p.preco } : null;
     }).filter(Boolean);
     try {
-      await sb.from('pedidos').insert({
+      const { data: pedidoData } = await sb.from('pedidos').insert({
         cliente_nome: nome, cliente_tel: tel,
         tipo_entrega: tipoEntrega, bairro: bairroNome || '',
         endereco: endereco || '', itens: itensPedido,
         subtotal: sub, taxa_entrega: taxa, total,
         forma_pgto: formaPgto,
         troco: trocoVal ? parseFloat(trocoVal) : null,
-        obs: obs || '', status: 'novo'
-      });
+        obs: obs || '', status: 'novo',
+        data_entrega: dataEntrega || null,
+        cupom_codigo: cupomAtivo ? cupomAtivo.codigo : '',
+        desconto: desconto || 0
+      }).select('id').single();
+      if (pedidoData) pedidoSalvoId = pedidoData.id;
+      // Incrementar uso do cupom
+      if (cupomAtivo) {
+        await sb.from('cupons').update({ usos: (cupomAtivo.usos || 0) + 1 }).eq('id', cupomAtivo.id);
+      }
     } catch(e) { console.warn('Pedido não registrado:', e); }
   }
 
@@ -1958,16 +2125,22 @@ async function confirmarPedido() {
   // Limpar
   carrinho = [];
   formaPgto = '';
+  cupomAtivo = null;
   document.getElementById('clienteNome').value = '';
   document.getElementById('clienteTel').value = '';
   document.getElementById('clienteObs').value = '';
   document.getElementById('clienteEndereco').value = '';
   document.getElementById('trocoValor').value = '';
+  document.getElementById('dataEntrega').value = '';
+  document.getElementById('cupomCodigo').value = '';
+  document.getElementById('cupomMsg').innerHTML = '';
   ['pgtoCartao','pgtoPix','pgtoDinheiro'].forEach(id => document.getElementById(id).classList.remove('ativo'));
   document.getElementById('trocoGroup').classList.remove('visivel');
   fecharCheckout();
   atualizarUI();
-  mostrarToast('Pedido enviado! Obrigada 💕', 'sucesso');
+
+  // Abrir avaliação após 2s
+  setTimeout(() => abrirAvaliacao(pedidoSalvoId, nome), 2000);
 }
 
 /* ======================================================
@@ -2410,9 +2583,131 @@ async function init() {
   atualizarUI();
   atualizarStatusLoja();
   iniciarRealtime();
+  carregarAvaliacoes();
 }
 
 init();
+
+/* ======================================================
+   CUPOM DE DESCONTO
+====================================================== */
+let cupomAtivo = null; // { codigo, tipo, valor }
+
+async function aplicarCupom() {
+  const codigo = document.getElementById('cupomCodigo').value.trim().toUpperCase();
+  const msgEl = document.getElementById('cupomMsg');
+  if (!codigo) { msgEl.innerHTML = '<div class="cupom-erro">Digite um código de cupom.</div>'; return; }
+  if (!sb) { msgEl.innerHTML = '<div class="cupom-erro">Sem conexão. Tente novamente.</div>'; return; }
+
+  const { data, error } = await sb.from('cupons')
+    .select('*')
+    .eq('codigo', codigo)
+    .eq('ativo', true)
+    .single();
+
+  if (error || !data) {
+    cupomAtivo = null;
+    msgEl.innerHTML = '<div class="cupom-erro">❌ Cupom inválido ou expirado.</div>';
+    atualizarResumoPedido();
+    return;
+  }
+
+  // Verificar validade
+  if (data.validade && new Date(data.validade) < new Date()) {
+    cupomAtivo = null;
+    msgEl.innerHTML = '<div class="cupom-erro">❌ Este cupom expirou.</div>';
+    atualizarResumoPedido();
+    return;
+  }
+
+  // Verificar uso máximo
+  if (data.uso_maximo > 0 && data.usos >= data.uso_maximo) {
+    cupomAtivo = null;
+    msgEl.innerHTML = '<div class="cupom-erro">❌ Este cupom atingiu o limite de usos.</div>';
+    atualizarResumoPedido();
+    return;
+  }
+
+  cupomAtivo = data;
+  const descLabel = data.tipo === 'percentual' ? `${data.valor}% de desconto` : `R$ ${parseFloat(data.valor).toFixed(2).replace('.',',')} de desconto`;
+  msgEl.innerHTML = `<div class="cupom-ok">✅ Cupom aplicado! ${descLabel}</div>`;
+  atualizarResumoPedido();
+}
+
+function calcularDesconto(sub) {
+  if (!cupomAtivo) return 0;
+  if (cupomAtivo.tipo === 'percentual') return sub * (parseFloat(cupomAtivo.valor) / 100);
+  return Math.min(parseFloat(cupomAtivo.valor), sub);
+}
+
+/* ======================================================
+   AVALIAÇÕES
+====================================================== */
+let notaAval = 0;
+let pedidoIdParaAval = null;
+let nomeClienteParaAval = '';
+
+function selecionarEstrela(nota) {
+  notaAval = nota;
+  document.querySelectorAll('.estrela').forEach((el, i) => {
+    el.classList.toggle('sel', i < nota);
+  });
+}
+
+function abrirAvaliacao(pedidoId, nomeCliente) {
+  pedidoIdParaAval = pedidoId;
+  nomeClienteParaAval = nomeCliente;
+  notaAval = 0;
+  document.querySelectorAll('.estrela').forEach(el => el.classList.remove('sel'));
+  document.getElementById('avalComentario').value = '';
+  document.getElementById('modalAvaliacao').classList.add('aberto');
+}
+
+function fecharAvaliacao() {
+  document.getElementById('modalAvaliacao').classList.remove('aberto');
+}
+
+async function enviarAvaliacao() {
+  if (!notaAval) { mostrarToast('Selecione uma nota! ⭐', 'erro'); return; }
+  if (!sb) { fecharAvaliacao(); return; }
+  const comentario = document.getElementById('avalComentario').value.trim();
+  try {
+    await sb.from('avaliacoes').insert({
+      pedido_id: pedidoIdParaAval,
+      cliente_nome: nomeClienteParaAval,
+      nota: notaAval,
+      comentario: comentario
+    });
+    fecharAvaliacao();
+    mostrarToast('Obrigada pela avaliação! 💕', 'sucesso');
+    carregarAvaliacoes();
+  } catch(e) {
+    fecharAvaliacao();
+  }
+}
+
+async function carregarAvaliacoes() {
+  if (!sb) return;
+  const { data } = await sb.from('avaliacoes').select('*').order('criado_em', { ascending: false }).limit(20);
+  if (!data || data.length === 0) return;
+
+  const section = document.getElementById('avaliacoesSection');
+  section.style.display = 'block';
+
+  const media = data.reduce((s, a) => s + a.nota, 0) / data.length;
+  document.getElementById('avalNota').textContent = media.toFixed(1);
+  document.getElementById('avalLabel').textContent = `${data.length} avaliação${data.length !== 1 ? 'ões' : ''}`;
+
+  document.getElementById('avalLista').innerHTML = data.map(a => `
+    <div class="aval-item">
+      <div class="aval-header">
+        <span class="aval-nome">👤 ${a.cliente_nome}</span>
+        <span class="aval-estrelas">${'⭐'.repeat(a.nota)}</span>
+      </div>
+      ${a.comentario ? `<div class="aval-comentario">"${a.comentario}"</div>` : ''}
+    </div>
+  `).join('');
+}
 
 /* ======================================================
    FIX iOS: viewport jump ao fechar teclado
