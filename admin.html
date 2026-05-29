@@ -311,6 +311,99 @@
     .foto-acoes {
       display: flex; gap: 8px; justify-content: center; margin-top: 8px;
     }
+
+    /* ===== ABA PEDIDOS ===== */
+    .filtro-bar { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 12px; }
+    .filtro-btn {
+      padding: 8px 16px; border-radius: 20px; font-size: 13px; font-weight: 700;
+      color: var(--marrom-medio); background: var(--bege); border: 2px solid transparent;
+      transition: all 0.2s; cursor: pointer;
+    }
+    .filtro-btn.ativo { background: var(--marrom); color: white; }
+    .filtro-btn:hover:not(.ativo) { border-color: var(--marrom); }
+    .filtro-custom { display: none; gap: 8px; align-items: center; flex-wrap: wrap; margin-top: 8px; }
+    .filtro-custom.visivel { display: flex; }
+    .filtro-custom input[type="date"] {
+      padding: 8px 12px; border: 2px solid var(--bege); border-radius: 10px;
+      font-size: 13px; font-family: inherit; color: var(--marrom); outline: none;
+    }
+    .filtro-custom input[type="date"]:focus { border-color: var(--rosa); }
+
+    .pedido-status {
+      display: inline-block; padding: 4px 10px; border-radius: 10px; font-size: 11px; font-weight: 700;
+    }
+    .status-novo       { background: #e3f2fd; color: #1565c0; }
+    .status-confirmado { background: #fff3e0; color: #e65100; }
+    .status-preparando { background: #fff9c4; color: #f57f17; }
+    .status-pronto     { background: #ede7f6; color: #6a1b9a; }
+    .status-entregue   { background: #e8f5e9; color: #2e7d32; }
+    .status-cancelado  { background: #fdecea; color: #c62828; }
+
+    .pedido-item {
+      background: var(--branco); border-radius: var(--radius-sm); padding: 14px 16px;
+      margin-bottom: 8px; border-left: 5px solid var(--bege-escuro);
+      box-shadow: var(--sombra-card); transition: border-color 0.2s;
+    }
+    .pedido-item.borda-novo       { border-color: #1565c0; }
+    .pedido-item.borda-confirmado { border-color: #e65100; }
+    .pedido-item.borda-preparando { border-color: #f57f17; }
+    .pedido-item.borda-pronto     { border-color: #6a1b9a; }
+    .pedido-item.borda-entregue   { border-color: #2e7d32; }
+    .pedido-item.borda-cancelado  { border-color: #c62828; }
+
+    .pedido-header { display: flex; align-items: flex-start; justify-content: space-between; flex-wrap: wrap; gap: 8px; margin-bottom: 8px; }
+    .pedido-cliente { font-weight: 800; font-size: 14px; color: var(--marrom); }
+    .pedido-hora    { font-size: 12px; color: var(--cinza-texto); margin-top: 2px; }
+    .pedido-itens   { font-size: 13px; color: var(--cinza-texto); margin-bottom: 8px; line-height: 1.5; }
+    .pedido-footer  { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 8px; }
+    .pedido-total   { font-weight: 800; font-size: 15px; color: var(--rosa-escuro); }
+    .pedido-pgto    { font-size: 12px; color: var(--cinza-texto); }
+
+    .ranking-item { display: flex; align-items: center; gap: 12px; padding: 10px 0; border-bottom: 1px solid var(--rosa-claro); }
+    .ranking-item:last-child { border-bottom: none; }
+    .ranking-pos   { font-size: 18px; width: 28px; text-align: center; font-weight: 800; color: var(--marrom-medio); flex-shrink: 0; }
+    .ranking-wrap  { flex: 1; min-width: 0; }
+    .ranking-nome  { font-size: 13px; font-weight: 700; color: var(--marrom); margin-bottom: 4px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .ranking-barra { height: 8px; border-radius: 4px; background: linear-gradient(to right, var(--rosa-escuro), var(--rosa)); transition: width 0.6s ease; min-width: 4px; }
+    .ranking-nums  { font-size: 12px; color: var(--cinza-texto); margin-top: 3px; }
+    .ranking-fat   { font-size: 13px; font-weight: 700; color: var(--rosa-escuro); white-space: nowrap; flex-shrink: 0; }
+
+    .chart-container { position: relative; height: 220px; margin-top: 8px; }
+
+    .status-select {
+      font-size: 12px; font-family: inherit; font-weight: 700; cursor: pointer;
+      border: 2px solid var(--bege); border-radius: 8px; padding: 5px 8px;
+      background: var(--branco); color: var(--marrom); outline: none; transition: border-color 0.2s;
+    }
+    .status-select:focus { border-color: var(--rosa); }
+
+    .nenhum-pedido { text-align: center; padding: 40px 20px; color: var(--cinza-texto); }
+    .nenhum-pedido .icone { font-size: 48px; margin-bottom: 12px; }
+    .nenhum-pedido p { font-size: 15px; font-weight: 600; }
+
+    /* Notificação novo pedido */
+    .notif-pedido {
+      position: fixed; top: 72px; right: 16px; z-index: 200;
+      background: var(--verde); color: white; padding: 12px 20px;
+      border-radius: 14px; font-size: 14px; font-weight: 700;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.2);
+      animation: slideIn 0.3s ease; cursor: pointer;
+    }
+    @keyframes slideIn { from { transform: translateX(120%); } to { transform: translateX(0); } }
+
+    /* ===== IMPRESSÃO ===== */
+    @media print {
+      .login-page, .admin-header, .admin-tabs,
+      .filtro-bar, .filtro-custom, #btnExportarPDF,
+      .status-select, .btn-primario, .btn-secundario,
+      .btn-perigo, .btn-verde, .toast { display: none !important; }
+      .admin-page { display: block !important; }
+      .admin-section { display: none !important; }
+      #tabPedidos { display: block !important; }
+      .pedido-item { break-inside: avoid; box-shadow: none !important; border: 1px solid #ddd !important; border-left: 5px solid #aaa !important; }
+      .chart-container { height: 260px; }
+      .admin-content { padding: 0 !important; max-width: 100% !important; }
+    }
   </style>
 </head>
 <body>
@@ -372,6 +465,7 @@
     <button class="admin-tab" onclick="abrirTab(this,'tabBairros')">🛵 Bairros / Taxas</button>
     <button class="admin-tab" onclick="abrirTab(this,'tabPromocoes')">🔥 Promoções</button>
     <button class="admin-tab" onclick="abrirTab(this,'tabCardapioDia')">📅 Cardápio do Dia</button>
+    <button class="admin-tab" id="tabBtnPedidos" onclick="abrirTab(this,'tabPedidos');carregarPedidosTab()">📦 Pedidos</button>
     <button class="admin-tab" onclick="abrirTab(this,'tabConfig')">⚙️ Configurações</button>
   </div>
 
@@ -667,6 +761,57 @@
 
     </div><!-- /tabCardapioDia -->
 
+    <!-- ================================================ -->
+    <!-- TAB: PEDIDOS                                     -->
+    <!-- ================================================ -->
+    <div class="admin-section" id="tabPedidos">
+
+      <!-- Filtro + Export -->
+      <div class="admin-card">
+        <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px;margin-bottom:16px">
+          <h3 style="margin:0">📦 Relatório de Pedidos</h3>
+          <button class="btn-primario" id="btnExportarPDF" onclick="exportarPDF()" style="font-size:13px;padding:8px 18px">📥 Exportar PDF</button>
+        </div>
+        <div class="filtro-bar">
+          <button class="filtro-btn ativo" onclick="setFiltroPedidos('hoje',this)">Hoje</button>
+          <button class="filtro-btn" onclick="setFiltroPedidos('semana',this)">Esta semana</button>
+          <button class="filtro-btn" onclick="setFiltroPedidos('mes',this)">Este mês</button>
+          <button class="filtro-btn" onclick="setFiltroPedidos('trimestre',this)">Trimestre</button>
+          <button class="filtro-btn" onclick="setFiltroPedidos('custom',this)">📅 Personalizado</button>
+        </div>
+        <div class="filtro-custom" id="filtroCustom">
+          <label style="font-size:13px;font-weight:700;color:var(--marrom)">De:</label>
+          <input type="date" id="filtroDataInicio" onchange="aplicarFiltroCustom()" />
+          <label style="font-size:13px;font-weight:700;color:var(--marrom)">Até:</label>
+          <input type="date" id="filtroDataFim" onchange="aplicarFiltroCustom()" />
+        </div>
+      </div>
+
+      <!-- Cards resumo -->
+      <div class="dashboard-grid" id="pedidosCards"></div>
+
+      <!-- Gráfico faturamento -->
+      <div class="admin-card">
+        <h3>📊 Faturamento no Período</h3>
+        <div class="chart-container">
+          <canvas id="chartPedidos"></canvas>
+        </div>
+      </div>
+
+      <!-- Ranking produtos -->
+      <div class="admin-card">
+        <h3>🏆 Produtos Mais Vendidos</h3>
+        <div id="rankingProdutos"></div>
+      </div>
+
+      <!-- Lista pedidos -->
+      <div class="admin-card">
+        <h3>📋 Pedidos <span id="contPedidos" style="font-size:13px;font-weight:600;color:var(--cinza-texto)"></span></h3>
+        <div id="listaPedidos"><div class="nenhum-pedido"><div class="icone">📦</div><p>Abra esta aba para carregar os pedidos</p></div></div>
+      </div>
+
+    </div><!-- /tabPedidos -->
+
   </div><!-- /admin-content -->
 </div><!-- /adminPage -->
 
@@ -800,6 +945,7 @@ function renderTudo() {
   carregarConfig();
   renderPromocoes();
   renderCardapioDia();
+  iniciarRealtimePedidos();
 }
 
 /* ======================================================
@@ -1633,6 +1779,270 @@ async function compartilharFlyer() {
   // Fallback: baixar
   baixarFlyer();
   toast('Compartilhe a imagem salva no WhatsApp ou Instagram!', '');
+}
+
+/* ======================================================
+   PEDIDOS — Dashboard completo
+====================================================== */
+let pedidosFiltrados = [];
+let filtroAtualPedidos = 'hoje';
+let chartPedidosInstance = null;
+
+const STATUS_LABELS = {
+  novo: '🔵 Novo', confirmado: '🟠 Confirmado', preparando: '🟡 Preparando',
+  pronto: '🟣 Pronto', entregue: '🟢 Entregue', cancelado: '🔴 Cancelado'
+};
+const STATUS_PGTO = { cartao: '💳 Cartão', pix: '💠 PIX', dinheiro: '💵 Dinheiro' };
+
+function getFiltroRange(tipo) {
+  const agora = new Date();
+  const hoje = new Date(agora.getFullYear(), agora.getMonth(), agora.getDate());
+  switch(tipo) {
+    case 'hoje':
+      return { inicio: hoje, fim: new Date(hoje.getTime() + 86400000) };
+    case 'semana': {
+      const dom = new Date(hoje); dom.setDate(hoje.getDate() - hoje.getDay());
+      return { inicio: dom, fim: new Date(dom.getTime() + 7 * 86400000) };
+    }
+    case 'mes':
+      return { inicio: new Date(agora.getFullYear(), agora.getMonth(), 1),
+               fim: new Date(agora.getFullYear(), agora.getMonth() + 1, 1) };
+    case 'trimestre': {
+      const q = Math.floor(agora.getMonth() / 3);
+      return { inicio: new Date(agora.getFullYear(), q * 3, 1),
+               fim: new Date(agora.getFullYear(), q * 3 + 3, 1) };
+    }
+    case 'custom': {
+      const ini = document.getElementById('filtroDataInicio').value;
+      const fim = document.getElementById('filtroDataFim').value;
+      if (!ini || !fim) return null;
+      return { inicio: new Date(ini + 'T00:00:00'), fim: new Date(fim + 'T23:59:59') };
+    }
+  }
+  return null;
+}
+
+function setFiltroPedidos(tipo, btn) {
+  filtroAtualPedidos = tipo;
+  document.querySelectorAll('.filtro-btn').forEach(b => b.classList.remove('ativo'));
+  btn.classList.add('ativo');
+  document.getElementById('filtroCustom').classList.toggle('visivel', tipo === 'custom');
+  if (tipo !== 'custom') carregarPedidosTab();
+}
+
+function aplicarFiltroCustom() {
+  const ini = document.getElementById('filtroDataInicio').value;
+  const fim = document.getElementById('filtroDataFim').value;
+  if (ini && fim) carregarPedidosTab();
+}
+
+async function carregarPedidosTab() {
+  const range = getFiltroRange(filtroAtualPedidos);
+  if (!range) return;
+
+  document.getElementById('listaPedidos').innerHTML =
+    '<p style="text-align:center;padding:30px;color:var(--cinza-texto)">⏳ Carregando pedidos...</p>';
+
+  // Carregar Chart.js sob demanda
+  if (!window.Chart) {
+    await new Promise(resolve => {
+      const s = document.createElement('script');
+      s.src = 'https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js';
+      s.onload = resolve; s.onerror = resolve;
+      document.head.appendChild(s);
+    });
+  }
+
+  const { data, error } = await sb.from('pedidos')
+    .select('*')
+    .gte('criado_em', range.inicio.toISOString())
+    .lt('criado_em', range.fim.toISOString())
+    .order('criado_em', { ascending: false });
+
+  if (error) { toast('Erro ao carregar pedidos!', 'erro'); return; }
+  pedidosFiltrados = data || [];
+  renderPedidosTab();
+}
+
+function renderPedidosTab() {
+  renderCardsPedidos();
+  renderChartPedidos();
+  renderRankingProdutos();
+  renderListaPedidos();
+}
+
+function renderCardsPedidos() {
+  const ativos = pedidosFiltrados.filter(p => p.status !== 'cancelado');
+  const total = pedidosFiltrados.length;
+  const faturamento = ativos.reduce((s, p) => s + parseFloat(p.total || 0), 0);
+  const ticket = ativos.length > 0 ? faturamento / ativos.length : 0;
+  const qtdProds = ativos.reduce((s, p) => s + (p.itens || []).reduce((q, i) => q + (i.qtd || 0), 0), 0);
+  const cancelados = pedidosFiltrados.filter(p => p.status === 'cancelado').length;
+
+  document.getElementById('pedidosCards').innerHTML = `
+    <div class="dash-card"><div class="num">${total}</div><div class="label">Pedidos</div></div>
+    <div class="dash-card"><div class="num" style="font-size:19px">${fmt(faturamento)}</div><div class="label">Faturamento</div></div>
+    <div class="dash-card"><div class="num" style="font-size:19px">${ativos.length > 0 ? fmt(ticket) : 'R$0'}</div><div class="label">Ticket médio</div></div>
+    <div class="dash-card"><div class="num">${qtdProds}</div><div class="label">Itens vendidos</div></div>
+    <div class="dash-card"><div class="num" style="color:#c0392b">${cancelados}</div><div class="label">Cancelados</div></div>
+  `;
+  document.getElementById('contPedidos').textContent = `(${total} pedido${total !== 1 ? 's' : ''})`;
+}
+
+function renderChartPedidos() {
+  if (!window.Chart) return;
+  const ativos = pedidosFiltrados.filter(p => p.status !== 'cancelado');
+  const grupos = {};
+  ativos.forEach(p => {
+    const d = new Date(p.criado_em).toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit' });
+    grupos[d] = (grupos[d] || 0) + parseFloat(p.total || 0);
+  });
+  const labels = Object.keys(grupos).reverse();
+  const valores = labels.map(l => parseFloat(grupos[l].toFixed(2)));
+
+  if (chartPedidosInstance) { chartPedidosInstance.destroy(); chartPedidosInstance = null; }
+  if (labels.length === 0) {
+    document.querySelector('.chart-container').innerHTML = '<p style="text-align:center;padding:40px;color:var(--cinza-texto)">Sem dados para exibir</p>';
+    return;
+  }
+  // Restaurar canvas se foi substituído
+  const wrap = document.querySelector('.chart-container');
+  if (!wrap.querySelector('canvas')) { wrap.innerHTML = '<canvas id="chartPedidos"></canvas>'; }
+
+  const ctx = document.getElementById('chartPedidos').getContext('2d');
+  chartPedidosInstance = new Chart(ctx, {
+    type: 'bar',
+    data: {
+      labels,
+      datasets: [{
+        label: 'Faturamento (R$)',
+        data: valores,
+        backgroundColor: 'rgba(232,128,154,0.75)',
+        borderColor: '#D4607A',
+        borderWidth: 2,
+        borderRadius: 10,
+      }]
+    },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      plugins: { legend: { display: false } },
+      scales: {
+        y: { beginAtZero: true, ticks: { callback: v => 'R$' + v.toLocaleString('pt-BR') } },
+        x: { grid: { display: false } }
+      }
+    }
+  });
+}
+
+function renderRankingProdutos() {
+  const contagem = {}; const faturProd = {};
+  pedidosFiltrados.filter(p => p.status !== 'cancelado').forEach(p => {
+    (p.itens || []).forEach(item => {
+      const n = item.nome || '?';
+      contagem[n] = (contagem[n] || 0) + (item.qtd || 0);
+      faturProd[n] = (faturProd[n] || 0) + ((item.preco_unit || 0) * (item.qtd || 0));
+    });
+  });
+  const ranking = Object.entries(contagem).sort((a, b) => b[1] - a[1]).slice(0, 8);
+  const el = document.getElementById('rankingProdutos');
+  if (ranking.length === 0) {
+    el.innerHTML = '<p style="text-align:center;padding:20px;color:var(--cinza-texto)">Nenhum produto vendido no período.</p>'; return;
+  }
+  const max = ranking[0][1] || 1;
+  const medalhas = ['🥇','🥈','🥉'];
+  el.innerHTML = ranking.map(([nome, qtd], i) => `
+    <div class="ranking-item">
+      <div class="ranking-pos">${medalhas[i] || (i+1)+'º'}</div>
+      <div class="ranking-wrap">
+        <div class="ranking-nome">${nome}</div>
+        <div class="ranking-barra" style="width:${Math.round((qtd/max)*100)}%"></div>
+        <div class="ranking-nums">${qtd} unidade${qtd !== 1 ? 's' : ''}</div>
+      </div>
+      <div class="ranking-fat">${fmt(faturProd[nome] || 0)}</div>
+    </div>
+  `).join('');
+}
+
+function renderListaPedidos() {
+  const el = document.getElementById('listaPedidos');
+  if (pedidosFiltrados.length === 0) {
+    el.innerHTML = '<div class="nenhum-pedido"><div class="icone">📭</div><p>Nenhum pedido no período selecionado</p></div>'; return;
+  }
+  el.innerHTML = pedidosFiltrados.map(p => {
+    const data = new Date(p.criado_em);
+    const hora = data.toLocaleString('pt-BR', { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' });
+    const itensTexto = (p.itens || []).map(i => `${i.qtd}x ${i.nome}`).join(' • ');
+    const entrega = p.tipo_entrega === 'entrega' ? `🛵 ${p.bairro}` : '🏃 Retirada';
+    const statusKey = p.status || 'novo';
+    const pgtoLabel = STATUS_PGTO[p.forma_pgto] || p.forma_pgto || '';
+    return `
+      <div class="pedido-item borda-${statusKey}" id="pedido-${p.id}">
+        <div class="pedido-header">
+          <div>
+            <div class="pedido-cliente">👤 ${p.cliente_nome}${p.cliente_tel ? ' · ' + p.cliente_tel : ''}</div>
+            <div class="pedido-hora">${hora} · ${entrega} · ${pgtoLabel}</div>
+          </div>
+          <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">
+            <span class="pedido-status status-${statusKey}" id="badge-${p.id}">${STATUS_LABELS[statusKey]}</span>
+            <select class="status-select" onchange="alterarStatusPedido(${p.id}, this.value)">
+              ${Object.entries(STATUS_LABELS).map(([v,l]) => `<option value="${v}" ${v === statusKey ? 'selected' : ''}>${l}</option>`).join('')}
+            </select>
+          </div>
+        </div>
+        <div class="pedido-itens">📋 ${itensTexto}</div>
+        ${p.obs ? `<div class="pedido-itens">📝 ${p.obs}</div>` : ''}
+        <div class="pedido-footer">
+          <div class="pedido-total">${fmt(parseFloat(p.total || 0))}</div>
+          <div class="pedido-pgto">${parseFloat(p.taxa_entrega||0) > 0 ? `Sub ${fmt(parseFloat(p.subtotal||0))} + Taxa ${fmt(parseFloat(p.taxa_entrega||0))}` : `Subtotal ${fmt(parseFloat(p.subtotal||0))}`}</div>
+        </div>
+      </div>
+    `;
+  }).join('');
+}
+
+async function alterarStatusPedido(id, novoStatus) {
+  const { error } = await sb.from('pedidos').update({ status: novoStatus }).eq('id', id);
+  if (error) { toast('Erro ao atualizar status!', 'erro'); return; }
+  const p = pedidosFiltrados.find(p => p.id === id);
+  if (p) {
+    p.status = novoStatus;
+    const el = document.getElementById(`pedido-${id}`);
+    const badge = document.getElementById(`badge-${id}`);
+    if (el) el.className = `pedido-item borda-${novoStatus}`;
+    if (badge) { badge.className = `pedido-status status-${novoStatus}`; badge.textContent = STATUS_LABELS[novoStatus]; }
+    renderCardsPedidos(); // Atualiza cards
+  }
+  toast(`✅ ${STATUS_LABELS[novoStatus]}`, 'sucesso');
+}
+
+function exportarPDF() {
+  window.print();
+  toast('📥 Imprima ou salve como PDF no seu navegador!', '');
+}
+
+/* Realtime — notificar novo pedido */
+function iniciarRealtimePedidos() {
+  if (!sb) return;
+  sb.channel('admin-pedidos-rt')
+    .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'pedidos' }, (payload) => {
+      const tabAtiva = document.getElementById('tabPedidos').classList.contains('ativa');
+      if (tabAtiva) {
+        pedidosFiltrados.unshift(payload.new);
+        renderPedidosTab();
+      }
+      // Notificação visual
+      const notif = document.createElement('div');
+      notif.className = 'notif-pedido';
+      notif.innerHTML = `🔔 Novo pedido! ${payload.new.cliente_nome} — ${fmt(parseFloat(payload.new.total||0))}`;
+      notif.onclick = () => {
+        notif.remove();
+        abrirTab(document.getElementById('tabBtnPedidos'), 'tabPedidos');
+        carregarPedidosTab();
+      };
+      document.body.appendChild(notif);
+      setTimeout(() => notif.remove(), 8000);
+    })
+    .subscribe();
 }
 
 /* ======================================================

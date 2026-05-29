@@ -1876,7 +1876,7 @@ function selecionarPgto(forma) {
   if (forma !== 'dinheiro') document.getElementById('trocoValor').value = '';
 }
 
-function confirmarPedido() {
+async function confirmarPedido() {
   const nome = document.getElementById('clienteNome').value.trim();
   const tel = document.getElementById('clienteTel').value.trim();
   const obs = document.getElementById('clienteObs').value.trim();
@@ -1931,6 +1931,25 @@ function confirmarPedido() {
   if (obs) msg += `📝 *Obs:* ${obs}\n`;
   msg += `━━━━━━━━━━━━━━━━━━\n`;
   msg += `_Pedido feito pelo site Eline Bolos_ 💕`;
+
+  // Salvar pedido no Supabase silenciosamente (não bloqueia o WhatsApp)
+  if (sb) {
+    const itensPedido = carrinho.map(c => {
+      const p = dados.produtos.find(p => p.id === c.produtoId);
+      return p ? { id: p.id, nome: p.nome, qtd: c.qtd, preco_unit: p.preco } : null;
+    }).filter(Boolean);
+    try {
+      await sb.from('pedidos').insert({
+        cliente_nome: nome, cliente_tel: tel,
+        tipo_entrega: tipoEntrega, bairro: bairroNome || '',
+        endereco: endereco || '', itens: itensPedido,
+        subtotal: sub, taxa_entrega: taxa, total,
+        forma_pgto: formaPgto,
+        troco: trocoVal ? parseFloat(trocoVal) : null,
+        obs: obs || '', status: 'novo'
+      });
+    } catch(e) { console.warn('Pedido não registrado:', e); }
+  }
 
   const wpp = dados.whatsapp || '5598984156128';
   const url = `https://wa.me/${wpp}?text=${encodeURIComponent(msg)}`;
