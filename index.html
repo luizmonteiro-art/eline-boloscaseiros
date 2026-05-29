@@ -784,6 +784,133 @@
     .cupom-ok { color: var(--verde); font-size: 12px; font-weight: 700; margin-top: 4px; }
     .cupom-erro { color: #c0392b; font-size: 12px; font-weight: 700; margin-top: 4px; }
 
+    /* ===== OVERLAY PAGAMENTO (PIX / CRÉDITO) ===== */
+    .pgto-overlay {
+      position: fixed;
+      inset: 0;
+      z-index: 1100;
+      background: rgba(74,36,24,0.75);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.3s;
+    }
+    .pgto-overlay.aberto { opacity: 1; pointer-events: all; }
+    .pgto-box {
+      background: white;
+      border-radius: var(--radius);
+      padding: 28px 24px;
+      max-width: 400px;
+      width: 100%;
+      text-align: center;
+      max-height: 90vh;
+      overflow-y: auto;
+    }
+    .pgto-titulo { font-family: 'Playfair Display', serif; font-size: 22px; color: var(--marrom); margin-bottom: 4px; }
+    .pgto-sub { font-size: 13px; color: var(--marrom-medio); margin-bottom: 20px; }
+
+    /* Timer */
+    .pgto-timer {
+      font-size: 36px;
+      font-weight: 800;
+      color: var(--marrom);
+      margin-bottom: 4px;
+      font-variant-numeric: tabular-nums;
+    }
+    .pgto-timer.urgente { color: #c0392b; animation: pulse-timer 1s infinite; }
+    @keyframes pulse-timer { 0%,100%{opacity:1} 50%{opacity:0.5} }
+    .pgto-timer-label { font-size: 12px; color: var(--cinza-texto); margin-bottom: 20px; }
+
+    /* QR Code */
+    #qrcodeCanvas { margin: 0 auto 16px; display: block; border-radius: 12px; border: 3px solid var(--rosa-claro); }
+
+    /* Copia e cola */
+    .pix-copia-box {
+      background: var(--rosa-bg);
+      border: 2px dashed var(--rosa);
+      border-radius: var(--radius-sm);
+      padding: 12px;
+      margin-bottom: 16px;
+      word-break: break-all;
+      font-size: 10px;
+      font-family: monospace;
+      color: var(--marrom);
+      text-align: left;
+      position: relative;
+    }
+    .btn-copiar-pix {
+      width: 100%;
+      background: var(--rosa-escuro);
+      color: white;
+      font-size: 14px;
+      font-weight: 800;
+      padding: 13px;
+      border-radius: 12px;
+      margin-bottom: 10px;
+      transition: background 0.2s;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+    }
+    .btn-copiar-pix:hover { background: var(--marrom); }
+
+    /* Link pagamento crédito */
+    .link-pgto-box {
+      background: #f0f8ff;
+      border: 2px solid #3498db;
+      border-radius: var(--radius-sm);
+      padding: 12px 16px;
+      margin-bottom: 16px;
+      font-size: 13px;
+      color: #2c3e50;
+      word-break: break-all;
+    }
+    .btn-copiar-link {
+      width: 100%;
+      background: #3498db;
+      color: white;
+      font-size: 14px;
+      font-weight: 800;
+      padding: 13px;
+      border-radius: 12px;
+      margin-bottom: 10px;
+      transition: background 0.2s;
+    }
+    .btn-copiar-link:hover { background: #2980b9; }
+
+    /* Botão confirmar pagamento */
+    .btn-pago {
+      width: 100%;
+      background: var(--verde);
+      color: white;
+      font-size: 15px;
+      font-weight: 800;
+      padding: 15px;
+      border-radius: 14px;
+      margin-bottom: 10px;
+      box-shadow: 0 4px 16px rgba(124,179,66,0.3);
+      transition: background 0.2s, transform 0.15s;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+    }
+    .btn-pago:hover { background: #6aa33a; transform: translateY(-1px); }
+    .btn-cancelar-pgto {
+      font-size: 12px;
+      color: var(--cinza-texto);
+      text-decoration: underline;
+      cursor: pointer;
+      background: none;
+      border: none;
+      width: 100%;
+      padding: 6px;
+    }
+
     /* Modal de Avaliação */
     .modal-avaliacao {
       position: fixed;
@@ -1358,6 +1485,39 @@
   </div>
 </div>
 
+<!-- ===== OVERLAY PIX ===== -->
+<div class="pgto-overlay" id="overlayPix">
+  <div class="pgto-box">
+    <div style="font-size:40px;margin-bottom:6px">💠</div>
+    <div class="pgto-titulo">Pague via PIX</div>
+    <div class="pgto-sub">Escaneie o QR Code ou copie o código</div>
+    <div class="pgto-timer" id="pixTimer">10:00</div>
+    <div class="pgto-timer-label">para o pagamento expirar</div>
+    <canvas id="qrcodeCanvas" width="200" height="200"></canvas>
+    <p style="font-size:12px;color:var(--cinza-texto);margin-bottom:8px">Ou copie o código PIX:</p>
+    <div class="pix-copia-box" id="pixChave">00020126330014BR.GOV.BCB.PIX0111838960822725204000053039865802BR5925Maria Eline de Sousa da S6009SAO PAULO62140510DWCCAItjjL63042045</div>
+    <button class="btn-copiar-pix" onclick="copiarPix()">📋 Copiar código PIX</button>
+    <button class="btn-pago" onclick="confirmarPagamentoPix()">✅ Fiz o PIX — Confirmar pedido</button>
+    <button class="btn-cancelar-pgto" onclick="cancelarPgtoOverlay('pix')">Cancelar e voltar</button>
+  </div>
+</div>
+
+<!-- ===== OVERLAY CRÉDITO ===== -->
+<div class="pgto-overlay" id="overlayCredito">
+  <div class="pgto-box">
+    <div style="font-size:40px;margin-bottom:6px">💳</div>
+    <div class="pgto-titulo">Pague no Crédito</div>
+    <div class="pgto-sub">Acesse o link e pague com cartão de crédito</div>
+    <div class="pgto-timer" id="creditoTimer">10:00</div>
+    <div class="pgto-timer-label">para o link expirar</div>
+    <div class="link-pgto-box" id="linkPgtoBox">Carregando link...</div>
+    <button class="btn-copiar-link" onclick="copiarLinkPgto()">📋 Copiar link de pagamento</button>
+    <p style="font-size:12px;color:var(--cinza-texto);margin-bottom:12px">Após pagar, clique no botão abaixo para confirmar seu pedido.</p>
+    <button class="btn-pago" onclick="confirmarPagamentoCredito()">✅ Efetuei o pagamento — Confirmar pedido</button>
+    <button class="btn-cancelar-pgto" onclick="cancelarPgtoOverlay('credito')">Cancelar e voltar</button>
+  </div>
+</div>
+
 <!-- ===== CARRINHO FLUTUANTE ===== -->
 <button class="cart-float" id="cartFloat">
   <span class="cart-float-icon">🛒</span>
@@ -1443,8 +1603,11 @@
     <div class="form-group">
       <span class="pgto-label">Forma de pagamento <span class="obrig">*</span></span>
       <div class="pgto-opcoes">
-        <button class="pgto-btn" id="pgtoCartao" onclick="selecionarPgto('cartao')">
-          <span class="pgto-icon">💳</span>Cartão<br><small style="font-weight:400;font-size:11px">máquina</small>
+        <button class="pgto-btn" id="pgtoCredito" onclick="selecionarPgto('credito')">
+          <span class="pgto-icon">💳</span>Crédito<br><small style="font-weight:400;font-size:11px">link seguro</small>
+        </button>
+        <button class="pgto-btn" id="pgtoDebito" onclick="selecionarPgto('debito')">
+          <span class="pgto-icon">💳</span>Débito<br><small style="font-weight:400;font-size:11px">na máquina</small>
         </button>
         <button class="pgto-btn" id="pgtoPix" onclick="selecionarPgto('pix')">
           <span class="pgto-icon">💠</span>PIX
@@ -1693,7 +1856,13 @@ async function carregarDados() {
   }));
   dados.bairros = (bairros || []).map(r => ({ id: r.id, nome: r.nome, taxa: parseFloat(r.taxa) }));
   dados.banners = (banners || []).filter(b => b.ativo).map(r => ({ id: r.id, texto: r.texto, imagem: r.imagem || '' }));
-  if (config) { dados.whatsapp = config.whatsapp; dados.lojaAberta = config.loja_aberta; dados.senha = config.senha; }
+  if (config) {
+    dados.whatsapp = config.whatsapp;
+    dados.lojaAberta = config.loja_aberta;
+    dados.senha = config.senha;
+    dados.horario = config.horario || '';
+    dados.link_pagamento = config.link_pagamento || '';
+  }
 }
 
 /* ======================================================
@@ -2019,13 +2188,24 @@ let formaPgto = ''; // 'cartao' | 'pix' | 'dinheiro'
 
 function selecionarPgto(forma) {
   formaPgto = forma;
-  ['cartao','pix','dinheiro'].forEach(f => {
-    document.getElementById('pgto' + f.charAt(0).toUpperCase() + f.slice(1)).classList.toggle('ativo', f === forma);
+  ['credito','debito','pix','dinheiro'].forEach(f => {
+    const el = document.getElementById('pgto' + f.charAt(0).toUpperCase() + f.slice(1));
+    if (el) el.classList.toggle('ativo', f === forma);
   });
   const trocoGroup = document.getElementById('trocoGroup');
   trocoGroup.classList.toggle('visivel', forma === 'dinheiro');
   if (forma !== 'dinheiro') document.getElementById('trocoValor').value = '';
 }
+
+/* ======================================================
+   MONTAGEM DO PEDIDO (reutilizada por todos os fluxos)
+====================================================== */
+let _msgPedido = '';
+let _wppUrl = '';
+let _pedidoPayload = null;
+let _pedidoSalvoId = null;
+let _nomeCliente = '';
+let _timerInterval = null;
 
 async function confirmarPedido() {
   const nome = document.getElementById('clienteNome').value.trim();
@@ -2046,7 +2226,6 @@ async function confirmarPedido() {
     bairroNome = bairro.nome;
   }
 
-  // Montar mensagem
   const itensMsg = carrinho.map(c => {
     const p = dados.produtos.find(p => p.id === c.produtoId);
     if (!p) return '';
@@ -2057,90 +2236,247 @@ async function confirmarPedido() {
   const taxa = tipoEntrega === 'entrega' ? taxaAtual : 0;
   const desconto = calcularDesconto(sub);
   const total = sub + taxa - desconto;
-
-  // Forma de pagamento
-  const pgtoLabels = { cartao: '💳 Cartão (máquina)', pix: '💠 PIX', dinheiro: '💵 Dinheiro' };
   const trocoVal = document.getElementById('trocoValor').value.trim();
+  const pgtoLabels = { credito: '💳 Crédito (link)', debito: '💳 Débito (máquina)', pix: '💠 PIX', dinheiro: '💵 Dinheiro' };
 
+  // Montar mensagem completa ANTES de qualquer ação
   let msg = `🎂 *Novo Pedido — Eline Bolos*\n`;
   msg += `━━━━━━━━━━━━━━━━━━\n`;
   msg += `👤 *Cliente:* ${nome}\n`;
   msg += `📱 *Telefone:* ${tel}\n`;
-  if (dataEntrega) {
-    const [y,m,d] = dataEntrega.split('-');
-    msg += `📅 *Data desejada:* ${d}/${m}/${y}\n`;
-  }
+  if (dataEntrega) { const [y,m,d] = dataEntrega.split('-'); msg += `📅 *Data desejada:* ${d}/${m}/${y}\n`; }
   msg += `━━━━━━━━━━━━━━━━━━\n`;
   msg += `📋 *Itens do pedido:*\n${itensMsg}\n`;
   msg += `━━━━━━━━━━━━━━━━━━\n`;
   if (tipoEntrega === 'entrega') {
-    msg += `🛵 *Tipo:* Entrega\n`;
-    msg += `📍 *Bairro:* ${bairroNome}\n`;
+    msg += `🛵 *Tipo:* Entrega\n📍 *Bairro:* ${bairroNome}\n`;
     if (endereco) msg += `🏠 *Endereço:* ${endereco}\n`;
     msg += `🚚 *Taxa de entrega:* ${formatarMoeda(taxa)}\n`;
-  } else {
-    msg += `🏃 *Tipo:* Retirada no local\n`;
-  }
+  } else { msg += `🏃 *Tipo:* Retirada no local\n`; }
   msg += `━━━━━━━━━━━━━━━━━━\n`;
   if (desconto > 0) msg += `🎁 *Cupom (${cupomAtivo.codigo}):* -${formatarMoeda(desconto)}\n`;
   msg += `💰 *Total: ${formatarMoeda(total)}*\n`;
   msg += `💳 *Pagamento:* ${pgtoLabels[formaPgto]}\n`;
   if (formaPgto === 'dinheiro' && trocoVal) msg += `🔄 *Troco para:* R$ ${parseFloat(trocoVal).toFixed(2).replace('.', ',')}\n`;
   if (obs) msg += `📝 *Obs:* ${obs}\n`;
-  msg += `━━━━━━━━━━━━━━━━━━\n`;
-  msg += `_Pedido feito pelo site Eline Bolos_ 💕`;
+  msg += `━━━━━━━━━━━━━━━━━━\n_Pedido feito pelo site Eline Bolos_ 💕`;
 
-  // Salvar pedido no Supabase silenciosamente
-  let pedidoSalvoId = null;
-  if (sb) {
-    const itensPedido = carrinho.map(c => {
-      const p = dados.produtos.find(p => p.id === c.produtoId);
-      return p ? { id: p.id, nome: p.nome, qtd: c.qtd, preco_unit: p.preco } : null;
-    }).filter(Boolean);
+  _msgPedido = msg;
+  _nomeCliente = nome;
+  _wppUrl = `https://wa.me/${dados.whatsapp || '5598984156128'}?text=${encodeURIComponent(msg)}`;
+
+  // Payload para salvar no Supabase
+  const itensPedido = carrinho.map(c => {
+    const p = dados.produtos.find(p => p.id === c.produtoId);
+    return p ? { id: p.id, nome: p.nome, qtd: c.qtd, preco_unit: p.preco } : null;
+  }).filter(Boolean);
+  _pedidoPayload = {
+    cliente_nome: nome, cliente_tel: tel,
+    tipo_entrega: tipoEntrega, bairro: bairroNome || '',
+    endereco: endereco || '', itens: itensPedido,
+    subtotal: sub, taxa_entrega: taxa, total,
+    forma_pgto: formaPgto,
+    troco: trocoVal ? parseFloat(trocoVal) : null,
+    obs: obs || '', status: 'novo',
+    data_entrega: dataEntrega || null,
+    cupom_codigo: cupomAtivo ? cupomAtivo.codigo : '',
+    desconto: desconto || 0
+  };
+
+  fecharCheckout();
+
+  // Roteamento por forma de pagamento
+  if (formaPgto === 'pix') {
+    abrirOverlayPix();
+  } else if (formaPgto === 'credito') {
+    abrirOverlayCredito();
+  } else {
+    // Débito ou Dinheiro → fluxo direto
+    await salvarEEnviarWhatsapp();
+  }
+}
+
+async function salvarEEnviarWhatsapp() {
+  // Salvar no Supabase
+  if (sb && _pedidoPayload) {
     try {
-      const { data: pedidoData } = await sb.from('pedidos').insert({
-        cliente_nome: nome, cliente_tel: tel,
-        tipo_entrega: tipoEntrega, bairro: bairroNome || '',
-        endereco: endereco || '', itens: itensPedido,
-        subtotal: sub, taxa_entrega: taxa, total,
-        forma_pgto: formaPgto,
-        troco: trocoVal ? parseFloat(trocoVal) : null,
-        obs: obs || '', status: 'novo',
-        data_entrega: dataEntrega || null,
-        cupom_codigo: cupomAtivo ? cupomAtivo.codigo : '',
-        desconto: desconto || 0
-      }).select('id').single();
-      if (pedidoData) pedidoSalvoId = pedidoData.id;
-      // Incrementar uso do cupom
-      if (cupomAtivo) {
-        await sb.from('cupons').update({ usos: (cupomAtivo.usos || 0) + 1 }).eq('id', cupomAtivo.id);
-      }
+      const { data: pd } = await sb.from('pedidos').insert(_pedidoPayload).select('id').single();
+      if (pd) _pedidoSalvoId = pd.id;
+      if (cupomAtivo) await sb.from('cupons').update({ usos: (cupomAtivo.usos || 0) + 1 }).eq('id', cupomAtivo.id);
     } catch(e) { console.warn('Pedido não registrado:', e); }
   }
+  window.open(_wppUrl, '_blank');
+  limparFormulario();
+  setTimeout(() => abrirAvaliacao(_pedidoSalvoId, _nomeCliente), 2000);
+}
 
-  const wpp = dados.whatsapp || '5598984156128';
-  const url = `https://wa.me/${wpp}?text=${encodeURIComponent(msg)}`;
-  window.open(url, '_blank');
-
-  // Limpar
+function limparFormulario() {
   carrinho = [];
   formaPgto = '';
   cupomAtivo = null;
-  document.getElementById('clienteNome').value = '';
-  document.getElementById('clienteTel').value = '';
-  document.getElementById('clienteObs').value = '';
-  document.getElementById('clienteEndereco').value = '';
-  document.getElementById('trocoValor').value = '';
-  document.getElementById('dataEntrega').value = '';
-  document.getElementById('cupomCodigo').value = '';
+  _pedidoPayload = null;
+  _pedidoSalvoId = null;
+  ['clienteNome','clienteTel','clienteObs','clienteEndereco','trocoValor','dataEntrega','cupomCodigo'].forEach(id => {
+    const el = document.getElementById(id); if (el) el.value = '';
+  });
   document.getElementById('cupomMsg').innerHTML = '';
-  ['pgtoCartao','pgtoPix','pgtoDinheiro'].forEach(id => document.getElementById(id).classList.remove('ativo'));
+  ['pgtoCredito','pgtoDebito','pgtoPix','pgtoDinheiro'].forEach(id => {
+    const el = document.getElementById(id); if (el) el.classList.remove('ativo');
+  });
   document.getElementById('trocoGroup').classList.remove('visivel');
-  fecharCheckout();
   atualizarUI();
+}
 
-  // Abrir avaliação após 2s
-  setTimeout(() => abrirAvaliacao(pedidoSalvoId, nome), 2000);
+/* ======================================================
+   OVERLAY PIX
+====================================================== */
+const CHAVE_PIX = '00020126330014BR.GOV.BCB.PIX0111838960822725204000053039865802BR5925Maria Eline de Sousa da S6009SAO PAULO62140510DWCCAItjjL63042045';
+
+function abrirOverlayPix() {
+  // Gerar QR Code
+  carregarQRCode(() => {
+    gerarQRCode(CHAVE_PIX);
+  });
+  document.getElementById('pixChave').textContent = CHAVE_PIX;
+  document.getElementById('overlayPix').classList.add('aberto');
+  iniciarTimer('pixTimer', 10 * 60, () => {
+    document.getElementById('overlayPix').classList.remove('aberto');
+    mostrarToast('⏱ Tempo do PIX expirou. Tente novamente.', 'erro');
+  });
+}
+
+function copiarPix() {
+  navigator.clipboard.writeText(CHAVE_PIX).then(() => {
+    mostrarToast('✅ Código PIX copiado!', 'sucesso');
+  }).catch(() => {
+    // fallback
+    const el = document.getElementById('pixChave');
+    const range = document.createRange();
+    range.selectNode(el);
+    window.getSelection().removeAllRanges();
+    window.getSelection().addRange(range);
+    document.execCommand('copy');
+    mostrarToast('✅ Código PIX copiado!', 'sucesso');
+  });
+}
+
+async function confirmarPagamentoPix() {
+  pararTimer();
+  document.getElementById('overlayPix').classList.remove('aberto');
+  // Adicionar confirmação na mensagem
+  _wppUrl = _wppUrl.replace('_Pedido feito pelo site', '✅ *PIX REALIZADO* — _Pedido feito pelo site');
+  await salvarEEnviarWhatsapp();
+}
+
+function cancelarPgtoOverlay(tipo) {
+  pararTimer();
+  document.getElementById('overlay' + (tipo === 'pix' ? 'Pix' : 'Credito')).classList.remove('aberto');
+  mostrarToast('Pagamento cancelado. Seu pedido não foi enviado.', '');
+  limparFormulario();
+}
+
+/* ======================================================
+   OVERLAY CRÉDITO
+====================================================== */
+function abrirOverlayCredito() {
+  const link = dados.link_pagamento || '';
+  const linkEl = document.getElementById('linkPgtoBox');
+  if (link) {
+    linkEl.innerHTML = `<a href="${link}" target="_blank" style="color:#2980b9;font-weight:700;word-break:break-all">${link}</a>`;
+  } else {
+    linkEl.innerHTML = '<span style="color:#c0392b">Link de pagamento não configurado. Entre em contato pelo WhatsApp.</span>';
+  }
+  document.getElementById('overlayCredito').classList.add('aberto');
+  iniciarTimer('creditoTimer', 10 * 60, () => {
+    document.getElementById('overlayCredito').classList.remove('aberto');
+    mostrarToast('⏱ Tempo expirou. Tente novamente.', 'erro');
+  });
+}
+
+function copiarLinkPgto() {
+  const link = dados.link_pagamento || '';
+  if (!link) { mostrarToast('Link não configurado!', 'erro'); return; }
+  navigator.clipboard.writeText(link).then(() => {
+    mostrarToast('✅ Link copiado!', 'sucesso');
+  });
+}
+
+async function confirmarPagamentoCredito() {
+  pararTimer();
+  document.getElementById('overlayCredito').classList.remove('aberto');
+  _wppUrl = _wppUrl.replace('_Pedido feito pelo site', '✅ *PAGAMENTO CRÉDITO REALIZADO* — _Pedido feito pelo site');
+  await salvarEEnviarWhatsapp();
+}
+
+/* ======================================================
+   TIMER GENÉRICO
+====================================================== */
+function iniciarTimer(elId, segundos, onExpire) {
+  pararTimer();
+  let restante = segundos;
+  const el = document.getElementById(elId);
+  function atualizar() {
+    const m = Math.floor(restante / 60);
+    const s = restante % 60;
+    el.textContent = `${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
+    el.classList.toggle('urgente', restante <= 60);
+    if (restante <= 0) { pararTimer(); onExpire(); return; }
+    restante--;
+  }
+  atualizar();
+  _timerInterval = setInterval(atualizar, 1000);
+}
+
+function pararTimer() {
+  if (_timerInterval) { clearInterval(_timerInterval); _timerInterval = null; }
+}
+
+/* ======================================================
+   QRCODE.JS — carregamento lazy
+====================================================== */
+let _qrLoaded = false;
+function carregarQRCode(cb) {
+  if (_qrLoaded) { cb(); return; }
+  const s = document.createElement('script');
+  s.src = 'https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js';
+  s.onload = () => { _qrLoaded = true; cb(); };
+  document.head.appendChild(s);
+}
+
+function gerarQRCode(texto) {
+  const canvas = document.getElementById('qrcodeCanvas');
+  const ctx = canvas.getContext('2d');
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+  // QRCode.js desenha em um div — usamos um div temporário
+  const tmp = document.createElement('div');
+  tmp.style.display = 'none';
+  document.body.appendChild(tmp);
+  try {
+    new QRCode(tmp, {
+      text: texto,
+      width: 200,
+      height: 200,
+      correctLevel: QRCode.CorrectLevel.M
+    });
+    // Copiar a imagem gerada para o canvas
+    setTimeout(() => {
+      const img = tmp.querySelector('img');
+      if (img) {
+        const i = new Image();
+        i.onload = () => { ctx.drawImage(i, 0, 0, 200, 200); };
+        i.src = img.src;
+      }
+      tmp.remove();
+    }, 200);
+  } catch(e) {
+    tmp.remove();
+    // Fallback: mostrar texto
+    ctx.fillStyle = '#fff';
+    ctx.fillRect(0,0,200,200);
+    ctx.fillStyle = '#333';
+    ctx.font = '12px monospace';
+    ctx.fillText('Use o código abaixo', 10, 100);
+  }
 }
 
 /* ======================================================

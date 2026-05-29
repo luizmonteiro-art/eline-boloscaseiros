@@ -753,6 +753,32 @@
       </div>
 
       <div class="admin-card">
+        <h3>💠 Pagamentos</h3>
+        <div class="config-row">
+          <div>
+            <div class="config-label">Chave PIX (copia e cola)</div>
+            <div class="config-sub">Código EMV gerado pelo seu banco para pagamento via PIX</div>
+          </div>
+          <div class="config-control" style="width:100%;max-width:340px">
+            <textarea class="form-control" id="cfgChavePix"
+                   style="font-size:11px;padding:9px 12px;font-family:monospace;height:70px;resize:vertical"
+                   placeholder="00020126..."></textarea>
+          </div>
+        </div>
+        <div class="config-row">
+          <div>
+            <div class="config-label">Link de pagamento (Crédito)</div>
+            <div class="config-sub">Link gerado pela maquininha ou plataforma de pagamento para crédito parcelado</div>
+          </div>
+          <div class="config-control">
+            <input type="url" class="form-control" id="cfgLinkPgto"
+                   style="width:240px;font-size:12px;padding:9px 12px"
+                   placeholder="https://..." />
+          </div>
+        </div>
+      </div>
+
+      <div class="admin-card">
         <h3>🔐 Segurança</h3>
         <div class="config-row">
           <div>
@@ -1017,7 +1043,14 @@ async function carregarDados() {
   dados.produtos = (prods || []).map(normProd);
   dados.bairros  = (bairros || []).map(r => ({ id: r.id, nome: r.nome, taxa: parseFloat(r.taxa) }));
   dados.banners  = (banners || []).map(r => ({ id: r.id, texto: r.texto, imagem: r.imagem || '', ativo: r.ativo }));
-  if (config) { dados.whatsapp = config.whatsapp; dados.senha = config.senha; dados.lojaAberta = config.loja_aberta; dados.horario = config.horario || ''; }
+  if (config) {
+    dados.whatsapp = config.whatsapp;
+    dados.senha = config.senha;
+    dados.lojaAberta = config.loja_aberta;
+    dados.horario = config.horario || '';
+    dados.chave_pix = config.chave_pix || '';
+    dados.link_pagamento = config.link_pagamento || '';
+  }
 }
 
 /* (DADOS_PADRAO removido — dados vêm do Supabase) */
@@ -1351,6 +1384,8 @@ async function deletarBairro(id) {
 function carregarConfig() {
   document.getElementById('cfgWhatsapp').value = dados.whatsapp || '';
   document.getElementById('cfgHorario').value = dados.horario || '';
+  document.getElementById('cfgChavePix').value = dados.chave_pix || '';
+  document.getElementById('cfgLinkPgto').value = dados.link_pagamento || '';
   document.getElementById('toggleLoja').classList.toggle('on', dados.lojaAberta !== false);
 }
 
@@ -1362,9 +1397,17 @@ async function toggleLojaStatus() {
 }
 
 async function salvarConfiguracoes() {
-  dados.whatsapp = document.getElementById('cfgWhatsapp').value.trim() || '5598984156128';
-  dados.horario  = document.getElementById('cfgHorario').value.trim();
-  const { error } = await sb.from('configuracoes').update({ whatsapp: dados.whatsapp, loja_aberta: dados.lojaAberta, horario: dados.horario }).eq('id', 1);
+  dados.whatsapp      = document.getElementById('cfgWhatsapp').value.trim() || '5598984156128';
+  dados.horario       = document.getElementById('cfgHorario').value.trim();
+  dados.chave_pix     = document.getElementById('cfgChavePix').value.trim();
+  dados.link_pagamento= document.getElementById('cfgLinkPgto').value.trim();
+  const { error } = await sb.from('configuracoes').update({
+    whatsapp: dados.whatsapp,
+    loja_aberta: dados.lojaAberta,
+    horario: dados.horario,
+    chave_pix: dados.chave_pix,
+    link_pagamento: dados.link_pagamento
+  }).eq('id', 1);
   if (error) { toast('Erro ao salvar!', 'erro'); return; }
   toast('✅ Configurações salvas!', 'sucesso');
 }
