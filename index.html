@@ -2297,7 +2297,11 @@ async function confirmarPedido() {
 }
 
 async function salvarEEnviarWhatsapp() {
-  // Salvar no Supabase
+  // Abre o WhatsApp PRIMEIRO — antes de qualquer await
+  // Isso é essencial para iOS Safari não bloquear como popup
+  window.open(_wppUrl, '_blank');
+
+  // Salva no Supabase em segundo plano (não bloqueia o WhatsApp)
   if (sb && _pedidoPayload) {
     try {
       const { data: pd } = await sb.from('pedidos').insert(_pedidoPayload).select('id').single();
@@ -2305,7 +2309,6 @@ async function salvarEEnviarWhatsapp() {
       if (cupomAtivo) await sb.from('cupons').update({ usos: (cupomAtivo.usos || 0) + 1 }).eq('id', cupomAtivo.id);
     } catch(e) { console.warn('Pedido não registrado:', e); }
   }
-  window.open(_wppUrl, '_blank');
   limparFormulario();
   setTimeout(() => abrirAvaliacao(_pedidoSalvoId, _nomeCliente), 2000);
 }
