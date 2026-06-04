@@ -2034,7 +2034,7 @@ function getFiltroRange(tipo) {
 function setFiltroPedidos(tipo, btn) {
   filtroAtualPedidos = tipo;
   document.querySelectorAll('.filtro-btn').forEach(b => b.classList.remove('ativo'));
-  btn.classList.add('ativo');
+  if (btn) btn.classList.add('ativo');
   document.getElementById('filtroCustom').classList.toggle('visivel', tipo === 'custom');
   if (tipo !== 'custom') carregarPedidosTab();
 }

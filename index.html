@@ -1418,7 +1418,7 @@
 
   <!-- HERO -->
   <section class="hero">
-    <div class="hero-emoji">🎂</div>
+    <div class="hero-emoji"><img src="./logotipo.png" alt="Eline Bolos" style="width:90px;height:90px;object-fit:contain;border-radius:50%;" onerror="this.outerHTML='🎂'" /></div>
     <h1>Eline Bolos<br><span>Caseiros e Confeitados</span></h1>
     <p>Bolo é carinho em forma de comida 🙂<br>Santa Inês – MA</p>
     <div class="hero-tags">
@@ -3039,7 +3039,7 @@ async function carregarAvaliacoes() {
 
   const media = data.reduce((s, a) => s + a.nota, 0) / data.length;
   document.getElementById('avalNota').textContent = media.toFixed(1);
-  document.getElementById('avalLabel').textContent = `${data.length} avaliação${data.length !== 1 ? 'ões' : ''}`;
+  document.getElementById('avalLabel').textContent = `${data.length} avaliação${data.length !== 1 ? 'ões' : ' registrada'}`;
 
   document.getElementById('avalLista').innerHTML = data.map(a => `
     <div class="aval-item">
