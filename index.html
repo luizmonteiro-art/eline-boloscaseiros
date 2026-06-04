@@ -2296,12 +2296,13 @@ async function confirmarPedido() {
   }
 }
 
-async function salvarEEnviarWhatsapp() {
-  // Abre o WhatsApp PRIMEIRO — antes de qualquer await
-  // Isso é essencial para iOS Safari não bloquear como popup
-  window.open(_wppUrl, '_blank');
+// Chamado de funções síncronas — abre WhatsApp já, salva Supabase depois
+function abrirWhatsappEsalvar() {
+  window.open(_wppUrl, '_blank'); // síncrono — iOS não bloqueia
+  _salvarSupabaseBackground();   // async em segundo plano
+}
 
-  // Salva no Supabase em segundo plano (não bloqueia o WhatsApp)
+async function _salvarSupabaseBackground() {
   if (sb && _pedidoPayload) {
     try {
       const { data: pd } = await sb.from('pedidos').insert(_pedidoPayload).select('id').single();
@@ -2311,6 +2312,12 @@ async function salvarEEnviarWhatsapp() {
   }
   limparFormulario();
   setTimeout(() => abrirAvaliacao(_pedidoSalvoId, _nomeCliente), 2000);
+}
+
+// Mantido para débito/dinheiro chamado de dentro do confirmarPedido (async)
+async function salvarEEnviarWhatsapp() {
+  window.open(_wppUrl, '_blank');
+  await _salvarSupabaseBackground();
 }
 
 function limparFormulario() {
@@ -2363,12 +2370,10 @@ function copiarPix() {
   });
 }
 
-async function confirmarPagamentoPix() {
+function confirmarPagamentoPix() {
   pararTimer();
   document.getElementById('overlayPix').classList.remove('aberto');
-  // Adicionar confirmação na mensagem
-  _wppUrl = _wppUrl.replace('_Pedido feito pelo site', '✅ *PIX REALIZADO* — _Pedido feito pelo site');
-  await salvarEEnviarWhatsapp();
+  abrirWhatsappEsalvar(); // síncrono — iOS não bloqueia
 }
 
 function cancelarPgtoOverlay(tipo) {
@@ -2404,11 +2409,10 @@ function copiarLinkPgto() {
   });
 }
 
-async function confirmarPagamentoCredito() {
+function confirmarPagamentoCredito() {
   pararTimer();
   document.getElementById('overlayCredito').classList.remove('aberto');
-  _wppUrl = _wppUrl.replace('_Pedido feito pelo site', '✅ *PAGAMENTO CRÉDITO REALIZADO* — _Pedido feito pelo site');
-  await salvarEEnviarWhatsapp();
+  abrirWhatsappEsalvar(); // síncrono — iOS não bloqueia
 }
 
 /* ======================================================
