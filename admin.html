@@ -421,6 +421,31 @@
       text-decoration: none;
       white-space: nowrap;
     }
+    .btn-del-pedido {
+      background: none;
+      border: none;
+      color: #c0392b;
+      font-size: 16px;
+      cursor: pointer;
+      padding: 4px 8px;
+      border-radius: 6px;
+      transition: background 0.2s;
+      opacity: 0.6;
+    }
+    .btn-del-pedido:hover { background: #fde8e8; opacity: 1; }
+    .btn-del-cliente {
+      background: none;
+      border: 2px solid #e74c3c;
+      color: #e74c3c;
+      font-size: 12px;
+      font-weight: 700;
+      padding: 7px 12px;
+      border-radius: 8px;
+      cursor: pointer;
+      white-space: nowrap;
+      transition: all 0.2s;
+    }
+    .btn-del-cliente:hover { background: #e74c3c; color: white; }
 
     /* ===== CUPONS ===== */
     .cupom-card {
@@ -2197,6 +2222,7 @@ function renderListaPedidos() {
             <select class="status-select" onchange="alterarStatusPedido(${p.id}, this.value)">
               ${Object.entries(STATUS_LABELS).map(([v,l]) => `<option value="${v}" ${v === statusKey ? 'selected' : ''}>${l}</option>`).join('')}
             </select>
+            <button class="btn-del-pedido" onclick="deletarPedido(${p.id}, '${(p.cliente_nome||'').replace(/'/g,"\\'")}')\" title="Apagar pedido">🗑</button>
           </div>
         </div>
         <div class="pedido-itens">📋 ${itensTexto}</div>
@@ -2223,6 +2249,18 @@ async function alterarStatusPedido(id, novoStatus) {
     renderCardsPedidos(); // Atualiza cards
   }
   toast(`✅ ${STATUS_LABELS[novoStatus]}`, 'sucesso');
+}
+
+async function deletarPedido(id, nomeCliente) {
+  if (!confirm(`Apagar pedido de "${nomeCliente}" permanentemente?\n\nEsta ação não pode ser desfeita.`)) return;
+  const { error } = await sb.from('pedidos').delete().eq('id', id);
+  if (error) { toast('Erro ao apagar pedido!', 'erro'); return; }
+  // Remove do array local e da lista sem recarregar tudo
+  pedidosFiltrados = pedidosFiltrados.filter(p => p.id !== id);
+  const el = document.getElementById(`pedido-${id}`);
+  if (el) el.remove();
+  renderCardsPedidos();
+  toast('🗑 Pedido apagado', 'sucesso');
 }
 
 function exportarPDF() {
@@ -2329,7 +2367,10 @@ function renderListaClientes(lista) {
           <div class="cliente-stat"><div class="val">${fmt(c.gasto)}</div><div class="lbl">Gasto total</div></div>
           <div class="cliente-stat"><div class="val">${fmt(c.gasto / Math.max(c.pedidos - c.cancelados, 1))}</div><div class="lbl">Ticket médio</div></div>
         </div>
-        ${wppLink ? `<a href="${wppLink}" target="_blank" class="btn-wpp-cliente">💬 WhatsApp</a>` : ''}
+        <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
+          ${wppLink ? `<a href="${wppLink}" target="_blank" class="btn-wpp-cliente">💬 WhatsApp</a>` : ''}
+          <button class="btn-del-cliente" onclick="deletarCliente('${(c.tel||'').replace(/'/g,"\\'")}', '${c.nome.replace(/'/g,"\\'")}')">🗑 Apagar</button>
+        </div>
       </div>`;
   }).join('');
 }
@@ -2340,6 +2381,34 @@ function filtrarClientes() {
   renderListaClientes(todosClientes.filter(c =>
     c.nome.toLowerCase().includes(q) || (c.tel && c.tel.includes(q))
   ));
+}
+
+async function deletarCliente(tel, nome) {
+  if (!confirm(`Apagar o cliente "${nome}" e todos os seus pedidos?\n\nEsta ação remove permanentemente todo o histórico deste cliente.`)) return;
+  if (!confirm(`Confirmar: apagar TODOS os pedidos de "${nome}"?`)) return;
+
+  let query = sb.from('pedidos');
+  if (tel) {
+    query = query.delete().eq('cliente_tel', tel);
+  } else {
+    query = query.delete().eq('cliente_nome', nome);
+  }
+  const { error } = await query;
+  if (error) { toast('Erro ao apagar cliente!', 'erro'); return; }
+
+  // Remove da lista local e re-renderiza
+  todosClientes = todosClientes.filter(c => tel ? c.tel !== tel : c.nome !== nome);
+  renderListaClientes(todosClientes);
+
+  // Atualizar resumo
+  const total = todosClientes.reduce((s, c) => s + c.pedidos, 0);
+  const receita = todosClientes.reduce((s, c) => s + c.gasto, 0);
+  document.getElementById('clientesResumo').innerHTML = `
+    <div class="dash-card"><div class="num">${todosClientes.length}</div><div class="label">Clientes únicos</div></div>
+    <div class="dash-card"><div class="num">${total}</div><div class="label">Total de pedidos</div></div>
+    <div class="dash-card"><div class="num" style="font-size:16px">${fmt(receita)}</div><div class="label">Receita total</div></div>
+  `;
+  toast('🗑 Cliente e pedidos apagados', 'sucesso');
 }
 
 /* ======================================================
