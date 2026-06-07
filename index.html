@@ -221,7 +221,13 @@
       padding: 6px 14px;
       border-radius: 20px;
       box-shadow: var(--sombra-card);
+      cursor: pointer;
+      border: none;
+      font-family: inherit;
+      transition: background 0.15s, transform 0.1s;
     }
+    .hero-tag:hover { background: var(--rosa-claro); transform: translateY(-1px); }
+    .hero-tag:active { transform: translateY(0); }
     .hero-tag span { margin-right: 4px; }
     .btn-hero {
       background: var(--rosa-escuro);
@@ -1421,13 +1427,10 @@
     <div class="hero-emoji"><img src="./logotipo.png" alt="Eline Bolos" style="width:90px;height:90px;object-fit:contain;border-radius:50%;" onerror="this.outerHTML='🎂'" /></div>
     <h1>Eline Bolos<br><span>Caseiros e Confeitados</span></h1>
     <p>Bolo é carinho em forma de comida 🙂<br>Santa Inês – MA</p>
-    <div class="hero-tags">
-      <div class="hero-tag"><span>🍰</span> Bolos Caseiros</div>
-      <div class="hero-tag"><span>🍮</span> Pudim</div>
-      <div class="hero-tag"><span>🍬</span> Doces</div>
-      <div class="hero-tag"><span>🛵</span> Delivery</div>
+    <div class="hero-tags" id="heroTags">
+      <!-- Populado dinamicamente via renderHeroTags() -->
     </div>
-    <a href="#cardapio" class="btn-hero">Ver Cardápio 🍴</a>
+    <a href="#cardapio" class="btn-hero" onclick="filtrarCategoria('Todas')">Ver Cardápio 🍴</a>
   </section>
 
   <!-- BANNERS PROMOCIONAIS -->
@@ -2564,14 +2567,41 @@ function filtrarCategoria(cat) {
   renderProdutos();
 }
 
+function irParaCategoria(cat) {
+  filtrarCategoria(cat);
+  const section = document.getElementById('cardapio');
+  if (section) section.scrollIntoView({ behavior: 'smooth' });
+}
+
+function renderHeroTags() {
+  const container = document.getElementById('heroTags');
+  if (!container) return;
+  // Usa categorias ativas do Supabase; fallback para fixas se não carregou
+  let cats;
+  if (dados.categorias && dados.categorias.length > 0) {
+    cats = dados.categorias.filter(c => c.ativo);
+  } else {
+    cats = [
+      { nome: 'Bolos Caseiros', emoji: '🍰' },
+      { nome: 'Pudim',          emoji: '🍮' },
+      { nome: 'Doces',          emoji: '🍬' }
+    ];
+  }
+  // Sempre inclui Delivery como tag estática (não filtrável)
+  const tagsHtml = cats.map(c =>
+    `<button class="hero-tag" onclick="irParaCategoria('${c.nome.replace(/'/g,"\\'")}')"><span>${c.emoji}</span> ${c.nome}</button>`
+  ).join('');
+  container.innerHTML = tagsHtml + `<span class="hero-tag" style="cursor:default"><span>🛵</span> Delivery</span>`;
+}
+
 function renderProdutos() {
   let lista;
   if (categoriaAtiva === '📅 Cardápio do Dia') {
     lista = dados.produtos.filter(p => p.cardapio_dia && p.disponivel);
   } else if (categoriaAtiva === 'Todas') {
-    lista = dados.produtos;
+    lista = dados.produtos.filter(p => p.disponivel);
   } else {
-    lista = dados.produtos.filter(p => p.categoria === categoriaAtiva);
+    lista = dados.produtos.filter(p => p.categoria === categoriaAtiva && p.disponivel);
   }
 
   const grid = document.getElementById('produtosGrid');
@@ -2961,6 +2991,7 @@ async function init() {
 
   renderBanners();
   renderCategorias();
+  renderHeroTags();
   renderProdutos();
   atualizarUI();
   atualizarStatusLoja();
