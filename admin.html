@@ -648,6 +648,10 @@
             <label>Emoji (ícone)</label>
             <input type="text" class="form-control" id="pEmoji" placeholder="🎂" maxlength="4" />
           </div>
+          <div>
+            <label>Estoque disponível</label>
+            <input type="number" class="form-control" id="pEstoque" placeholder="Deixe vazio = ilimitado" min="0" step="1" />
+          </div>
           <div class="full">
             <label>Descrição</label>
             <input type="text" class="form-control" id="pDesc" placeholder="Ex: Bolo caseiro fofinho com cobertura de chocolate" />
@@ -683,6 +687,14 @@
         <h3>📋 Produtos Cadastrados <span id="contProdutos" style="font-size:13px;font-weight:600;color:var(--cinza-texto)"></span></h3>
         <div class="cat-tabs" id="catTabs"></div>
         <div class="lista-admin" id="listaProdutos"></div>
+      </div>
+
+      <div class="admin-card" style="margin-top:0">
+        <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;margin-bottom:14px">
+          <h3 style="margin:0">📊 Relatório de Estoque &amp; Vendas</h3>
+          <button class="btn-perigo" style="font-size:12px;padding:7px 12px" onclick="resetarVendidos()">🔄 Zerar vendidos (novo mês)</button>
+        </div>
+        <div id="relatorioEstoque"></div>
       </div>
     </div>
 
@@ -1100,7 +1112,9 @@ function normProd(r) {
     emoji: r.emoji || '🎂', desc: r.descricao || '', disponivel: r.disponivel, img: r.img || '',
     em_promocao: r.em_promocao || false,
     preco_promo: r.preco_promo ? parseFloat(r.preco_promo) : null,
-    cardapio_dia: r.cardapio_dia || false
+    cardapio_dia: r.cardapio_dia || false,
+    estoque: (r.estoque !== null && r.estoque !== undefined) ? parseInt(r.estoque) : null,
+    vendidos: parseInt(r.vendidos) || 0
   };
 }
 
@@ -1277,6 +1291,7 @@ function filtrarCat(cat) { catAtiva = cat; renderProdutos(); }
 
 function renderProdutos() {
   renderCatTabs();
+  renderRelatorioEstoque();
   const lista = catAtiva === 'Todas' ? dados.produtos : dados.produtos.filter(p => p.categoria === catAtiva);
   document.getElementById('contProdutos').textContent = `(${dados.produtos.length} total)`;
   document.getElementById('listaProdutos').innerHTML = lista.length === 0
@@ -1293,6 +1308,17 @@ function renderProdutos() {
           <div class="item-admin-nome">${p.nome}</div>
           <div class="item-admin-detalhe">
             ${p.categoria} • <strong style="color:var(--rosa-escuro)">${fmt(p.preco)}</strong>
+          </div>
+          <div style="margin-top:5px;display:flex;align-items:center;gap:6px;flex-wrap:wrap">
+            ${p.estoque !== null
+              ? `<span style="font-size:11px;background:${p.estoque > 0 ? '#e8f5e9' : '#ffebee'};color:${p.estoque > 0 ? '#2e7d32' : '#c62828'};padding:2px 8px;border-radius:20px;font-weight:700">📦 ${p.estoque} em estoque</span>
+                 <button onclick="ajustarEstoque(${p.id},-1)" style="width:22px;height:22px;border-radius:50%;background:#eee;border:none;font-size:14px;font-weight:700;cursor:pointer;display:inline-flex;align-items:center;justify-content:center;line-height:1">−</button>
+                 <button onclick="ajustarEstoque(${p.id},1)"  style="width:22px;height:22px;border-radius:50%;background:#c8e6c9;border:none;font-size:14px;font-weight:700;cursor:pointer;display:inline-flex;align-items:center;justify-content:center;line-height:1">+</button>
+                 <button onclick="desativarEstoque(${p.id})" style="font-size:10px;color:var(--cinza-texto);background:none;border:none;cursor:pointer;text-decoration:underline">♾️ ilimitado</button>`
+              : `<span style="font-size:11px;color:var(--cinza-texto)">♾️ Ilimitado</span>
+                 <button onclick="ativarEstoque(${p.id})" style="font-size:11px;background:var(--bege);border:none;padding:2px 8px;border-radius:20px;cursor:pointer;font-weight:600">📦 Controlar</button>`
+            }
+            <span style="font-size:11px;color:#7B4A2D;font-weight:600;margin-left:2px">✅ ${p.vendidos} vendidos</span>
           </div>
           <div style="margin-top:4px">
             <button class="btn-foto" onclick="uploadFotoProduto(${p.id})">
@@ -1318,6 +1344,8 @@ async function salvarProduto() {
   const emoji = document.getElementById('pEmoji').value.trim() || '🎂';
   const desc  = document.getElementById('pDesc').value.trim();
   const img   = document.getElementById('pImg').value.trim();
+  const estoqueVal = document.getElementById('pEstoque').value;
+  const estoque = estoqueVal !== '' ? parseInt(estoqueVal) : null;
   const editId = document.getElementById('pEditId').value;
 
   if (!nome || !cat || isNaN(preco) || preco < 0) { toast('Preencha nome, categoria e preço!', 'erro'); return; }
@@ -1328,13 +1356,13 @@ async function salvarProduto() {
 
   if (editId) {
     const id = parseInt(editId);
-    const { error } = await sb.from('produtos').update({ nome, categoria: cat, preco, emoji, descricao: desc, img }).eq('id', id);
+    const { error } = await sb.from('produtos').update({ nome, categoria: cat, preco, emoji, descricao: desc, img, estoque }).eq('id', id);
     if (error) { toast('Erro ao salvar!', 'erro'); btn.disabled = false; btn.textContent = textoOriginal; return; }
     const idx = dados.produtos.findIndex(p => p.id === id);
-    if (idx >= 0) dados.produtos[idx] = { ...dados.produtos[idx], nome, categoria: cat, preco, emoji, desc, img };
+    if (idx >= 0) dados.produtos[idx] = { ...dados.produtos[idx], nome, categoria: cat, preco, emoji, desc, img, estoque };
     toast(`✅ ${nome} atualizado!`, 'sucesso');
   } else {
-    const { data, error } = await sb.from('produtos').insert({ nome, categoria: cat, preco, emoji, descricao: desc, img, disponivel: true }).select().single();
+    const { data, error } = await sb.from('produtos').insert({ nome, categoria: cat, preco, emoji, descricao: desc, img, disponivel: true, estoque, vendidos: 0 }).select().single();
     if (error) { toast('Erro ao adicionar!', 'erro'); btn.disabled = false; btn.textContent = textoOriginal; return; }
     dados.produtos.push(normProd(data));
     toast(`${emoji} ${nome} adicionado!`, 'sucesso');
@@ -1345,7 +1373,7 @@ async function salvarProduto() {
 }
 
 function limparFormProd() {
-  ['pNome','pPreco','pEmoji','pDesc'].forEach(id => document.getElementById(id).value = '');
+  ['pNome','pPreco','pEmoji','pDesc','pEstoque'].forEach(id => document.getElementById(id).value = '');
   document.getElementById('pCategoria').selectedIndex = 0;
   document.getElementById('pEditId').value = '';
   document.getElementById('btnSalvarProd').textContent = '➕ Adicionar Produto';
@@ -1361,6 +1389,7 @@ function editarProd(id) {
   document.getElementById('pPreco').value = p.preco;
   document.getElementById('pEmoji').value = p.emoji || '';
   document.getElementById('pDesc').value = p.desc || '';
+  document.getElementById('pEstoque').value = p.estoque !== null && p.estoque !== undefined ? p.estoque : '';
   document.getElementById('pEditId').value = p.id;
   mostrarFotoNoForm(p.img || '');
   document.getElementById('btnSalvarProd').textContent = '💾 Salvar Alterações';
@@ -2669,6 +2698,116 @@ async function deletarCategoria(id) {
   renderProdutos();
   renderDashboard();
   toast(`🗑 Categoria "${c.nome}" removida.`, '');
+}
+
+/* ======================================================
+   ESTOQUE — Controle de quantidade e relatório
+====================================================== */
+async function ativarEstoque(id) {
+  const qtd = prompt('Quantas unidades disponíveis para este produto?');
+  if (qtd === null) return;
+  const n = parseInt(qtd);
+  if (isNaN(n) || n < 0) { toast('Número inválido!', 'erro'); return; }
+  const { error } = await sb.from('produtos').update({ estoque: n }).eq('id', id);
+  if (error) { toast('Erro ao ativar controle!', 'erro'); return; }
+  const p = dados.produtos.find(p => p.id === id);
+  if (p) p.estoque = n;
+  renderProdutos();
+  toast(`📦 Estoque definido: ${n} unidade${n !== 1 ? 's' : ''}`, 'sucesso');
+}
+
+async function desativarEstoque(id) {
+  const p = dados.produtos.find(p => p.id === id);
+  if (!p || !confirm(`Remover controle de estoque de "${p.nome}"?\nO produto voltará a ser ilimitado.`)) return;
+  const { error } = await sb.from('produtos').update({ estoque: null }).eq('id', id);
+  if (error) { toast('Erro ao remover controle!', 'erro'); return; }
+  p.estoque = null;
+  renderProdutos();
+  toast('♾️ Produto voltou a ser ilimitado.', '');
+}
+
+async function ajustarEstoque(id, delta) {
+  const p = dados.produtos.find(p => p.id === id);
+  if (!p) return;
+  const atual = p.estoque !== null ? p.estoque : 0;
+  const novoEstoque = Math.max(0, atual + delta);
+  const { error } = await sb.from('produtos').update({ estoque: novoEstoque }).eq('id', id);
+  if (error) { toast('Erro ao atualizar estoque!', 'erro'); return; }
+  p.estoque = novoEstoque;
+  renderProdutos();
+  toast(`📦 ${p.nome}: ${novoEstoque} em estoque`, '');
+}
+
+async function resetarVendidos() {
+  const mes = new Date().toLocaleString('pt-BR', { month: 'long', year: 'numeric' });
+  if (!confirm(`Zerar o contador de VENDIDOS de todos os produtos?\n\nFaça isso no início de cada mês para começar uma nova contagem.\n(Os dados de ${mes} serão perdidos)`)) return;
+  const { error } = await sb.from('produtos').update({ vendidos: 0 }).gte('id', 0);
+  if (error) { toast('Erro ao zerar vendidos!', 'erro'); return; }
+  dados.produtos.forEach(p => p.vendidos = 0);
+  renderProdutos();
+  toast('✅ Contador de vendidos zerado! Pronto para o novo mês.', 'sucesso');
+}
+
+function renderRelatorioEstoque() {
+  const el = document.getElementById('relatorioEstoque');
+  if (!el) return;
+  const totalVendidos = dados.produtos.reduce((acc, p) => acc + (p.vendidos || 0), 0);
+  const comEstoque    = dados.produtos.filter(p => p.estoque !== null);
+  const esgotados     = comEstoque.filter(p => p.estoque === 0).length;
+  const poucos        = comEstoque.filter(p => p.estoque > 0 && p.estoque <= 3).length;
+
+  if (dados.produtos.length === 0) {
+    el.innerHTML = '<p style="color:var(--cinza-texto);font-size:13px">Nenhum produto cadastrado.</p>';
+    return;
+  }
+
+  el.innerHTML = `
+    <div style="display:flex;gap:12px;flex-wrap:wrap;margin-bottom:14px">
+      <div style="background:var(--rosa-bg);border-radius:12px;padding:10px 16px;text-align:center;flex:1;min-width:90px">
+        <div style="font-size:22px;font-weight:800;color:var(--verde)">${totalVendidos}</div>
+        <div style="font-size:11px;color:var(--cinza-texto)">unid. vendidas</div>
+      </div>
+      ${esgotados > 0 ? `<div style="background:#ffebee;border-radius:12px;padding:10px 16px;text-align:center;flex:1;min-width:90px">
+        <div style="font-size:22px;font-weight:800;color:#c62828">${esgotados}</div>
+        <div style="font-size:11px;color:#c62828">⚠️ esgotados</div>
+      </div>` : ''}
+      ${poucos > 0 ? `<div style="background:#fff3e0;border-radius:12px;padding:10px 16px;text-align:center;flex:1;min-width:90px">
+        <div style="font-size:22px;font-weight:800;color:#e65100">${poucos}</div>
+        <div style="font-size:11px;color:#e65100">⚡ poucos</div>
+      </div>` : ''}
+    </div>
+    <div style="overflow-x:auto">
+      <table style="width:100%;border-collapse:collapse;font-size:13px">
+        <thead>
+          <tr style="background:var(--rosa-bg)">
+            <th style="text-align:left;padding:8px 10px;font-weight:700">Produto</th>
+            <th style="text-align:center;padding:8px 10px;font-weight:700">Estoque</th>
+            <th style="text-align:center;padding:8px 10px;font-weight:700">Vendidos</th>
+            <th style="text-align:center;padding:8px 10px;font-weight:700">Status</th>
+          </tr>
+        </thead>
+        <tbody>
+          ${dados.produtos.map(p => `
+            <tr style="border-bottom:1px solid var(--bege)">
+              <td style="padding:7px 10px;font-weight:600">${p.emoji} ${p.nome}</td>
+              <td style="text-align:center;padding:7px 10px">${p.estoque !== null ? p.estoque : '<span style="color:var(--cinza-texto)">♾️</span>'}</td>
+              <td style="text-align:center;padding:7px 10px;color:${p.vendidos > 0 ? 'var(--verde)' : 'var(--cinza-texto)'};font-weight:700">${p.vendidos}</td>
+              <td style="text-align:center;padding:7px 10px">
+                ${p.estoque === null
+                  ? '<span style="color:var(--cinza-texto);font-size:11px">ilimitado</span>'
+                  : p.estoque === 0
+                    ? '<span style="background:#ffebee;color:#c62828;padding:2px 8px;border-radius:20px;font-size:11px;font-weight:700">⚠️ Esgotado</span>'
+                    : p.estoque <= 3
+                      ? '<span style="background:#fff3e0;color:#e65100;padding:2px 8px;border-radius:20px;font-size:11px;font-weight:700">⚡ Poucos</span>'
+                      : '<span style="background:#e8f5e9;color:#2e7d32;padding:2px 8px;border-radius:20px;font-size:11px;font-weight:700">✅ OK</span>'
+                }
+              </td>
+            </tr>
+          `).join('')}
+        </tbody>
+      </table>
+    </div>
+  `;
 }
 
 /* Realtime — notificar novo pedido */

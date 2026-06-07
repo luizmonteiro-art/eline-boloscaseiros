@@ -1853,7 +1853,9 @@ async function carregarDados() {
     emoji: r.emoji || '🎂', desc: r.descricao || '', disponivel: r.disponivel, img: r.img || '',
     em_promocao: r.em_promocao || false,
     preco_promo: r.preco_promo ? parseFloat(r.preco_promo) : null,
-    cardapio_dia: r.cardapio_dia || false
+    cardapio_dia: r.cardapio_dia || false,
+    estoque: (r.estoque !== null && r.estoque !== undefined) ? parseInt(r.estoque) : null,
+    vendidos: parseInt(r.vendidos) || 0
   }));
   dados.bairros    = (bairros || []).map(r => ({ id: r.id, nome: r.nome, taxa: parseFloat(r.taxa) }));
   dados.banners    = (banners || []).filter(b => b.ativo).map(r => ({ id: r.id, texto: r.texto, imagem: r.imagem || '' }));
@@ -1982,6 +1984,17 @@ let carrinho = []; // [{produto, qtd}]
 function adicionarAoCarrinho(produtoId) {
   const prod = dados.produtos.find(p => p.id === produtoId);
   if (!prod || !prod.disponivel) return;
+  // Verificar estoque
+  if (prod.estoque !== null && prod.estoque <= 0) {
+    mostrarToast(`😔 ${prod.nome} está esgotado!`, 'erro'); return;
+  }
+  if (prod.estoque !== null) {
+    const noCarrinho = carrinho.find(c => c.produtoId === produtoId);
+    const qtdNoCarrinho = noCarrinho ? noCarrinho.qtd : 0;
+    if (qtdNoCarrinho >= prod.estoque) {
+      mostrarToast(`Máximo disponível: ${prod.estoque} unidade${prod.estoque !== 1 ? 's' : ''}`, 'erro'); return;
+    }
+  }
   const idx = carrinho.findIndex(c => c.produtoId === produtoId);
   if (idx >= 0) {
     carrinho[idx].qtd++;
@@ -2310,6 +2323,20 @@ async function _salvarSupabaseBackground() {
       const { data: pd } = await sb.from('pedidos').insert(_pedidoPayload).select('id').single();
       if (pd) _pedidoSalvoId = pd.id;
       if (cupomAtivo) await sb.from('cupons').update({ usos: (cupomAtivo.usos || 0) + 1 }).eq('id', cupomAtivo.id);
+
+      // Atualizar estoque e vendidos de cada produto pedido
+      for (const item of (_pedidoPayload.itens || [])) {
+        const p = dados.produtos.find(prod => prod.id === item.id);
+        if (!p) continue;
+        const novosVendidos = (p.vendidos || 0) + item.qtd;
+        const updateObj = { vendidos: novosVendidos };
+        if (p.estoque !== null) {
+          updateObj.estoque = Math.max(0, p.estoque - item.qtd);
+        }
+        await sb.from('produtos').update(updateObj).eq('id', item.id);
+        p.vendidos = novosVendidos;
+        if (p.estoque !== null) p.estoque = Math.max(0, p.estoque - item.qtd);
+      }
     } catch(e) { console.warn('Pedido não registrado:', e); }
   }
   limparFormulario();
@@ -2574,9 +2601,15 @@ function renderProdutos() {
           <div class="produto-desc">${p.desc || ''}</div>
           <div class="produto-footer">
             ${precoHtml}
-            ${p.disponivel
-              ? `<button class="btn-add" onclick="adicionarAoCarrinho(${p.id})" aria-label="Adicionar ${p.nome}">+</button>`
-              : `<span class="produto-tag-indisponivel">Indisponível</span>`
+            ${!p.disponivel
+              ? `<span class="produto-tag-indisponivel">Indisponível</span>`
+              : (p.estoque !== null && p.estoque <= 0)
+                ? `<span class="produto-tag-indisponivel" style="background:#ffebee;color:#c62828">⚠️ Esgotado</span>`
+                : `<button class="btn-add" onclick="adicionarAoCarrinho(${p.id})" aria-label="Adicionar ${p.nome}">+</button>`
+            }
+            ${p.disponivel && p.estoque !== null && p.estoque > 0 && p.estoque <= 5
+              ? `<span style="font-size:10px;color:#e65100;display:block;text-align:right;margin-top:2px">⚡ Últimas ${p.estoque}!</span>`
+              : ''
             }
           </div>
         </div>
