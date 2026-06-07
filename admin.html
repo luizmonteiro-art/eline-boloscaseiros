@@ -598,6 +598,7 @@
     <button class="admin-tab" id="tabBtnPedidos" onclick="abrirTab(this,'tabPedidos');carregarPedidosTab()">📦 Pedidos</button>
     <button class="admin-tab" onclick="abrirTab(this,'tabClientes');carregarClientesTab()">👥 Clientes</button>
     <button class="admin-tab" onclick="abrirTab(this,'tabCupons');carregarCuponsTab()">🎁 Cupons</button>
+    <button class="admin-tab" onclick="abrirTab(this,'tabCategorias');renderCategoriasTab()">🗂️ Categorias</button>
     <button class="admin-tab" onclick="abrirTab(this,'tabConfig')">⚙️ Configurações</button>
   </div>
 
@@ -636,12 +637,7 @@
           <div>
             <label>Categoria *</label>
             <select class="form-control" id="pCategoria">
-              <option value="Bolos Caseiros">🎂 Bolos Caseiros</option>
-              <option value="Bolos com Cobertura">🍫 Bolos com Cobertura</option>
-              <option value="Bolos Pequenos">🧁 Bolos Pequenos</option>
-              <option value="Bolos por Encomenda">✨ Bolos por Encomenda</option>
-              <option value="Pudim">🍮 Pudim</option>
-              <option value="Doces">🍬 Doces</option>
+              <!-- Populado dinamicamente via renderSelectCategorias() -->
             </select>
           </div>
           <div>
@@ -1029,6 +1025,56 @@
       </div>
     </div>
 
+    <!-- ================================================ -->
+    <!-- TAB: CATEGORIAS                                  -->
+    <!-- ================================================ -->
+    <div class="admin-section" id="tabCategorias">
+
+      <div class="admin-card">
+        <h3>🗂️ Gerenciar Categorias</h3>
+        <p style="font-size:13px;color:var(--cinza-texto);margin-bottom:16px">
+          As categorias organizam os produtos do cardápio. Crie novas, renomeie, ative/desative ou exclua categorias.
+          <strong>Para excluir</strong>, mova os produtos para outra categoria primeiro.
+        </p>
+
+        <!-- Formulário -->
+        <div style="background:var(--rosa-bg);border-radius:var(--radius-sm);padding:16px;margin-bottom:20px">
+          <h4 style="margin-bottom:12px;color:var(--marrom)">➕ Nova Categoria</h4>
+          <div style="display:grid;grid-template-columns:1fr 90px;gap:10px;align-items:end">
+            <div>
+              <label style="font-size:12px;font-weight:700;color:var(--marrom);display:block;margin-bottom:4px">Nome da categoria *</label>
+              <input type="text" id="catNome" class="form-control" placeholder="Ex: Bolos Fitness" />
+            </div>
+            <div>
+              <label style="font-size:12px;font-weight:700;color:var(--marrom);display:block;margin-bottom:4px">Emoji</label>
+              <input type="text" id="catEmoji" class="form-control" placeholder="🎂" maxlength="4" style="text-align:center;font-size:20px" />
+            </div>
+          </div>
+          <div style="display:flex;gap:8px;align-items:center;margin-top:12px;flex-wrap:wrap">
+            <button class="btn-primario" id="btnSalvarCat" onclick="salvarCategoria()">➕ Criar Categoria</button>
+            <button class="btn-secundario" onclick="limparFormCat()">✕ Limpar</button>
+            <span id="catEditandoLabel" style="font-size:12px;color:var(--rosa-escuro);font-weight:700;display:none">✏️ Editando categoria...</span>
+          </div>
+        </div>
+
+        <!-- Lista de categorias -->
+        <div class="lista-admin" id="listaCategorias">
+          <p style="text-align:center;color:var(--cinza-texto);padding:20px">Carregando categorias...</p>
+        </div>
+      </div>
+
+      <div class="admin-card" style="background:#fff9e6;border:1px solid #ffe082">
+        <h3 style="font-size:14px;margin-bottom:8px">💡 Como funcionam as categorias?</h3>
+        <p style="font-size:13px;color:#795548;line-height:1.6">
+          • Cada produto pertence a uma categoria.<br>
+          • As categorias aparecem como abas no cardápio da loja.<br>
+          • Categorias <strong>desativadas</strong> não aparecem na loja, mas os produtos continuam cadastrados.<br>
+          • Ao <strong>renomear</strong> uma categoria, atualize também os produtos já cadastrados nela.
+        </p>
+      </div>
+
+    </div><!-- /tabCategorias -->
+
   </div><!-- /admin-content -->
 </div><!-- /adminPage -->
 
@@ -1046,7 +1092,7 @@ try {
   console.warn('Supabase não carregou:', e);
 }
 
-let dados = { produtos: [], bairros: [], banners: [], whatsapp: '5598984156128', senha: 'eline2025', lojaAberta: true };
+let dados = { produtos: [], bairros: [], banners: [], categorias: [], whatsapp: '5598984156128', senha: 'eline2025', lojaAberta: true };
 
 function normProd(r) {
   return {
@@ -1059,15 +1105,17 @@ function normProd(r) {
 }
 
 async function carregarDados() {
-  const [{ data: prods }, { data: bairros }, { data: config }, { data: banners }] = await Promise.all([
+  const [{ data: prods }, { data: bairros }, { data: config }, { data: banners }, { data: cats }] = await Promise.all([
     sb.from('produtos').select('*').order('id'),
     sb.from('bairros').select('*').order('id'),
     sb.from('configuracoes').select('*').eq('id', 1).single(),
-    sb.from('banners').select('*').order('id')
+    sb.from('banners').select('*').order('id'),
+    sb.from('categorias').select('*').order('ordem').order('id')
   ]);
-  dados.produtos = (prods || []).map(normProd);
-  dados.bairros  = (bairros || []).map(r => ({ id: r.id, nome: r.nome, taxa: parseFloat(r.taxa) }));
-  dados.banners  = (banners || []).map(r => ({ id: r.id, texto: r.texto, imagem: r.imagem || '', ativo: r.ativo }));
+  dados.produtos   = (prods || []).map(normProd);
+  dados.bairros    = (bairros || []).map(r => ({ id: r.id, nome: r.nome, taxa: parseFloat(r.taxa) }));
+  dados.banners    = (banners || []).map(r => ({ id: r.id, texto: r.texto, imagem: r.imagem || '', ativo: r.ativo }));
+  dados.categorias = (cats || []).map(r => ({ id: r.id, nome: r.nome, emoji: r.emoji || '🎂', ordem: r.ordem || 0, ativo: r.ativo !== false }));
   if (config) {
     dados.whatsapp = config.whatsapp;
     dados.senha = config.senha;
@@ -1163,6 +1211,7 @@ function abrirTab(btn, tabId) {
    RENDER TUDO
 ====================================================== */
 function renderTudo() {
+  renderSelectCategorias();
   renderDashboard();
   renderProdutos();
   renderBairros();
@@ -1210,15 +1259,11 @@ function renderDashboard() {
 let catAtiva = 'Todas';
 
 function getCatEmoji(cat) {
-  return {
-    'Todas': '🍽️',
-    'Bolos Caseiros': '🎂',
-    'Bolos com Cobertura': '🍫',
-    'Bolos Pequenos': '🧁',
-    'Bolos por Encomenda': '✨',
-    'Pudim': '🍮',
-    'Doces': '🍬'
-  }[cat] || '🎂';
+  if (cat === 'Todas') return '🍽️';
+  const found = dados.categorias.find(c => c.nome === cat);
+  if (found) return found.emoji;
+  // fallback hardcoded para quando categorias ainda não carregaram
+  return { 'Bolos Caseiros':'🎂','Bolos com Cobertura':'🍫','Bolos Pequenos':'🧁','Bolos por Encomenda':'✨','Pudim':'🍮','Doces':'🍬' }[cat] || '🎂';
 }
 
 function renderCatTabs() {
@@ -2476,6 +2521,154 @@ async function deletarCupom(id) {
   await sb.from('cupons').delete().eq('id', id);
   toast('🗑 Cupom apagado', 'sucesso');
   carregarCuponsTab();
+}
+
+/* ======================================================
+   CATEGORIAS — CRUD COMPLETO
+====================================================== */
+let catEditId = null;
+
+function renderSelectCategorias() {
+  const sel = document.getElementById('pCategoria');
+  if (!sel) return;
+  const cats = dados.categorias.filter(c => c.ativo);
+  if (cats.length === 0) {
+    // Fallback: categorias padrão se tabela ainda não foi criada
+    sel.innerHTML = `
+      <option value="Bolos Caseiros">🎂 Bolos Caseiros</option>
+      <option value="Bolos com Cobertura">🍫 Bolos com Cobertura</option>
+      <option value="Bolos Pequenos">🧁 Bolos Pequenos</option>
+      <option value="Bolos por Encomenda">✨ Bolos por Encomenda</option>
+      <option value="Pudim">🍮 Pudim</option>
+      <option value="Doces">🍬 Doces</option>
+    `;
+  } else {
+    sel.innerHTML = cats.map(c => `<option value="${c.nome}">${c.emoji} ${c.nome}</option>`).join('');
+  }
+}
+
+function renderCategoriasTab() {
+  const lista = dados.categorias;
+  const el = document.getElementById('listaCategorias');
+  if (!el) return;
+  if (lista.length === 0) {
+    el.innerHTML = '<p style="text-align:center;color:var(--cinza-texto);padding:20px">Nenhuma categoria encontrada. Execute o arquivo <strong>categorias.sql</strong> no Supabase primeiro.</p>';
+    return;
+  }
+  el.innerHTML = lista.map(c => {
+    const qtdProdutos = dados.produtos.filter(p => p.categoria === c.nome).length;
+    return `
+      <div class="item-admin" id="cat-item-${c.id}" style="${!c.ativo ? 'opacity:0.5' : ''}">
+        <div class="item-admin-emoji">${c.emoji}</div>
+        <div class="item-admin-info">
+          <div class="item-admin-nome">${c.nome}</div>
+          <div class="item-admin-detalhe">${qtdProdutos} produto${qtdProdutos !== 1 ? 's' : ''} • ${c.ativo ? '🟢 Ativa' : '⚫ Inativa'}</div>
+        </div>
+        <div class="item-admin-acoes">
+          <div class="toggle-switch ${c.ativo ? 'on' : ''}" onclick="toggleCategoria(${c.id})" title="${c.ativo ? 'Desativar' : 'Ativar'}"></div>
+          <button class="btn-secundario" style="font-size:12px;padding:6px 10px" onclick="editarCategoria(${c.id})" title="Editar">✏️</button>
+          <button class="btn-perigo" onclick="deletarCategoria(${c.id})" title="Excluir">🗑️</button>
+        </div>
+      </div>
+    `;
+  }).join('');
+}
+
+async function salvarCategoria() {
+  const nome  = document.getElementById('catNome').value.trim();
+  const emoji = document.getElementById('catEmoji').value.trim() || '🎂';
+  if (!nome) { toast('Digite o nome da categoria!', 'erro'); return; }
+
+  const btn = document.getElementById('btnSalvarCat');
+  const textoOriginal = btn.textContent;
+  btn.disabled = true; btn.textContent = '⏳ Salvando...';
+
+  if (catEditId) {
+    const nomeAntigo = dados.categorias.find(c => c.id === catEditId)?.nome;
+    const { error } = await sb.from('categorias').update({ nome, emoji }).eq('id', catEditId);
+    if (error) {
+      toast(error.code === '23505' ? 'Já existe uma categoria com esse nome!' : 'Erro ao salvar!', 'erro');
+      btn.disabled = false; btn.textContent = textoOriginal; return;
+    }
+    const idx = dados.categorias.findIndex(c => c.id === catEditId);
+    if (idx >= 0) { dados.categorias[idx].nome = nome; dados.categorias[idx].emoji = emoji; }
+    toast(`✅ Categoria "${nome}" atualizada!`, 'sucesso');
+    // Avisar sobre produtos com o nome antigo
+    if (nomeAntigo && nomeAntigo !== nome) {
+      const qtd = dados.produtos.filter(p => p.categoria === nomeAntigo).length;
+      if (qtd > 0) setTimeout(() => toast(`⚠️ ${qtd} produto(s) ainda com nome antigo "${nomeAntigo}". Edite-os manualmente.`, 'erro'), 1500);
+    }
+  } else {
+    const ordem = dados.categorias.length + 1;
+    const { data, error } = await sb.from('categorias').insert({ nome, emoji, ordem, ativo: true }).select().single();
+    if (error) {
+      toast(error.code === '23505' ? 'Já existe uma categoria com esse nome!' : 'Erro ao criar!', 'erro');
+      btn.disabled = false; btn.textContent = textoOriginal; return;
+    }
+    dados.categorias.push({ id: data.id, nome: data.nome, emoji: data.emoji, ordem: data.ordem, ativo: true });
+    toast(`${emoji} Categoria "${nome}" criada!`, 'sucesso');
+  }
+
+  btn.disabled = false;
+  limparFormCat();
+  renderCategoriasTab();
+  renderSelectCategorias();
+  renderProdutos();
+  renderDashboard();
+}
+
+function editarCategoria(id) {
+  const c = dados.categorias.find(c => c.id === id);
+  if (!c) return;
+  catEditId = id;
+  document.getElementById('catNome').value  = c.nome;
+  document.getElementById('catEmoji').value = c.emoji;
+  document.getElementById('btnSalvarCat').textContent = '💾 Salvar Alterações';
+  document.getElementById('catEditandoLabel').style.display = 'inline';
+  document.getElementById('catNome').focus();
+  toast('Categoria carregada para edição!', '');
+  // Scroll para o topo da aba
+  document.getElementById('tabCategorias').scrollIntoView({ behavior: 'smooth' });
+}
+
+function limparFormCat() {
+  catEditId = null;
+  document.getElementById('catNome').value  = '';
+  document.getElementById('catEmoji').value = '';
+  document.getElementById('btnSalvarCat').textContent = '➕ Criar Categoria';
+  document.getElementById('catEditandoLabel').style.display = 'none';
+}
+
+async function toggleCategoria(id) {
+  const c = dados.categorias.find(c => c.id === id);
+  if (!c) return;
+  const novoVal = !c.ativo;
+  const { error } = await sb.from('categorias').update({ ativo: novoVal }).eq('id', id);
+  if (error) { toast('Erro ao atualizar!', 'erro'); return; }
+  c.ativo = novoVal;
+  renderCategoriasTab();
+  renderSelectCategorias();
+  renderProdutos();
+  toast(novoVal ? `✅ "${c.nome}" ativada` : `"${c.nome}" desativada`, '');
+}
+
+async function deletarCategoria(id) {
+  const c = dados.categorias.find(c => c.id === id);
+  if (!c) return;
+  const qtdProdutos = dados.produtos.filter(p => p.categoria === c.nome).length;
+  if (qtdProdutos > 0) {
+    toast(`⚠️ Há ${qtdProdutos} produto(s) nesta categoria. Mova-os primeiro!`, 'erro');
+    return;
+  }
+  if (!confirm(`Excluir a categoria "${c.nome}" permanentemente?`)) return;
+  const { error } = await sb.from('categorias').delete().eq('id', id);
+  if (error) { toast('Erro ao excluir!', 'erro'); return; }
+  dados.categorias = dados.categorias.filter(c2 => c2.id !== id);
+  renderCategoriasTab();
+  renderSelectCategorias();
+  renderProdutos();
+  renderDashboard();
+  toast(`🗑 Categoria "${c.nome}" removida.`, '');
 }
 
 /* Realtime — notificar novo pedido */

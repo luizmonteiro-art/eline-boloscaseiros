@@ -1838,14 +1838,15 @@ try {
   console.warn('Supabase não carregou:', e);
 }
 
-let dados = { produtos: [], bairros: [], banners: [], whatsapp: '5598984156128', lojaAberta: true, senha: 'eline2025', horario: '' };
+let dados = { produtos: [], bairros: [], banners: [], categorias: [], whatsapp: '5598984156128', lojaAberta: true, senha: 'eline2025', horario: '' };
 
 async function carregarDados() {
-  const [{ data: prods }, { data: bairros }, { data: config }, { data: banners }] = await Promise.all([
+  const [{ data: prods }, { data: bairros }, { data: config }, { data: banners }, { data: cats }] = await Promise.all([
     sb.from('produtos').select('*').order('id'),
     sb.from('bairros').select('*').order('id'),
     sb.from('configuracoes').select('*').eq('id', 1).single(),
-    sb.from('banners').select('*').order('id')
+    sb.from('banners').select('*').order('id'),
+    sb.from('categorias').select('*').order('ordem').order('id')
   ]);
   dados.produtos = (prods || []).map(r => ({
     id: r.id, nome: r.nome, categoria: r.categoria, preco: parseFloat(r.preco),
@@ -1854,13 +1855,14 @@ async function carregarDados() {
     preco_promo: r.preco_promo ? parseFloat(r.preco_promo) : null,
     cardapio_dia: r.cardapio_dia || false
   }));
-  dados.bairros = (bairros || []).map(r => ({ id: r.id, nome: r.nome, taxa: parseFloat(r.taxa) }));
-  dados.banners = (banners || []).filter(b => b.ativo).map(r => ({ id: r.id, texto: r.texto, imagem: r.imagem || '' }));
+  dados.bairros    = (bairros || []).map(r => ({ id: r.id, nome: r.nome, taxa: parseFloat(r.taxa) }));
+  dados.banners    = (banners || []).filter(b => b.ativo).map(r => ({ id: r.id, texto: r.texto, imagem: r.imagem || '' }));
+  dados.categorias = (cats || []).map(r => ({ id: r.id, nome: r.nome, emoji: r.emoji || '🎂', ativo: r.ativo !== false }));
   if (config) {
-    dados.whatsapp = config.whatsapp;
-    dados.lojaAberta = config.loja_aberta;
-    dados.senha = config.senha;
-    dados.horario = config.horario || '';
+    dados.whatsapp       = config.whatsapp;
+    dados.lojaAberta     = config.loja_aberta;
+    dados.senha          = config.senha;
+    dados.horario        = config.horario || '';
     dados.link_pagamento = config.link_pagamento || '';
   }
 }
@@ -2493,11 +2495,19 @@ let categoriaAtiva = 'Todas';
 
 function renderCategorias() {
   const temDia = dados.produtos.some(p => p.cardapio_dia && p.disponivel);
-  const cats = ['Todas', ...(temDia ? ['📅 Cardápio do Dia'] : []), ...new Set(dados.produtos.map(p => p.categoria))];
+  // Usar categorias do Supabase se disponíveis, senão derivar dos produtos
+  let catList;
+  if (dados.categorias && dados.categorias.length > 0) {
+    catList = dados.categorias.filter(c => c.ativo).map(c => c.nome);
+  } else {
+    catList = [...new Set(dados.produtos.map(p => p.categoria))];
+  }
+  const cats = ['Todas', ...(temDia ? ['📅 Cardápio do Dia'] : []), ...catList];
   const tabs = document.getElementById('categorias-tabs');
-  tabs.innerHTML = cats.map(c => `
-    <button class="tab-btn ${c === categoriaAtiva ? 'ativo' : ''}" onclick="filtrarCategoria('${c}')">${c.startsWith('📅') ? c : getCatEmoji(c) + ' ' + c}</button>
-  `).join('');
+  tabs.innerHTML = cats.map(c => {
+    const emoji = c.startsWith('📅') ? '' : (getCatEmoji(c) + ' ');
+    return `<button class="tab-btn ${c === categoriaAtiva ? 'ativo' : ''}" onclick="filtrarCategoria('${c.replace(/'/g,"\\'")}'">${emoji}${c}</button>`;
+  }).join('');
 }
 
 function renderBanners() {
@@ -2513,16 +2523,12 @@ function renderBanners() {
 }
 
 function getCatEmoji(cat) {
-  const map = {
-    'Todas': '🍽️',
-    'Bolos Caseiros': '🎂',
-    'Bolos com Cobertura': '🍫',
-    'Bolos Pequenos': '🧁',
-    'Bolos por Encomenda': '✨',
-    'Pudim': '🍮',
-    'Doces': '🍬'
-  };
-  return map[cat] || '🎂';
+  if (cat === 'Todas') return '🍽️';
+  if (cat.startsWith('📅')) return '';
+  const found = dados.categorias.find(c => c.nome === cat);
+  if (found) return found.emoji;
+  // Fallback para quando categorias ainda não carregaram
+  return { 'Bolos Caseiros':'🎂','Bolos com Cobertura':'🍫','Bolos Pequenos':'🧁','Bolos por Encomenda':'✨','Pudim':'🍮','Doces':'🍬' }[cat] || '🎂';
 }
 
 function filtrarCategoria(cat) {
