@@ -2477,44 +2477,39 @@ let _qrLoaded = false;
 function carregarQRCode(cb) {
   if (_qrLoaded) { cb(); return; }
   const s = document.createElement('script');
-  s.src = 'https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js';
-  s.onload = () => { _qrLoaded = true; cb(); };
+  // QRious — desenha direto no canvas, sem gambiarras
+  s.src = 'https://cdnjs.cloudflare.com/ajax/libs/qrious/4.0.2/qrious.min.js';
+  s.onload  = () => { _qrLoaded = true; cb(); };
+  s.onerror = () => { cb(); }; // continua mesmo se falhar (fallback abaixo)
   document.head.appendChild(s);
 }
 
 function gerarQRCode(texto) {
   const canvas = document.getElementById('qrcodeCanvas');
-  const ctx = canvas.getContext('2d');
-  ctx.clearRect(0, 0, canvas.width, canvas.height);
-  // QRCode.js desenha em um div — usamos um div temporário
-  const tmp = document.createElement('div');
-  tmp.style.display = 'none';
-  document.body.appendChild(tmp);
+  if (!canvas) return;
   try {
-    new QRCode(tmp, {
-      text: texto,
-      width: 200,
-      height: 200,
-      correctLevel: QRCode.CorrectLevel.M
+    if (typeof QRious === 'undefined') {
+      // Biblioteca não carregou — exibe aviso no canvas
+      const ctx = canvas.getContext('2d');
+      ctx.fillStyle = '#fff8f9';
+      ctx.fillRect(0, 0, 200, 200);
+      ctx.fillStyle = '#888';
+      ctx.font = '14px sans-serif';
+      ctx.textAlign = 'center';
+      ctx.fillText('⚠️ QR indisponível', 100, 90);
+      ctx.fillText('Use o código abaixo', 100, 115);
+      return;
+    }
+    new QRious({
+      element:    canvas,
+      value:      texto,
+      size:       200,
+      background: '#ffffff',
+      foreground: '#000000',
+      level:      'M'   // nível de correção de erro médio
     });
-    // Copiar a imagem gerada para o canvas
-    setTimeout(() => {
-      const img = tmp.querySelector('img');
-      if (img) {
-        const i = new Image();
-        i.onload = () => { ctx.drawImage(i, 0, 0, 200, 200); };
-        i.src = img.src;
-      }
-      tmp.remove();
-    }, 200);
   } catch(e) {
-    tmp.remove();
-    // Fallback: mostrar texto
-    ctx.fillStyle = '#fff';
-    ctx.fillRect(0,0,200,200);
-    ctx.fillStyle = '#333';
-    ctx.font = '12px monospace';
-    ctx.fillText('Use o código abaixo', 10, 100);
+    console.warn('QR Code erro:', e);
   }
 }
 
