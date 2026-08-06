@@ -2298,7 +2298,8 @@ async function confirmarPedido() {
     obs: obs || '', status: 'novo',
     data_entrega: dataEntrega || null,
     cupom_codigo: cupomAtivo ? cupomAtivo.codigo : '',
-    desconto: desconto || 0
+    desconto: desconto || 0,
+    pagamento_confirmado: false
   };
 
   fecharCheckout();
@@ -2314,34 +2315,50 @@ async function confirmarPedido() {
   }
 }
 
-// Chamado de funções síncronas — abre WhatsApp já, salva Supabase depois
-function abrirWhatsappEsalvar() {
-  window.open(_wppUrl, '_blank'); // síncrono — iOS não bloqueia
-  _salvarSupabaseBackground();   // async em segundo plano
+/* ======================================================
+   SALVAR PEDIDO — agora acontece IMEDIATAMENTE ao gerar o
+   PIX / abrir o link de cartão / escolher dinheiro, e não
+   apenas quando o cliente confirma o pagamento. Assim, se o
+   cliente sair do navegador antes de voltar, o pedido já
+   está registrado no painel (com pagamento_confirmado=false).
+   A função é idempotente: se já foi salvo, não insere de novo.
+====================================================== */
+async function _inserirPedidoSupabase() {
+  if (!sb || !_pedidoPayload || _pedidoSalvoId) return _pedidoSalvoId;
+  try {
+    const { data: pd, error } = await sb.from('pedidos').insert(_pedidoPayload).select('id').single();
+    if (error) { console.warn('Erro ao salvar pedido:', error); return null; }
+    _pedidoSalvoId = pd.id;
+    if (cupomAtivo) await sb.from('cupons').update({ usos: (cupomAtivo.usos || 0) + 1 }).eq('id', cupomAtivo.id);
+
+    // Atualizar estoque e vendidos de cada produto pedido
+    for (const item of (_pedidoPayload.itens || [])) {
+      const p = dados.produtos.find(prod => prod.id === item.id);
+      if (!p) continue;
+      const novosVendidos = (p.vendidos || 0) + item.qtd;
+      const updateObj = { vendidos: novosVendidos };
+      if (p.estoque !== null) {
+        updateObj.estoque = Math.max(0, p.estoque - item.qtd);
+      }
+      await sb.from('produtos').update(updateObj).eq('id', item.id);
+      p.vendidos = novosVendidos;
+      if (p.estoque !== null) p.estoque = Math.max(0, p.estoque - item.qtd);
+    }
+    return _pedidoSalvoId;
+  } catch(e) {
+    console.warn('Pedido não registrado:', e);
+    return null;
+  }
 }
 
-async function _salvarSupabaseBackground() {
-  if (sb && _pedidoPayload) {
-    try {
-      const { data: pd } = await sb.from('pedidos').insert(_pedidoPayload).select('id').single();
-      if (pd) _pedidoSalvoId = pd.id;
-      if (cupomAtivo) await sb.from('cupons').update({ usos: (cupomAtivo.usos || 0) + 1 }).eq('id', cupomAtivo.id);
+// Chamado de funções síncronas — abre WhatsApp já, garante salvamento depois
+function abrirWhatsappEsalvar() {
+  window.open(_wppUrl, '_blank'); // síncrono — iOS não bloqueia
+  _finalizarPedido();             // async em segundo plano
+}
 
-      // Atualizar estoque e vendidos de cada produto pedido
-      for (const item of (_pedidoPayload.itens || [])) {
-        const p = dados.produtos.find(prod => prod.id === item.id);
-        if (!p) continue;
-        const novosVendidos = (p.vendidos || 0) + item.qtd;
-        const updateObj = { vendidos: novosVendidos };
-        if (p.estoque !== null) {
-          updateObj.estoque = Math.max(0, p.estoque - item.qtd);
-        }
-        await sb.from('produtos').update(updateObj).eq('id', item.id);
-        p.vendidos = novosVendidos;
-        if (p.estoque !== null) p.estoque = Math.max(0, p.estoque - item.qtd);
-      }
-    } catch(e) { console.warn('Pedido não registrado:', e); }
-  }
+async function _finalizarPedido() {
+  await _inserirPedidoSupabase(); // idempotente — não duplica se já foi salvo antes
   limparFormulario();
   setTimeout(() => abrirAvaliacao(_pedidoSalvoId, _nomeCliente), 2000);
 }
@@ -2349,7 +2366,7 @@ async function _salvarSupabaseBackground() {
 // Mantido para débito/dinheiro chamado de dentro do confirmarPedido (async)
 async function salvarEEnviarWhatsapp() {
   window.open(_wppUrl, '_blank');
-  await _salvarSupabaseBackground();
+  await _finalizarPedido();
 }
 
 function limparFormulario() {
@@ -2375,6 +2392,8 @@ function limparFormulario() {
 const CHAVE_PIX = '00020126330014BR.GOV.BCB.PIX0111838960822725204000053039865802BR5925Maria Eline de Sousa da S6009SAO PAULO62140510DWCCAItjjL63042045';
 
 function abrirOverlayPix() {
+  // Salva o pedido no painel AGORA (não espera o cliente confirmar o pagamento)
+  _inserirPedidoSupabase();
   // Gerar QR Code
   carregarQRCode(() => {
     gerarQRCode(CHAVE_PIX);
@@ -2408,9 +2427,13 @@ function confirmarPagamentoPix() {
   abrirWhatsappEsalvar(); // síncrono — iOS não bloqueia
 }
 
-function cancelarPgtoOverlay(tipo) {
+async function cancelarPgtoOverlay(tipo) {
   pararTimer();
   document.getElementById('overlay' + (tipo === 'pix' ? 'Pix' : 'Credito')).classList.remove('aberto');
+  // O pedido já pode ter sido salvo no painel (ao abrir o overlay) — marcar como cancelado
+  if (_pedidoSalvoId && sb) {
+    try { await sb.from('pedidos').update({ status: 'cancelado' }).eq('id', _pedidoSalvoId); } catch(e) {}
+  }
   mostrarToast('Pagamento cancelado. Seu pedido não foi enviado.', '');
   limparFormulario();
 }
@@ -2419,6 +2442,8 @@ function cancelarPgtoOverlay(tipo) {
    OVERLAY CRÉDITO
 ====================================================== */
 function abrirOverlayCredito() {
+  // Salva o pedido no painel AGORA (não espera o cliente confirmar o pagamento)
+  _inserirPedidoSupabase();
   const link = dados.link_pagamento || '';
   const linkEl = document.getElementById('linkPgtoBox');
   if (link) {

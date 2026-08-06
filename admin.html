@@ -2187,12 +2187,14 @@ function renderCardsPedidos() {
   const ticket = ativos.length > 0 ? faturamento / ativos.length : 0;
   const qtdProds = ativos.reduce((s, p) => s + (p.itens || []).reduce((q, i) => q + (i.qtd || 0), 0), 0);
   const cancelados = pedidosFiltrados.filter(p => p.status === 'cancelado').length;
+  const aguardandoPgto = ativos.filter(p => !p.pagamento_confirmado).length;
 
   document.getElementById('pedidosCards').innerHTML = `
     <div class="dash-card"><div class="num">${total}</div><div class="label">Pedidos</div></div>
     <div class="dash-card"><div class="num" style="font-size:19px">${fmt(faturamento)}</div><div class="label">Faturamento</div></div>
     <div class="dash-card"><div class="num" style="font-size:19px">${ativos.length > 0 ? fmt(ticket) : 'R$0'}</div><div class="label">Ticket médio</div></div>
     <div class="dash-card"><div class="num">${qtdProds}</div><div class="label">Itens vendidos</div></div>
+    ${aguardandoPgto > 0 ? `<div class="dash-card"><div class="num" style="color:#e65100">${aguardandoPgto}</div><div class="label">⏳ Aguard. pagamento</div></div>` : ''}
     <div class="dash-card"><div class="num" style="color:#c0392b">${cancelados}</div><div class="label">Cancelados</div></div>
   `;
   document.getElementById('contPedidos').textContent = `(${total} pedido${total !== 1 ? 's' : ''})`;
@@ -2288,10 +2290,15 @@ function renderListaPedidos() {
       <div class="pedido-item borda-${statusKey}" id="pedido-${p.id}">
         <div class="pedido-header">
           <div>
-            <div class="pedido-cliente">👤 ${p.cliente_nome}${p.cliente_tel ? ' · ' + p.cliente_tel : ''}</div>
+            <div class="pedido-cliente">${p.pagamento_confirmado ? '' : '⏳ '}👤 ${p.cliente_nome}${p.cliente_tel ? ' · ' + p.cliente_tel : ''}</div>
             <div class="pedido-hora">${hora} · ${entrega} · ${pgtoLabel}</div>
           </div>
           <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">
+            ${p.pagamento_confirmado
+              ? `<span class="pedido-status" id="pgto-${p.id}" style="background:#e8f5e9;color:#2e7d32">✅ Pago</span>`
+              : `<span class="pedido-status" id="pgto-${p.id}" style="background:#fff3e0;color:#e65100">⏳ Aguard. pgto</span>
+                 <button class="btn-secundario" style="font-size:11px;padding:5px 10px" onclick="confirmarPagamento(${p.id})">✅ Confirmar pgto</button>`
+            }
             <span class="pedido-status status-${statusKey}" id="badge-${p.id}">${STATUS_LABELS[statusKey]}</span>
             <select class="status-select" onchange="alterarStatusPedido(${p.id}, this.value)">
               ${Object.entries(STATUS_LABELS).map(([v,l]) => `<option value="${v}" ${v === statusKey ? 'selected' : ''}>${l}</option>`).join('')}
@@ -2323,6 +2330,16 @@ async function alterarStatusPedido(id, novoStatus) {
     renderCardsPedidos(); // Atualiza cards
   }
   toast(`✅ ${STATUS_LABELS[novoStatus]}`, 'sucesso');
+}
+
+async function confirmarPagamento(id) {
+  const { error } = await sb.from('pedidos').update({ pagamento_confirmado: true }).eq('id', id);
+  if (error) { toast('Erro ao confirmar pagamento!', 'erro'); return; }
+  const p = pedidosFiltrados.find(p => p.id === id);
+  if (p) p.pagamento_confirmado = true;
+  renderListaPedidos();
+  renderCardsPedidos();
+  toast('✅ Pagamento confirmado!', 'sucesso');
 }
 
 async function deletarPedido(id, nomeCliente) {
@@ -2823,7 +2840,8 @@ function iniciarRealtimePedidos() {
       // Notificação visual
       const notif = document.createElement('div');
       notif.className = 'notif-pedido';
-      notif.innerHTML = `🔔 Novo pedido! ${payload.new.cliente_nome} — ${fmt(parseFloat(payload.new.total||0))}`;
+      const pgtoTag = payload.new.pagamento_confirmado ? '' : ' ⏳ (aguardando pgto)';
+      notif.innerHTML = `🔔 Novo pedido! ${payload.new.cliente_nome} — ${fmt(parseFloat(payload.new.total||0))}${pgtoTag}`;
       notif.onclick = () => {
         notif.remove();
         abrirTab(document.getElementById('tabBtnPedidos'), 'tabPedidos');
