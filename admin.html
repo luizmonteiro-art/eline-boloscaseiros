@@ -65,6 +65,10 @@
       background: var(--branco); transition: border-color 0.2s; outline: none;
     }
     .form-control:focus { border-color: var(--rosa); }
+        @media (max-width: 768px) {
+                /* Evita o zoom automatico do iOS ao focar em campos com fonte < 16px */
+                input.form-control, select.form-control, textarea.form-control { font-size: 16px !important; }
+        }
     .btn-login {
       width: 100%; background: var(--rosa-escuro); color: white;
       font-size: 16px; font-weight: 800; padding: 15px; border-radius: 14px;
@@ -2307,6 +2311,7 @@ function renderListaPedidos() {
           </div>
         </div>
         <div class="pedido-itens">📋 ${itensTexto}</div>
+                ${p.tipo_entrega === 'entrega' && p.endereco ? `<div class="pedido-itens" style="color:#1565c0;font-weight:600">📍 ${p.endereco}</div>` : ''}
         ${p.obs ? `<div class="pedido-itens">📝 ${p.obs}</div>` : ''}
         <div class="pedido-footer">
           <div class="pedido-total">${fmt(parseFloat(p.total || 0))}</div>
