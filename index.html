@@ -1400,7 +1400,7 @@
 
   <!-- STATUS BAR (loja fechada) -->
   <div class="status-bar" id="statusBar">
-    🔒 Estamos fechados no momento. Mas você pode ver o cardápio e fazer seu pedido para quando abrirmos!
+    🔒 Estamos fechados no momento. Você pode ver o cardápio, mas os pedidos abrem só no nosso horário de funcionamento.
   </div>
 
   <!-- HEADER -->
@@ -1767,7 +1767,7 @@
           <div class="config-row">
             <div>
               <div class="config-label">Status da loja</div>
-              <div class="config-sub">Quando fechada, o cliente vê um aviso mas pode pedir</div>
+              <div class="config-sub">Quando fechada, o cliente vê um aviso e não consegue finalizar pedidos</div>
             </div>
             <div class="toggle-disponivel on" id="toggleLojaAberta" onclick="toggleLoja()"></div>
           </div>
@@ -1985,6 +1985,10 @@ function salvarDados() {
 let carrinho = []; // [{produto, qtd}]
 
 function adicionarAoCarrinho(produtoId) {
+  if (!dados.lojaAberta) {
+    mostrarToast('🔒 Loja fechada no momento. Volte no nosso horário de funcionamento!', 'erro');
+    return;
+  }
   const prod = dados.produtos.find(p => p.id === produtoId);
   if (!prod || !prod.disponivel) return;
   // Verificar estoque
@@ -2177,6 +2181,10 @@ function atualizarResumoPedido() {
 
 function abrirCheckout() {
   if (totalItens() === 0) return;
+  if (!dados.lojaAberta) {
+    mostrarToast('🔒 Estamos fechados no momento. Volte no nosso horário de funcionamento para finalizar seu pedido!', 'erro');
+    return;
+  }
   fecharCarrinho();
 
   // Popular bairros
@@ -2651,7 +2659,7 @@ function renderProdutos() {
           <div class="produto-desc">${p.desc || ''}</div>
           <div class="produto-footer">
             ${precoHtml}
-            ${!p.disponivel
+            ${!dados.lojaAberta ? `<span class="produto-tag-indisponivel">🔒 Loja fechada</span>` : !p.disponivel
               ? `<span class="produto-tag-indisponivel">Indisponível</span>`
               : (p.estoque !== null && p.estoque <= 0)
                 ? `<span class="produto-tag-indisponivel" style="background:#ffebee;color:#c62828">⚠️ Esgotado</span>`
@@ -2676,7 +2684,7 @@ function atualizarStatusLoja() {
   const horario = dados.horario || '';
   if (!dados.lojaAberta) {
     bar.classList.add('fechada');
-    bar.textContent = `🔒 Estamos fechados no momento ${horario ? `(${horario})` : ''}. Mas você pode fazer seu pedido para quando abrirmos!`;
+    bar.textContent = `🔒 Estamos fechados no momento ${horario ? `(${horario})` : ''}. Volte no nosso horário de funcionamento para fazer seu pedido!`;
   } else {
     bar.classList.remove('fechada');
     if (horario) {
@@ -2977,6 +2985,7 @@ function iniciarRealtime() {
         dados.whatsapp = data.whatsapp;
         dados.lojaAberta = data.loja_aberta;
         atualizarStatusLoja();
+        renderProdutos();
       }
     })
     .on('postgres_changes', { event: '*', schema: 'public', table: 'banners' }, async () => {
@@ -2988,9 +2997,9 @@ function iniciarRealtime() {
 
   // Fallback: atualiza a cada 30 segundos caso o realtime falhe
   setInterval(async () => {
-    const snap = JSON.stringify(dados.produtos.map(p => ({ id: p.id, disponivel: p.disponivel, preco: p.preco, img: p.img })));
+    const snap = JSON.stringify({ loja: dados.lojaAberta, produtos: dados.produtos.map(p => ({ id: p.id, disponivel: p.disponivel, preco: p.preco, img: p.img })) });
     await carregarDados();
-    const snapNovo = JSON.stringify(dados.produtos.map(p => ({ id: p.id, disponivel: p.disponivel, preco: p.preco, img: p.img })));
+    const snapNovo = JSON.stringify({ loja: dados.lojaAberta, produtos: dados.produtos.map(p => ({ id: p.id, disponivel: p.disponivel, preco: p.preco, img: p.img })) });
     if (snap !== snapNovo) {
       renderCategorias();
       renderProdutos();
